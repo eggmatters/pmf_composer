@@ -1,3 +1,10 @@
+<?php 
+
+require_once dirname(__DIR__) . '/autoload.php';
+
+$app = new app\controllers\IndexController();
+
+?>
 <!DOCTYPE html>
 <html>
   <head>
