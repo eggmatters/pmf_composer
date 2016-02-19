@@ -3,7 +3,8 @@
 require_once dirname(__DIR__) . '/autoload.php';
 
 $app = new app\controllers\IndexController();
-
+$model = new app\models\IndexModel();
+$model->get();
 ?>
 <!DOCTYPE html>
 <html>

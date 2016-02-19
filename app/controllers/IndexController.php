@@ -9,8 +9,5 @@ use core\ControllerBase;
 
 class IndexController extends ControllerBase {
 
-  public function __construct(array $resources = [], $loadLevel = false) {
-    $this->resources = $resources;
-    $this->loadLevel = $loadLevel;
-  }
+  
 }
