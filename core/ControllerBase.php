@@ -8,10 +8,15 @@ namespace core;
 
 abstract class ControllerBase {
   protected $resources;
-  protected $loadLevel;
   
-  public function __construct(array $resources = [], $loadLevel = false) {
+  public function __construct() {
     
+  }
+  
+  public static function getPath($url = null ) {
+    $requestUri = filter_input(INPUT_SERVER, 'REQUEST_URI');
+    $requestParams = explode('/', $requestUri);
+    return $requestParams;
   }
 
 }
