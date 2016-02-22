@@ -9,7 +9,5 @@ use core\ModelBase;
  */
 
 class IndexModel extends ModelBase {
-  public function stay() {
-    echo "I am child";
-  }
+  
 }

@@ -2,9 +2,19 @@
 
 require_once dirname(__DIR__) . '/autoload.php';
 
-$app = new app\controllers\IndexController();
-$model = new app\models\IndexModel();
-$model->get();
+$modelAttributes = (object) array(
+  'shskhyu' => array(
+      'one' => 1,
+      'test' => (object)array(
+          'one' => 1,
+          'two' => 2,
+          'three' => 3
+    )
+  )
+);
+
+$model = new app\models\IndexModel($modelAttributes);
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -15,8 +25,7 @@ $model->get();
   <body>
     <pre>
       <?php
-        print_r($_GET);
-        print_r($_SERVER);
+        print_r($model);
       ?>
     </pre>
   </body>

@@ -6,14 +6,56 @@ namespace core;
  * @author meggers
  */
 abstract class ModelBase {
-  public function __construct(stdObject $modelAttributes = null) {
-    ;
+  
+  private $modelAttributes;
+  
+  public function __construct(\stdClass $modelAttributes = null) {
+    $this->modelAttributes = $modelAttributes;
+    $this->setAttributes();
   }
   
-  public function get() {
-    echo "I am base";
+  public function get() { return $this->modelAttributes;  }
+  
+  protected function setAttributes($modelAttributes = null) {
+    if (empty($this->modelAttributes)) {
+      return;
+    }
+    if (is_null($modelAttributes)) {
+      $modelAttributes = $this->modelAttributes;
+    }
+    foreach ($modelAttributes as $name => $value) {
+      if (is_array($value)) {
+        $this->$name = $this->setArray($value);
+      } else if (is_object($value)) {
+        $this->$name = $this->setObject($name, $value);
+      } else {
+        $this->$name = $value;
+      }
+    }
   }
   
+  private function setArray($array) {
+    $returnArray = [];
+    foreach ($array as $index => $arrayObject) {
+      if (is_array($arrayObject)) {
+        $returnArray[$index] = $this->setArray($arrayObject);
+      } elseif (is_object($arrayObject) && is_string($index)) {
+        $returnArray[$index] = $this->setObject($index, $arrayObject);
+      } 
+      else {
+        $returnArray[$index] = $arrayObject;
+      }
+    }
+    return $returnArray;
+  }
   
-  
+  private function setObject($name, \stdClass $modelObject) {
+    $className = 'app\\models\\' . PMFApp::toCamelCase($name) . "Model";
+    if (\class_exists($className)) {
+      $classReflector = new \ReflectionClass($className);
+      $classInstance = $classReflector->newInstance($modelObject);
+      return $classInstance;
+    }
+    return $modelObject;
+  }
 }
