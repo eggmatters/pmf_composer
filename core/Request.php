@@ -15,6 +15,8 @@ class Request {
   private $protocol;
   private $getParams;
   private $postParams;
+  private $id;
+  private $tag;
   
   
   public function __construct($requestUri = null) {
@@ -72,6 +74,14 @@ class Request {
   
   public function getRequestedId() {
     return $this->id;
+  }
+  
+  public function setRequestedTag($tag) {
+    $this->tag = $tag;
+  }
+  
+  public function getRequestedTag() {
+    return $this->tag;
   }
   
   private function filterRequestArray($filter, $requestArray) {

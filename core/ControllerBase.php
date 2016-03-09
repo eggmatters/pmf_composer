@@ -22,6 +22,8 @@ abstract class ControllerBase {
   
   protected $controllerName;
   
+  private $parentInstance;
+  
   public function __construct(Request $request, $resources = null) {
     $this->request = $request;
     if (is_null($resources)) {
@@ -43,17 +45,32 @@ abstract class ControllerBase {
           $this->loadController($resourceValue, $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex()));
           return;
         case "int":
-          
-        
+          $this->request->setRequestedId($resourceValue);
+          break;
+        case "string":
+          $this->request->setRequestedTag($resourceValue);
+          break;
       }
     }
   }
   
-  protected function get($id) {
+  protected function get() {
     
   }
   
-  protected function getAll() {
+  protected function index() {
+    
+  }
+  
+  protected function update() {
+    
+  }
+  
+  protected function create() {
+    
+  }
+  
+  protected function delete() {
     
   }
   
@@ -97,6 +114,55 @@ abstract class ControllerBase {
     $reflectionClass = new \ReflectionClass($controllerName);
     $controllerInstance = $reflectionClass->newInstance($this->request, $resourceStack);
     $controllerInstance->init();
+    //Requests other than "GET" are atomic,
+    //We don't need to be aware of contraints outside of the current controller:
+    if ($this->request->getHttpMethod() == "GET") {
+      $controllerInstance->setParentInstance($this);
+    }
+  }
+  
+  private function setParentInstance($controllerInstance) {
+    $this->parentInstance = $controllerInstance;
+  }
+  
+  private function callMethod() {
+    switch ($this->request->getHttpMethod()) {
+      case "GET":
+        $this->prepareGet();
+        break;
+      case "PUT":
+        $this->prepareUpdate();
+        break;
+      case "POST":
+        $this->create();
+        break;
+      case "DELETE":
+        $this->prepareDelete();
+        break;
+    }
+  }
+  
+  private function prepareGet() {
+    if (isset($this->request->getRequestedId())) {
+      $this->get();
+    } else {
+      $this->getAll();
+    }
+  }
+  private function prepareDelete() {
+    if (isset($this->request->getRequestedId())) {
+      $this->delete();
+    } else {
+      CoreApp::issue("404");
+    }
+  }
+  
+  private function prepareUpdate() {
+    if (isset($this->request->getRequestedId())) {
+      $this->update();
+    } else {
+      CoreApp::issue("404");
+    }
   }
 
 }

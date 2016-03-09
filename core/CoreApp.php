@@ -24,26 +24,8 @@ class CoreApp {
     
   }
   
-  
-  public static function getResourceType($resourceValue) {
-    if (class_exists(self::getControllerClassPath($resourceValue))) {
-      return "controller";
-    }   
-    if (class_exists(self::getModelClassPath($resourceValue))) {
-      return "model";
-    }   
-    if (is_numeric($resourceValue)) {
-      return "int";
-    }   
-    return "string";
-  }
-  
-  public static function getModelClassPath($resourceValue) {
-    return "app\\models\\" . Inflector::camelize($resourceValue);
-  }
-  
-  public static function getControllerClassPath($resourceValue) {
-    return "app\\controllers\\" . Inflector::camelize($resourceValue); 
+  public static function issue($httpCode) {
+    die("Issue $httpCode here");
   }
 }
 
