@@ -34,7 +34,8 @@ class Request {
     $this->postParams = [];
     if (!empty($_POST)) {
       $this->postParams = $this->filterRequestArray('POST', $_POST);
-    } 
+    }
+    $this->id = null;
   }
   
   public function getRequestUri() {
@@ -63,6 +64,14 @@ class Request {
   
   public function getPostParams() {
     return $this->postParams;
+  }
+  
+  public function setRequestedId($id) {
+    $this->id = $id;
+  }
+  
+  public function getRequestedId() {
+    return $this->id;
   }
   
   private function filterRequestArray($filter, $requestArray) {

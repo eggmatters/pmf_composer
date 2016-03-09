@@ -68,7 +68,7 @@ abstract class ModelBase {
   }
   
   private function setObject($name, \stdClass $modelObject) {
-    $className = 'app\\models\\' . PMFApp::toCamelCase($name) . "Model";
+    $className = 'app\\models\\' . Inflector::camelize($name) . "Model";
     if (\class_exists($className)) {
       $classReflector = new \ReflectionClass($className);
       $classInstance = $classReflector->newInstance($modelObject);
