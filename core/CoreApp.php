@@ -1,51 +1,37 @@
 <?php
 /**
- * Description of ControllerBase
+ * 
  *
  * @author meggers
  */
 namespace core;
 
-abstract class ControllerBase {
-  /**
-   * determinants provided from URI
-   * @var array $resources
-   */
-  protected $resources;
-  /**
-   * Instantiate Request object
-   * @var Request $request
-   */
-  protected $request;
-  
-  protected $associatedModels;
-  
-  public function __construct(Request $request) {
-    $this->request = $request;
-    $this->resources = $request->getResourceArray();
-  }
-  
-  protected function init() {
-     
-  }
-  
-  protected function get($id) {
+class CoreApp {
+  public function __construct() {
     
   }
   
-  protected function getAll() {
+  public static function routeRequest($requestUri = null) {
+    $requestPath = ControllerBase::getPath($requestUri);
     
+    return $requestPath;
   }
   
-  protected function getModelClass() {
-    $reflectionClass = new \ReflectionClass($this);
-    $className = $reflectionClass->getName();
-    $classBase = str_replace($className, 'Controller', '');
-    $testModel = "app//models//" . Inflector::singularize($classBase) . "Model";
-    if (class_exists($testModel)) {
-      return $testModel;
+  public static function toCamelCase($str) {
+    $str = preg_replace('/^[_\-]/', "", $str);
+    $str[0] = strtoupper($str[0]);
+    $func = create_function('$c', 'return strtoupper($c[1]);');
+    return preg_replace_callback('/[_\-]([a-z])/', $func, $str);
+  }
+  
+  private static function getControllerInstance($requestPath) {
+    if (!is_array($requestPath)) {
+      throw new Exception("Invalid Request Path");
     }
-    return null;
+    $controllerInstance = null;
+    if (count($requestPath) == 0) {
+      $controllerInstance = ControllerBase::setInstance('Index');
+    }
+    
   }
-
 }
