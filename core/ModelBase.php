@@ -14,7 +14,25 @@ abstract class ModelBase {
     $this->setAttributes();
   }
   
-  public function get() { return $this->modelAttributes;  }
+  public static function get($id) {
+    //establish connector
+    //perform fetch
+    //call instance.
+  }
+  
+  public static function getAll() {
+    //establish connector
+    //perform fetch
+    //call instance.
+  }
+  
+  public static function update($id, $params) {
+    
+  }
+  
+  public static function create($params) {
+    
+  }
   
   protected function setAttributes($modelAttributes = null) {
     if (empty($this->modelAttributes)) {
