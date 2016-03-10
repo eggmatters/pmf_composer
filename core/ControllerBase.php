@@ -22,8 +22,6 @@ abstract class ControllerBase {
   
   protected $controllerName;
   
-  private $parentInstance;
-  
   public function __construct(Request $request, $resources = null) {
     $this->request = $request;
     if (is_null($resources)) {
@@ -98,16 +96,8 @@ abstract class ControllerBase {
     $reflectionClass = new \ReflectionClass($controllerName);
     $controllerInstance = $reflectionClass->newInstance($this->request, $resourceStack);
     $controllerInstance->init();
-    //Requests other than "GET" are atomic,
-    //We don't need to be aware of contraints outside of the current controller:
-    if ($this->request->getHttpMethod() == "GET") {
-      $controllerInstance->setParentInstance($this);
-    }
   }
-  
-  private function setParentInstance($controllerInstance) {
-    $this->parentInstance = $controllerInstance;
-  }
+
   
   private function callMethod() {
     switch ($this->request->getHttpMethod()) {
@@ -135,17 +125,17 @@ abstract class ControllerBase {
   }
   private function prepareDelete() {
     if (is_null($this->request->getRequestedId())) {
-      $this->delete();
-    } else {
       CoreApp::issue("404");
+    } else {
+      $this->delete();
     }
   }
   
   private function prepareUpdate() {
     if (is_null($this->request->getRequestedId())) {
-      $this->update();
-    } else {
       CoreApp::issue("404");
+    } else {
+      $this->delete();
     }
   }
 
