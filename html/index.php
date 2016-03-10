@@ -25,7 +25,7 @@ $modelAttributes = (object) array(
   <body>
     <pre>
       <?php
-       
+       echo "index.php";
       ?>
     </pre>
   </body>

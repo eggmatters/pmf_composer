@@ -39,7 +39,7 @@ abstract class ControllerBase {
     $resourcesIterator = new SimpleIterator($this->resources);
     while ($resourcesIterator->hasNext()) {
       $resourceValue = $resourcesIterator->next();
-      $resourceType = $this->getResourceType($resourceValue);
+      $resourceType = CoreApp::getResourceType($resourceValue);
       switch ($resourceType) {
         case "controller":
           $this->loadController($resourceValue, $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex()));
@@ -85,29 +85,8 @@ abstract class ControllerBase {
     return null;
   }
   
-  private function getResourceType($resourceValue) {
-    if (class_exists(self::getControllerClassPath($resourceValue))) {
-      return "controller";
-    }   
-    if (class_exists(self::getModelClassPath($resourceValue))) {
-      return "model";
-    }   
-    if (is_numeric($resourceValue)) {
-      return "int";
-    }   
-    return "string";
-  }
-  
-  private function getModelClassPath($resourceValue) {
-    return "app\\models\\" . Inflector::camelize($resourceValue);
-  }
-  
-  private function getControllerClassPath($resourceValue) {
-    return "app\\controllers\\" . Inflector::camelize($resourceValue); 
-  }
-  
   private function loadController($resourceValue, $resourceStack) {
-    $controllerName = $this->getControllerClassPath($resourceValue);
+    $controllerName = CoreApp::getControllerClassPath($resourceValue);
     if ($controllerName == $this->controllerName) {
       return;
     }

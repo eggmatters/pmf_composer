@@ -10,22 +10,17 @@ class CoreApp {
   
   public static function routeRequest($requestUri = null) {
     $request = new Request($requestUri);
-    if (empty($request->getResourceArray())) {
-      $controller = new \app\controllers\IndexController($request);
-    } else {
+    $controllerClass = self::getControllerClassPath('Index');
+    if (!empty($request->getResourceArray())) {
       $controllerClass = self::getControllerClassPath($request->getResourceArray()[0]);
-      if (class_exists($controllerClass)) {
-        $reflectionClass = new \ReflectionClass($controllerClass);
-      } else {
-        self::issue("404");
-      }
-      $controller      = $reflectionClass->newInstance($request);
-    }   
-    if (!isset($controller)) {
-      return;
-    }   
-    $controller->init();
-    
+    }
+    if (class_exists($controllerClass)) {
+      $reflectionClass = new \ReflectionClass($controllerClass);
+      $controller  = $reflectionClass->newInstance($request);
+      $controller->init();
+    } else {
+      self::issue("404");
+    }
   }
   
   
@@ -50,7 +45,7 @@ class CoreApp {
     if ($resourceValue == "index.php") {
       return "app\\controllers\\IndexController";
     }
-    return "app\\controllers\\" . Inflector::camelize($resourceValue); 
+    return "app\\controllers\\" . Inflector::camelize($resourceValue) . "Controller"; 
   }
   
   public static function issue($httpCode) {

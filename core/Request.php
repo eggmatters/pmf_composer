@@ -26,7 +26,7 @@ class Request {
       $this->requestUri = $requestUri;
     }
     $this->requestPath = preg_replace("/^\/(.*)((\?.*)|\/)?$/U", "$1",$this->requestUri);
-    $this->resourceArray = explode('/', $this->requestPath);
+    $this->resourceArray = (empty($this->requestPath)) ? [] : explode('/', $this->requestPath);
     $this->httpMethod = filter_input(INPUT_SERVER, 'REQUEST_METHOD');
     $this->protocol = (stripos(filter_input(INPUT_SERVER, 'SERVER_PROTOCOL'),'https') === true ) ? 'https' : 'http';
     $this->getParams = [];

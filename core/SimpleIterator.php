@@ -38,14 +38,16 @@ class SimpleIterator {
   
   public function next() {
     if ($this->hasNext()) {
-      return $this->collection[$this->index++];
+      $this->index++;
+      return $this->collection[$this->index];
     }
     return false;
   }
   
   public function previous() {
     if ($this->hasPrevious()) {
-      return $this->collection[$this->index--];
+      $this->index--;
+      return $this->collection[$this->index];
     }
     return false;
   }
