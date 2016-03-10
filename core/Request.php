@@ -3,22 +3,68 @@
 namespace core;
 
 /**
- * Description of Request
+ * Container class storing data from incoming request.
+ * We parse the request_uri into an array for use by 
+ * controllers and models. 
+ * We also go ahead and sanitize GET and POST values and store them here.
+ * 
+ * Instances of this class are the closest we will get to globally defined objects.
  *
  * @author meggers
  */
 class Request {
+  /**
+   * SERVER['REQUEST_URI'] value
+   * @var string 
+   */
   private $requestUri;
+  /**
+   * parsed uri
+   * @var string 
+   */
   private $requestPath;
+  /**
+   * An array of individual elements from the requestPath
+   * @var array 
+   */
   private $resourceArray;
+  /**
+   * SERVER['HTTP_METHOD']
+   * @var string 
+   */
   private $httpMethod;
+  /**
+   * http/https
+   * @var string 
+   */
   private $protocol;
+  /**
+   * filtered, sanitized version of GET parameters
+   * @var array 
+   */
   private $getParams;
+  /**
+   * filtered, sanitized version of POST parameters
+   * @var array 
+   */
   private $postParams;
+  /**
+   * set if path contains an id (by controller)
+   * @var int 
+   */
   private $id;
+  /**
+   * set if path contains an arbitrary string (by controller
+   * @var string 
+   */
   private $tag;
   
-  
+  /**
+   * parses the path from the incoming request uri. If no argument, filters it 
+   * from the SERVER superglobal.
+   * All other superglobals are filtered and sanitized where applicable.
+   * @param string $requestUri
+   */
   public function __construct($requestUri = null) {
     if (is_null($requestUri)){
       $this->requestUri = filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
