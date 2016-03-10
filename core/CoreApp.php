@@ -14,7 +14,11 @@ class CoreApp {
       $controller = new \app\controllers\IndexController($request);
     } else {
       $controllerClass = self::getControllerClassPath($request->getResourceArray()[0]);
-      $reflectionClass = new \ReflectionClass($controllerClass);
+      if (class_exists($controllerClass)) {
+        $reflectionClass = new \ReflectionClass($controllerClass);
+      } else {
+        self::issue("404");
+      }
       $controller      = $reflectionClass->newInstance($request);
     }   
     if (!isset($controller)) {
@@ -22,6 +26,31 @@ class CoreApp {
     }   
     $controller->init();
     
+  }
+  
+  
+  public static function getResourceType($resourceValue) {
+    if (class_exists(self::getControllerClassPath($resourceValue))) {
+      return "controller";
+    }   
+    if (class_exists(self::getModelClassPath($resourceValue))) {
+      return "model";
+    }   
+    if (is_numeric($resourceValue)) {
+      return "int";
+    }   
+    return "string";
+  }
+  
+  public static function getModelClassPath($resourceValue) {
+    return "app\\models\\" . Inflector::camelize($resourceValue);
+  }
+  
+  public static function getControllerClassPath($resourceValue) {
+    if ($resourceValue == "index.php") {
+      return "app\\controllers\\IndexController";
+    }
+    return "app\\controllers\\" . Inflector::camelize($resourceValue); 
   }
   
   public static function issue($httpCode) {

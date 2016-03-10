@@ -35,7 +35,7 @@ abstract class ControllerBase {
     $this->controllerName = $reflectionClass->getName();
   }
   
-  protected function init() {
+  public function init() {
     $resourcesIterator = new SimpleIterator($this->resources);
     while ($resourcesIterator->hasNext()) {
       $resourceValue = $resourcesIterator->next();
@@ -55,7 +55,7 @@ abstract class ControllerBase {
   }
   
   protected function get() {
-    
+    //
   }
   
   protected function index() {
@@ -143,14 +143,14 @@ abstract class ControllerBase {
   }
   
   private function prepareGet() {
-    if (isset($this->request->getRequestedId())) {
+    if (is_null($this->request->getRequestedId())) {
       $this->get();
     } else {
       $this->getAll();
     }
   }
   private function prepareDelete() {
-    if (isset($this->request->getRequestedId())) {
+    if (is_null($this->request->getRequestedId())) {
       $this->delete();
     } else {
       CoreApp::issue("404");
@@ -158,7 +158,7 @@ abstract class ControllerBase {
   }
   
   private function prepareUpdate() {
-    if (isset($this->request->getRequestedId())) {
+    if (is_null($this->request->getRequestedId())) {
       $this->update();
     } else {
       CoreApp::issue("404");

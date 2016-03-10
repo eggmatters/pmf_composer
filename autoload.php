@@ -1,7 +1,10 @@
 <?php
 
 spl_autoload_register(function($class) {
-  $classpath = str_replace('\\', '/', $class);
-  require_once $classpath . ".php";
-  return true;
+  $classpath = __DIR__ . "/" . str_replace('\\', '/', $class) . ".php";
+  if (is_file($classpath)) {
+   require_once $classpath;
+   return true;
+  } 
+  return false;
 });

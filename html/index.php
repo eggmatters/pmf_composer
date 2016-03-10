@@ -13,7 +13,7 @@ $modelAttributes = (object) array(
   )
 );
 
-$model = new app\models\IndexModel($modelAttributes);
+\core\CoreApp::routeRequest();
 
 ?>
 <!DOCTYPE html>
@@ -25,7 +25,7 @@ $model = new app\models\IndexModel($modelAttributes);
   <body>
     <pre>
       <?php
-        print_r($model);
+       
       ?>
     </pre>
   </body>
