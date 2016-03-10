@@ -37,12 +37,14 @@ abstract class ControllerBase {
   
   public function init() {
     $resourcesIterator = new SimpleIterator($this->resources);
+    $renderFlag = true;
     while ($resourcesIterator->hasNext()) {
       $resourceValue = $resourcesIterator->next();
       $resourceType = CoreApp::getResourceType($resourceValue);
       switch ($resourceType) {
         case "controller":
           $this->loadController($resourceValue, $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex()));
+          $renderFlag = false;
           return;
         case "int":
           $this->request->setRequestedId($resourceValue);
@@ -52,26 +54,29 @@ abstract class ControllerBase {
           break;
       }
     }
+    if ($renderFlag) {
+      $this->callMethod();
+    }
   }
   
   protected function get() {
-    //
+    echo "got here with get in $this->controllerName";
   }
   
   protected function index() {
-    
+    echo "got here with index in $this->controllerName";
   }
   
   protected function update() {
-    
+    echo "got here with update in $this->controllerName";
   }
   
   protected function create() {
-    
+    echo "got here with create in $this->controllerName";
   }
   
   protected function delete() {
-    
+    echo "got here with delete in $this->controllerName";
   }
   
   protected function getModelClass() {
@@ -123,9 +128,9 @@ abstract class ControllerBase {
   
   private function prepareGet() {
     if (is_null($this->request->getRequestedId())) {
-      $this->get();
+      $this->index();
     } else {
-      $this->getAll();
+      $this->get();
     }
   }
   private function prepareDelete() {
