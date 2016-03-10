@@ -178,5 +178,14 @@ abstract class ControllerBase {
       $this->delete();
     }
   }
+  
+  private function loadModel() {
+    $modelClass = $this->getModelClass();
+    if (is_null($modelClass)) {
+      return null;
+    }
+    $reflectionClass = new \ReflectionClass($modelClass);
+    return $reflectionClass->newInstance($this->request);
+  }
 
 }

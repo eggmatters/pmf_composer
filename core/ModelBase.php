@@ -8,10 +8,11 @@ namespace core;
 abstract class ModelBase {
   
   private $modelAttributes;
+  private $request;
   
-  public function __construct(\stdClass $modelAttributes = null) {
-    $this->modelAttributes = $modelAttributes;
-    $this->setAttributes();
+  public function __construct(Request $request = null) {
+    $this->request = $request;
+    
   }
   
   public static function get($id) {
@@ -34,7 +35,7 @@ abstract class ModelBase {
     
   }
   
-  protected function setAttributes($modelAttributes = null) {
+  public function setAttributes($modelAttributes = null) {
     if (empty($this->modelAttributes)) {
       return;
     }
