@@ -7,31 +7,31 @@ namespace core;
  */
 abstract class ModelBase {
   
-  private $modelAttributes;
   private $request;
+  private $modelAttributes;
   
-  public function __construct(Request $request = null) {
+  public function __construct(Request $request, $modelAttributes = null) {
     $this->request = $request;
-    
+    $this->setAttributes($modelAttributes);
   }
   
-  public static function get($id) {
+  public function get($id) {
     //establish connector
     //perform fetch
     //call instance.
   }
   
-  public static function getAll() {
+  public function getAll() {
     //establish connector
     //perform fetch
     //call instance.
   }
   
-  public static function update($id, $params) {
+  public function update($id, $params) {
     
   }
   
-  public static function create($params) {
+  public function create($params) {
     
   }
   
