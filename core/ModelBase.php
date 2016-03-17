@@ -9,6 +9,7 @@ abstract class ModelBase {
   
   private $request;
   private $modelAttributes;
+  private $connector;
   
   public function __construct(Request $request, $modelAttributes = null) {
     $this->request = $request;

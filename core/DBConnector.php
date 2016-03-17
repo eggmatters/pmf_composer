@@ -7,7 +7,7 @@ namespace core;
  *
  * @author meggers
  */
-abstract class DBConnector {
+class DBConnector extends Connector {
   
   protected $host;
   protected $dbName;
@@ -29,7 +29,27 @@ abstract class DBConnector {
     $this->pdoConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
   }
   
-  protected function query($sql, array $bindValues) {
+  public function getAll($resource) {
+    ;
+  }
+  
+  public function get($resource) {
+    ;
+  }
+  
+  public function create($resource, $params) {
+    
+  }
+  
+  public function update($resource, $params) {
+    
+  }
+  
+  public function delete($resource) {
+    
+  }
+  
+  private function query($sql, array $bindValues) {
     $this->stmt = $this->pdoConn->prepare($sql);
     try {
       $this->stmt->execute($bindValues);
