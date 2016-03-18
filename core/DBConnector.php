@@ -49,7 +49,7 @@ class DBConnector extends Connector {
     
   }
   
-  private function query($sql, array $bindValues) {
+  protected function query($sql, array $bindValues) {
     $this->stmt = $this->pdoConn->prepare($sql);
     try {
       $this->stmt->execute($bindValues);

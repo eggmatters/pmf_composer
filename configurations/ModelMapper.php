@@ -8,6 +8,11 @@ $devDbConn = array(
   'pass'   => 'pmf_pass'
 );
 
+$schemaConnector = array(
+  'ConnectorType' => \core\Connector::DBCONN,
+  'Connector' => $devDbConn
+);
+
 $modelConnections = array(
    'IndexModel' => array(
      'ConnectorType' => 'none'
@@ -15,5 +20,5 @@ $modelConnections = array(
    'TestModel' => array(
      'ConnectorType' => \core\Connector::DBCONN,
      'Connector' => $devDbConn
-   )
+   ),
 );

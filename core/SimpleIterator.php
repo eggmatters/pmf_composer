@@ -52,6 +52,10 @@ class SimpleIterator {
     return false;
   }
   
+  public function preparePrevious() {
+    $this->index = count($this->collection) - 1;
+  }
+  
   public function getNext() {
     if ($this->hasNext()) {
       return $this->collection[$this->index + 1];
