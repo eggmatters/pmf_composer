@@ -39,22 +39,24 @@ abstract class Connector {
   
   abstract public function update($resource, $params);
   
-  abstract public function delete($resource, $params);
+  abstract public function delete($resource, $params = null);
 
-  public function __construct($modelConnection) {
-    if ($modelConnection['ConnectorType'] == self::DBCONN) {
-      $this->setDb($modelConnection['Connector']);
+  public function __construct($modelConnector) {
+    if ($modelConnector['ConnectorType'] == self::DBCONN) {
+      $this->setDb($modelConnector['Connector']);
       $this->conntype = self::DBCONN;
     }
-    if ($modelConnection['ConnectorType'] == self::APICONN) {
-      $this->setAPI($modelConnection['Connector']);
+    if ($modelConnector['ConnectorType'] == self::APICONN) {
+      $this->setAPI($modelConnector['Connector']);
       $this->conntype = self::APICONN;
     }
   }
   
   protected function setDb($connector) {
+    $reflectionClass = new \ReflectionClass($this);
+    $className = $reflectionClass->getName();
     foreach($connector as $property => $value) {
-      if (property_exists('Connector', $property)) {
+      if (property_exists($className, $property)) {
         $this->$property = $value;
       }
     }

@@ -22,11 +22,11 @@ class DBConnector extends Connector {
   
   public function conn() {
     try {
-      $this->pdoConn = new PDO("mysql:host=$this->host;dbname=$this->dbName", $this->user, $this->pass);
+      $this->pdoConn = new \PDO("mysql:host=$this->host;dbname=$this->dbName", $this->user, $this->pass);
     } catch (Exception $e) {
       throw new Exception($e->getMessage());
     }
-    $this->pdoConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $this->pdoConn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
   }
   
   public function getAll($resource) {
@@ -45,11 +45,11 @@ class DBConnector extends Connector {
     
   }
   
-  public function delete($resource) {
+  public function delete($resource, $params = null) {
     
   }
   
-  protected function query($sql, array $bindValues) {
+  public function query($sql, array $bindValues) {
     $this->stmt = $this->pdoConn->prepare($sql);
     try {
       $this->stmt->execute($bindValues);
