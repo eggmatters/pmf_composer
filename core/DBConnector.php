@@ -53,13 +53,13 @@ class DBConnector extends Connector {
     $this->stmt = $this->pdoConn->prepare($sql);
     try {
       $this->stmt->execute($bindValues);
-    } catch (PDOException $e) {
+    } catch (\PDOException $e) {
       $errorMessage = "Database error: Code $e->getCode\n"
         . "Message: $e->getMessage()";
       return $errorMessage;
     }
     if ($this->stmt->columnCount() > 0) {
-      $this->resultSet = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+      $this->resultSet = $this->stmt->fetchAll(\PDO::FETCH_ASSOC);
     } else {
       $this->lastInserted = $this->pdoConn->lastInsertId();
       $this->numRows = $this->stmt->rowCount();
@@ -69,7 +69,7 @@ class DBConnector extends Connector {
     return true;
   }
   
-  private function getResultsSet() {
+  public function getResultsSet() {
     if (isset($this->resultSet)) {
       return $this->resultSet;
     } else {
@@ -77,7 +77,7 @@ class DBConnector extends Connector {
     }
   }
   
-  private function getLastInsertId() {
+  public function getLastInsertId() {
     if (isset($this->lastInserted)) {
       return $this->lastInserted;
     } else {
@@ -85,7 +85,7 @@ class DBConnector extends Connector {
     }
   }
   
-  private function getNumRows() {
+  public function getNumRows() {
     if (isset($this->numRows)) {
       return $this->numRows;
     } else {

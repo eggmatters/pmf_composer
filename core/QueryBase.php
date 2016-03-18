@@ -31,7 +31,8 @@ class QueryBase {
     } else if (is_string($columns)) {
       $columnsList = explode(',', $columns);
     }
-    $this->columnsList = $this->tableizeArray($columnsList);
+    
+    $this->columnsList = array_map('core\Inflector::underscore', $columnsList);
     $this->query['select'] = "SELECT";
     return $this;
   }
@@ -43,7 +44,7 @@ class QueryBase {
     } else if (is_string($tables)) {
       $tablesList = explode(',', $tables);
     }
-    $this->tablesList = $this->tableizeArray($tablesList);
+    $this->tablesList = array_map('core\Inflector::tableize', $tablesList);
     $this->query['select-criteria'] = $this->aliasColumns();
     return $this;
   }
@@ -52,24 +53,17 @@ class QueryBase {
     return $this->query;
   }
   
-  private function tableizeArray($arrayNames) {
-    $retArray = [];
-    foreach ($arrayNames as $name) {
-      $retArray[] = Inflector::tableize($name);
-    }
-    return $retArray;
-  }
-  
   private function aliasColumns() {
-    $tablesValues   = implode(',', $this->setBindValueStrings($this->tablesList));
-    $tablesBindings = $this->setBindValues($this->tablesList);
     $columnsValues   = implode(',', $this->setBindValueStrings($this->columnsList));
     $columnBindings = $this->setBindValues($this->columnsList);
-    $sql = "SELECT `TABLE_NAME`, `COLUMN_NAME` FROM information_schema";
-    $sql .= " WHERE `TABLE_NAME` IN ($tablesValues) AND `COLUMN_NAME IN ($columnsValues)";
-    $bindArray = array_merge($tablesBindings, $columnBindings);
+    $sql = "SELECT `TABLE_NAME`, `COLUMN_NAME` FROM information_schema.COLUMNS";
+    $sql .= " WHERE `COLUMN_NAME` IN ($columnsValues) AND TABLE_SCHEMA = 'pmf_db'";
     $this->dbConn->conn();
-    return $this->dbConn->query($sql, $bindArray);    
+    if ($this->dbConn->query($sql, $columnBindings)) {
+      return $this->dbConn->getResultsSet();
+    } else {
+      return false;
+    }
   }
   
   private function setBindValues($array) {
