@@ -7,6 +7,7 @@ namespace core;
  */
 class QueryBase {
 
+  private $currentModel;
   private $query;
   private $columnsList;
   private $tablesList;
@@ -16,8 +17,10 @@ class QueryBase {
    */
   private $dbConn;
   
-  public function __construct() {
+  public function __construct($currentModel = null) {
     require_once dirname(__DIR__) . '/configurations/ModelMapper.php';
+    $reflectionClass = new \ReflectionClass($currentModel);
+    $this->currentModel = Inflector::tableize($reflectionClass->getName());
     $this->query = [];
     $this->columnsList = [];
     $this->tablesList = [];
@@ -33,11 +36,15 @@ class QueryBase {
     }
     
     $this->columnsList = array_map('core\Inflector::underscore', $columnsList);
-    $this->query['select'] = "SELECT";
+    if (count($this->columnsList) > 0 ) {
+      $this->query['select'] = "SELECT " . implode($columnsList) . " FROM $this->currentModel";
+    } else {
+      $this->query['select'] = "SELECT * FROM $this->currentModel";
+    }
     return $this;
   }
   
-  public function From($tables) {
+  public function Join($tables = null) {
     $tablesList = [];
     if (is_array($tables)) {
       $tablesList = $tables;
@@ -45,7 +52,7 @@ class QueryBase {
       $tablesList = explode(',', $tables);
     }
     $this->tablesList = array_map('core\Inflector::tableize', $tablesList);
-    $this->query['select-criteria'] = $this->aliasColumns();
+    
     return $this;
   }
   
@@ -78,3 +85,17 @@ class QueryBase {
     return array_map(create_function('$str', 'return ":$str";'), $array);
   }
 }
+/*
+SELECT 
+		i.TABLE_NAME,
+        k.COLUMN_NAME
+	FROM
+		information_schema.TABLE_CONSTRAINTS i
+			LEFT JOIN
+		information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME
+	WHERE
+		i.CONSTRAINT_TYPE = 'FOREIGN KEY'
+			AND i.TABLE_SCHEMA = DATABASE()
+			AND k.REFERENCED_TABLE_NAME = 'users';
+ * 
+ */
