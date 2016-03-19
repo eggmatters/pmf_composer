@@ -17,10 +17,10 @@ class QueryBase {
    */
   private $dbConn;
   
-  public function __construct($currentModel = null) {
+  public function __construct($currentModel) {
     require_once dirname(__DIR__) . '/configurations/ModelMapper.php';
     $reflectionClass = new \ReflectionClass($currentModel);
-    $this->currentModel = Inflector::tableize($reflectionClass->getName());
+    $this->currentModel = $this->tableizeModelName($reflectionClass->getName());
     $this->query = [];
     $this->columnsList = [];
     $this->tablesList = [];
@@ -37,10 +37,11 @@ class QueryBase {
     
     $this->columnsList = array_map('core\Inflector::underscore', $columnsList);
     if (count($this->columnsList) > 0 ) {
-      $this->query['select'] = "SELECT " . implode($columnsList) . " FROM $this->currentModel";
+      $this->query['select'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentModel";
     } else {
       $this->query['select'] = "SELECT * FROM $this->currentModel";
     }
+    echo $this->query['select'];
     return $this;
   }
   
@@ -83,6 +84,11 @@ class QueryBase {
   
   private function setBindValueStrings($array) {
     return array_map(create_function('$str', 'return ":$str";'), $array);
+  }
+  
+  private function tableizeModelName($modelName) {
+    $rv = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelName);
+    return Inflector::tableize($rv);
   }
 }
 /*

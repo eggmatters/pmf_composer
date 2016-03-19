@@ -15,8 +15,8 @@ require_once dirname(__DIR__) . '/autoload.php';
 
 //\core\CoreApp::routeRequest();
 
-$qb = new core\QueryBase();
-$db1 = $qb->Select("test_value,test_data,user_name,user_role")->From('tests,users');
+$qb = new core\QueryBase('app\models\TestModel');
+$db1 = $qb->Select("test_value,test_data,user_name,user_role");
 
 ?>
 <!DOCTYPE html>
