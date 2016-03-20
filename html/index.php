@@ -15,8 +15,8 @@ require_once dirname(__DIR__) . '/autoload.php';
 
 //\core\CoreApp::routeRequest();
 
-$qb = new core\QueryBase('app\models\TestModel');
-$db1 = $qb->Select("test_value,test_data,user_name,user_role");
+$qb = new core\QueryBase('app\models\PostModel');
+$db1 = $qb->Select()->Join('posts,tags');
 
 ?>
 <!DOCTYPE html>
@@ -28,7 +28,7 @@ $db1 = $qb->Select("test_value,test_data,user_name,user_role");
   <body>
     <pre>
       <?php
-       echo "index.php";
+       print_r($db1->getQuery());
       ?>
     </pre>
   </body>

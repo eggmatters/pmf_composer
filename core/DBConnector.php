@@ -49,7 +49,7 @@ class DBConnector extends Connector {
     
   }
   
-  public function query($sql, array $bindValues) {
+  public function query($sql, array $bindValues = []) {
     $this->stmt = $this->pdoConn->prepare($sql);
     try {
       $this->stmt->execute($bindValues);
@@ -92,4 +92,9 @@ class DBConnector extends Connector {
       return null;
     }
   }
+  
+  public function flattenResultSet() {
+
+  }
+  
 }
