@@ -7,15 +7,15 @@ namespace core;
  */
 abstract class ModelBase {
   
-  private $request;
-  private $connector;
-  private $modelAttributes;
+  protected $request;
+  protected $connector;
+  protected $modelAttributes;
   
   
   public function __construct(Request $request, $modelAttributes = null) {
     $this->request = $request;
     $this->setAttributes($modelAttributes);
-    $this->connector = $this->setConnector();
+    $this->setConnector();
   }
   
   public function get($id = null) {
@@ -53,11 +53,12 @@ abstract class ModelBase {
   
   public function setConnector() {
     global $modelConnections;
+    $modelReflector = new \ReflectionClass($this);
     $this->connector = null;
-    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", __CLASS__);
+    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelReflector->getName());
     switch ($modelConnections[$className]['ConnectorType']) {
       case Connector::DBCONN:
-        $this->connector = new DBConnector($modelConnections[$className], $this);
+        $this->connector = new DBConnector($modelConnections[$className], $this->request, $this);
         break;
       case Connector::APICONN:
         $this->connector = new APIConnector($modelConnections[$className], $this);

@@ -85,6 +85,9 @@ abstract class ControllerBase {
    */
   protected function get() {
     echo "got here with get in $this->controllerName";
+    $modelBase = $this->loadModel();
+    print_r($modelBase->get());
+    
   }
   /**
    * Default method, loads all models (if required to) and
@@ -120,9 +123,9 @@ abstract class ControllerBase {
    */
   protected function getModelClass() {
     $reflectionClass = new \ReflectionClass($this);
-    $className = $reflectionClass->getName();
-    $classBase = str_replace($className, 'Controller', '');
-    $testModel = "app//models//" . Inflector::singularize($classBase) . "Model";
+    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $reflectionClass->getName());
+    $classBase = str_replace('Controller', '', $className);
+    $testModel = "app\\models\\" . Inflector::singularize($classBase) . "Model";
     if (class_exists($testModel)) {
       return $testModel;
     }

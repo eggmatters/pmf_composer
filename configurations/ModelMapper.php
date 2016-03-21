@@ -21,4 +21,8 @@ $modelConnections = array(
      'ConnectorType' => \core\Connector::DBCONN,
      'Connector' => $devDbConn
    ),
+  'UserModel' => array(
+   'ConnectorType' => \core\Connector::DBCONN,
+   'Connector' => $devDbConn
+ )
 );

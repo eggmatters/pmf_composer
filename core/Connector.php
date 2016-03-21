@@ -43,7 +43,7 @@ abstract class Connector {
   
   abstract public function delete($params = null);
 
-  public function __construct($modelConnector, Requet $request = null, $modelInstance = null) {
+  public function __construct($modelConnector, Request $request = null, $modelInstance = null) {
     if ($modelConnector['ConnectorType'] == self::DBCONN) {
       $this->setDb($modelConnector['Connector']);
       $this->conntype = self::DBCONN;
@@ -53,7 +53,7 @@ abstract class Connector {
       $this->conntype = self::APICONN;
     }
     $this->request = $request;
-    $this->modelInstance = $this;
+    $this->modelInstance = $modelInstance;
   }
   
   protected function setDb($connector) {
