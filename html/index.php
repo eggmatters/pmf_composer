@@ -1,6 +1,7 @@
 <?php 
 
 require_once dirname(__DIR__) . '/autoload.php';
+require_once dirname(__DIR__) . '/configurations/ModelMapper.php';
 
 //$modelAttributes = (object) array(
 //  'shskhyu' => array(

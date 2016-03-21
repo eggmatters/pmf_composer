@@ -32,7 +32,7 @@ class QueryBase {
    * @param string $currentModel
    */
   public function __construct($currentModel) {
-    require_once dirname(__DIR__) . '/configurations/ModelMapper.php';
+    global $schemaConnector;
     $reflectionClass = new \ReflectionClass($currentModel);
     $this->currentTable = $this->tableizeModelName($reflectionClass->getName());
     $this->query = [];
@@ -143,7 +143,6 @@ class QueryBase {
       . " WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY'"
       . " AND i.TABLE_SCHEMA = DATABASE()"
       . " AND k.REFERENCED_TABLE_NAME in ($tablesListBindStrings);";
-    $this->dbConn->conn();
     if ($this->dbConn->query($sql, $tablesListBindValues)) {
        return $this->dbConn->getResultsSet();
     } else {

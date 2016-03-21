@@ -8,48 +8,35 @@ namespace core;
  * @author meggers
  */
 class DBConnector extends Connector {
-  
-  protected $host;
-  protected $dbName;
-  protected $user;
-  protected $port;
-  protected $pass;
+    
   private $pdoConn;
   private $stmt;
   private $lastInserted;
   private $resultSet;
   private $numRows;
   
-  public function conn() {
-    try {
-      $this->pdoConn = new \PDO("mysql:host=$this->host;dbname=$this->dbName", $this->user, $this->pass);
-    } catch (Exception $e) {
-      throw new Exception($e->getMessage());
-    }
-    $this->pdoConn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-  }
-  
-  public function getAll($resource) {
-    ;
-  }
-  
-  public function get($resource) {
-    ;
-  }
-  
-  public function create($resource, $params) {
+  public function getAll() {
     
   }
   
-  public function update($resource, $params) {
+  public function get() {
     
   }
   
-  public function delete($resource, $params = null) {
+  public function create($params) {
+    
+  }
+  
+  public function update($params) {
+    
+  }
+  
+  public function delete($params = null) {
     
   }
   
   public function query($sql, array $bindValues = []) {
+    $this->conn();
     $this->stmt = $this->pdoConn->prepare($sql);
     try {
       $this->stmt->execute($bindValues);
@@ -96,5 +83,15 @@ class DBConnector extends Connector {
   public function flattenResultSet() {
 
   }
+  
+  private function conn() {
+    try {
+      $this->pdoConn = new \PDO("mysql:host=$this->host;dbname=$this->dbName", $this->user, $this->pass);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage());
+    }
+    $this->pdoConn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+  }
+  
   
 }
