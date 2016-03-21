@@ -12,6 +12,7 @@ class QueryBase {
   private $columnsList;
   private $tablesList;
   private $fkConstraints;
+  
   /**
    *
    * @var core\DBConnector 
@@ -79,6 +80,11 @@ class QueryBase {
     return $this;
   }
   
+  public function Where() {
+    
+  }
+  
+  
   public function getQuery() {
     return $this->query;
   }
@@ -119,6 +125,8 @@ class QueryBase {
     }
   }
 }
+
+
 /*
 SELECT 
 		i.TABLE_NAME,
