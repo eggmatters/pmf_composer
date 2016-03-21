@@ -9,8 +9,6 @@ abstract class ModelBase {
   
   protected $request;
   protected $connector;
-  protected $modelAttributes;
-  
   
   public function __construct(Request $request, $modelAttributes = null) {
     $this->request = $request;
@@ -19,7 +17,11 @@ abstract class ModelBase {
   }
   
   public function get($id = null) {
-    return $this->connector->get($id);
+    $rs = $this->connector->get($id);
+    if ($rs) {
+      $this->setAttributes($rs[0]);
+    }
+    
   }
   
   public function getAll() {
@@ -34,11 +36,8 @@ abstract class ModelBase {
   }
   
   public function setAttributes($modelAttributes = null) {
-    if (empty($this->modelAttributes)) {
+    if (empty($modelAttributes)) {
       return;
-    }
-    if (is_null($modelAttributes)) {
-      $modelAttributes = $this->modelAttributes;
     }
     foreach ($modelAttributes as $name => $value) {
       if (is_array($value)) {
@@ -48,21 +47,6 @@ abstract class ModelBase {
       } else {
         $this->$name = $value;
       }
-    }
-  }
-  
-  public function setConnector() {
-    global $modelConnections;
-    $modelReflector = new \ReflectionClass($this);
-    $this->connector = null;
-    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelReflector->getName());
-    switch ($modelConnections[$className]['ConnectorType']) {
-      case Connector::DBCONN:
-        $this->connector = new DBConnector($modelConnections[$className], $this->request, $this);
-        break;
-      case Connector::APICONN:
-        $this->connector = new APIConnector($modelConnections[$className], $this);
-        break;
     }
   }
   
@@ -89,5 +73,20 @@ abstract class ModelBase {
       return $classInstance;
     }
     return $modelObject;
+  }
+  
+  private function setConnector() {
+    global $modelConnections;
+    $modelReflector = new \ReflectionClass($this);
+    $this->connector = null;
+    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelReflector->getName());
+    switch ($modelConnections[$className]['ConnectorType']) {
+      case Connector::DBCONN:
+        $this->connector = new DBConnector($modelConnections[$className], $this->request, $this);
+        break;
+      case Connector::APICONN:
+        $this->connector = new APIConnector($modelConnections[$className], $this);
+        break;
+    }
   }
 }

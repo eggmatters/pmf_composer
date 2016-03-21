@@ -18,12 +18,7 @@ abstract class ControllerBase {
    * @var Request $request
    */
   protected $request;
-  /**
-   * User defined array of models which may be associated with this controller.
-   * If undefined, BaseModel will attempt to join any and all models specified in the path.
-   * @var array 
-   */
-  protected $associatedModels;
+
   /**
    * Reflection property called by contructor setting name of child controller.
    * @var string
@@ -84,10 +79,11 @@ abstract class ControllerBase {
    * Also responsible for rendering forms for "update" and "new" requests.
    */
   protected function get() {
-    echo "got here with get in $this->controllerName";
     $modelBase = $this->loadModel();
-    print_r($modelBase->get());
-    
+    $modelBase->get($this->request->getRequestedId());
+    echo "<pre>";
+    print_r($modelBase);
+    echo "</pre>";
   }
   /**
    * Default method, loads all models (if required to) and
