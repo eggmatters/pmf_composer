@@ -6,6 +6,6 @@ use core\ModelBase;
  *
  * @author matthewe
  */
-class PostModel {
+class PostModel extends ModelBase {
   //put your code here
 }

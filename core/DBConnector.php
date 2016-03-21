@@ -19,8 +19,21 @@ class DBConnector extends Connector {
     
   }
   
-  public function get() {
-    
+  public function get($id = null) {
+    $queryBase = new QueryBase($this->modelInstance);
+    $constraint = new Constraints();
+    if (empty($id)) {
+      $resourceArray = $this->request->getResourceArray();
+      $id = $resourceArray[count($resourceArray - 1)];
+    }
+    $constraint->term("id", "=", $id);
+    $queryBase->Select()->Where($constraint);
+    $sql = $queryBase->getSelect();
+    $bindValues = $queryBase->getBindValues();
+    if ($this->query($sql, $bindValues)) {
+      return $this->getResultsSet();
+    }
+    return false;
   }
   
   public function create($params) {
@@ -91,7 +104,5 @@ class DBConnector extends Connector {
       throw new Exception($e->getMessage());
     }
     $this->pdoConn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-  }
-  
-  
+  }  
 }

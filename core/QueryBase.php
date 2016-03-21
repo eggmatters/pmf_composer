@@ -115,6 +115,10 @@ class QueryBase {
     return $queryString;
   }
   
+  public function getBindValues() {
+    return $this->bindings;
+  }
+  
   private function setBindValues($array) {
     $bindValues = [];
     foreach($array as $value) {

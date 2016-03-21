@@ -6,6 +6,6 @@ use core\ModelBase;
  *
  * @author matthewe
  */
-class TagModel {
+class TagModel extends ModelBase {
   //put your code here
 }

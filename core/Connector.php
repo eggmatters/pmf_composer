@@ -23,14 +23,19 @@ abstract class Connector {
   protected $port;
   protected $pass;
   protected $conntype;
+  /**
+   *
+   * @var core\Request 
+   */
   protected $request;
+  protected $modelInstance;
   
   const DBCONN=1;
   const APICONN=2;
   
   abstract public function getAll();
   
-  abstract public function get();
+  abstract public function get($id = null);
   
   abstract public function create($params);
   
@@ -38,7 +43,7 @@ abstract class Connector {
   
   abstract public function delete($params = null);
 
-  public function __construct($modelConnector, Requet $request = null) {
+  public function __construct($modelConnector, Requet $request = null, $modelInstance = null) {
     if ($modelConnector['ConnectorType'] == self::DBCONN) {
       $this->setDb($modelConnector['Connector']);
       $this->conntype = self::DBCONN;
@@ -48,6 +53,7 @@ abstract class Connector {
       $this->conntype = self::APICONN;
     }
     $this->request = $request;
+    $this->modelInstance = $this;
   }
   
   protected function setDb($connector) {
@@ -60,7 +66,7 @@ abstract class Connector {
     }
   }
   
-  protected function setAPI($modelConnection) {
+  protected function setAPI($connector) {
     
   }
 }

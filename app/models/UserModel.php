@@ -7,6 +7,6 @@ use core\ModelBase;
  *
  * @author matthewe
  */
-class UserModel {
+class UserModel extends ModelBase {
   //put your code here
 }

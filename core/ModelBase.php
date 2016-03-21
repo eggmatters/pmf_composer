@@ -8,24 +8,21 @@ namespace core;
 abstract class ModelBase {
   
   private $request;
-  private $modelAttributes;
   private $connector;
+  private $modelAttributes;
+  
   
   public function __construct(Request $request, $modelAttributes = null) {
     $this->request = $request;
     $this->setAttributes($modelAttributes);
+    $this->connector = $this->setConnector();
   }
   
-  public function get($id) {
-    //establish connector
-    //perform fetch
-    //call instance.
+  public function get($id = null) {
+    $this->connector->get($id);
   }
   
   public function getAll() {
-    //establish connector
-    //perform fetch
-    //call instance.
   }
   
   public function update($id, $params) {
@@ -51,6 +48,20 @@ abstract class ModelBase {
       } else {
         $this->$name = $value;
       }
+    }
+  }
+  
+  public function setConnector() {
+    global $modelConnections;
+    $this->connector = null;
+    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", __CLASS__);
+    switch ($modelConnections[$className]['ConnectorType']) {
+      case Connector::DBCONN:
+        $this->connector = new DBConnector($modelConnections[$className], $this);
+        break;
+      case Connector::APICONN:
+        $this->connector = new APIConnector($modelConnections[$className], $this);
+        break;
     }
   }
   

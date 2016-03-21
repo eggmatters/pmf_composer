@@ -13,6 +13,6 @@ namespace core;
  *
  * @author meggers
  */
-abstract class APIConnector {
+class APIConnector {
   //put your code here
 }
