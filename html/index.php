@@ -15,8 +15,12 @@ require_once dirname(__DIR__) . '/autoload.php';
 
 //\core\CoreApp::routeRequest();
 
-$qb = new core\QueryBase('app\models\PostModel');
-$db1 = $qb->Select()->Join('posts,tags');
+//$qb = new core\QueryBase('app\models\PostModel');
+//$db1 = $qb->Select()->Join('posts,tags');
+$cons = new \core\Constraints();
+
+$cons->term("meh", "=", "foo")->andTerm("blah", "!=", "heh")->andTerm()->groupBegin()->term("k", "!=", "v")->orTerm("l", "!=", "t")->groupEnd();
+//"meh = foo AND blah != heh AND ( k != v OR l != t )" 
 
 ?>
 <!DOCTYPE html>
@@ -28,7 +32,8 @@ $db1 = $qb->Select()->Join('posts,tags');
   <body>
     <pre>
       <?php
-       print_r($db1->getQuery());
+       print_r($cons->getConstraints());
+       
       ?>
     </pre>
   </body>

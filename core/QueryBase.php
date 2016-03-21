@@ -12,7 +12,6 @@ class QueryBase {
   private $columnsList;
   private $tablesList;
   private $fkConstraints;
-  
   /**
    *
    * @var core\DBConnector 
@@ -27,6 +26,7 @@ class QueryBase {
     $this->columnsList = [];
     $this->tablesList = [];
     $this->dbConn = new DBConnector($schemaConnector);
+    self::$constraints = (object) array();
   }
   /**
    * Columns list may be either an array or comma seperated string.
