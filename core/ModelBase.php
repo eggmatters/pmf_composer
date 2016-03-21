@@ -19,7 +19,7 @@ abstract class ModelBase {
   }
   
   public function get($id = null) {
-    $this->connector->get($id);
+    return $this->connector->get($id);
   }
   
   public function getAll() {

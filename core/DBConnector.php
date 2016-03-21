@@ -24,7 +24,7 @@ class DBConnector extends Connector {
     $constraint = new Constraints();
     if (empty($id)) {
       $resourceArray = $this->request->getResourceArray();
-      $id = $resourceArray[count($resourceArray - 1)];
+      $id = $resourceArray[count($resourceArray) - 1];
     }
     $constraint->term("id", "=", $id);
     $queryBase->Select()->Where($constraint);
