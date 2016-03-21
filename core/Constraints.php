@@ -15,9 +15,11 @@ namespace core;
  */
 class Constraints {
   private $constraints;
+  private $bindings;
   
   public function __construct() {
     $this->constraints = "";
+    $this->bindings = [];
   }
   
   public function term($lhs, $operator, $rhs) {
@@ -49,8 +51,21 @@ class Constraints {
     return $this->constraints;
   }
   
+  public function getBindings() {
+    return $this->bindings;
+  }
+  
   private function setTerm($lhs = "", $operator = "", $rhs = "") {
+    if (!empty($lhs) && !empty($rhs)) {
+      $rhs = $this->setBindings($lhs, $rhs);
+    }
     return trim("$lhs $operator $rhs") . " ";
+  }
+  
+  private function setBindings($lhs, $rhs) {
+    $placeholder = ":" . Inflector::underscore($lhs);
+    $this->bindings[$placeholder] = $rhs;
+    return $placeholder;
   }
   
   

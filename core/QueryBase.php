@@ -1,7 +1,15 @@
 <?php
 namespace core;
 /**
- * Description of QueryBase
+ * This is a basic parser to generate valid sql queries with bound parameters.
+ * The only association this class has with the overall framework is the model
+ * passed in the constructor.
+ * 
+ * Additionally, this class is reliant on foreign key constraints established
+ * in the databse. Calls to join on tables without defined foreign key constraints
+ * will not work.
+ * 
+ * This class relies on the Constraints class to establish where clauses.
  *
  * @author meggers
  */
@@ -12,12 +20,17 @@ class QueryBase {
   private $columnsList;
   private $tablesList;
   private $fkConstraints;
+  private $bindings;
   /**
    *
    * @var core\DBConnector 
    */
   private $dbConn;
   
+  /**
+   * Constructor accepts the class path of the model it is selecting from
+   * @param string $currentModel
+   */
   public function __construct($currentModel) {
     require_once dirname(__DIR__) . '/configurations/ModelMapper.php';
     $reflectionClass = new \ReflectionClass($currentModel);
@@ -25,8 +38,8 @@ class QueryBase {
     $this->query = [];
     $this->columnsList = [];
     $this->tablesList = [];
+    $this->bindings = [];
     $this->dbConn = new DBConnector($schemaConnector);
-    self::$constraints = (object) array();
   }
   /**
    * Columns list may be either an array or comma seperated string.
@@ -44,9 +57,9 @@ class QueryBase {
     
     $this->columnsList = array_map('core\Inflector::underscore', $columnsList);
     if (count($this->columnsList) > 0 ) {
-      $this->query['select'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
+      $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
     } else {
-      $this->query['select'] = "SELECT * FROM $this->currentTable";
+      $this->query['SELECT'] = "SELECT * FROM $this->currentTable";
     }
     return $this;
   }
@@ -54,11 +67,9 @@ class QueryBase {
    * Tables will be a valid list of tables with foreign key relations
    * on the currentTable (model).
    * 
+   * Tables may be an array or comma seperated string
    * 
-   * A false return from this method should bubble up through the ORM 
-   * eventually to the controller to issue a 404.
-   * 
-   * @param array $tables
+   * @param array | string $tables
    * @return \core\QueryBase
    */
   public function Join($tables = null) {
@@ -72,7 +83,7 @@ class QueryBase {
     $this->fkConstraints = $this->foreignKeyConstraints($tablesList);
     foreach ($this->fkConstraints as $constraint) {
       if (in_array($constraint['REFERENCED_TABLE_NAME'], $tablesList)) {
-        $this->query['joins'][] = "JOIN {$constraint['REFERENCED_TABLE_NAME']}"
+        $this->query['JOINS'][] = "JOIN {$constraint['REFERENCED_TABLE_NAME']}"
           . " ON {$constraint['TABLE_NAME']}.{$constraint['COLUMN_NAME']} ="
           . " {$constraint['REFERENCED_TABLE_NAME']}.id ";
       }
@@ -80,13 +91,28 @@ class QueryBase {
     return $this;
   }
   
-  public function Where() {
-    
+  /**
+   * gets the built constraints clause from a constraints instance defined outside of 
+   * this method. Sets bound params to constraints to this query.
+   * 
+   * @param \core\Constraints $constraint
+   * @return \core\QueryBase
+   */
+  public function Where(Constraints $constraint) {
+    $this->query['WHERE'] = "WHERE " . $constraint->getConstraints();
+    $this->bindings = array_merge($this->bindings, $constraint->getBindings());
+    return $this;
   }
   
-  
-  public function getQuery() {
-    return $this->query;
+  /**
+   * Returns the built query
+   * @return string
+   */
+  public function getSelect() {
+    $queryString =  isset($this->query['SELECT']) ? $this->query['SELECT'] ." " : "";
+    $queryString .= isset($this->query['JOINS']) ? implode("",$this->query['JOINS']) . " " : "";
+    $queryString .= isset($this->query['WHERE'] ) ? $this->query['WHERE'] . " " : "";
+    return $queryString;
   }
   
   private function setBindValues($array) {
