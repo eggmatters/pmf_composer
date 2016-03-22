@@ -157,43 +157,6 @@ class QueryBase {
 
 
 /*
-SELECT 
-		i.TABLE_NAME,
-        k.COLUMN_NAME
-	FROM
-		information_schema.TABLE_CONSTRAINTS i
-			LEFT JOIN
-		information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME
-	WHERE
-		i.CONSTRAINT_TYPE = 'FOREIGN KEY'
-			AND i.TABLE_SCHEMA = DATABASE()
-			AND k.REFERENCED_TABLE_NAME = 'users';
- * 
- CREATE TABLE `pmf_db`.`tests` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '',
-  `test_data` VARCHAR(45) NULL COMMENT '',
-  `test_value` VARCHAR(45) NULL COMMENT '',
-  `user_id` INT NOT NULL COMMENT '',
-  PRIMARY KEY (`id`)  COMMENT '');
- * 
- CREATE TABLE `pmf_db`.`users` (
-  `id` INT NOT NULL AUTO_INCREMENT COMMENT '',
-  `username` VARCHAR(45) NOT NULL COMMENT '',
-  `user_role` VARCHAR(45) NOT NULL COMMENT '',
-  `everything` VARCHAR(45) BINARY NOT NULL COMMENT '',
-  `number` INT UNSIGNED ZEROFILL NOT NULL COMMENT '',
-  PRIMARY KEY (`id`)  COMMENT '',
-  UNIQUE INDEX `everything_UNIQUE` (`everything` ASC)  COMMENT '',
-  UNIQUE INDEX `number_UNIQUE` (`number` ASC)  COMMENT '');
- * 
- ALTER TABLE `pmf_db`.`tests` 
-ADD INDEX `fk_tests_users_idx` (`user_id` ASC)  COMMENT '';
-ALTER TABLE `pmf_db`.`tests` 
-ADD CONSTRAINT `fk_tests_users`
-  FOREIGN KEY (`user_id`)
-  REFERENCES `pmf_db`.`users` (`id`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION;
  * 
  CREATE TABLE `pmf_db`.`posts_tags` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '',

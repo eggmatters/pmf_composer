@@ -13,6 +13,6 @@ use core\ControllerBase;
  *
  * @author meggers
  */
-class TestController extends ControllerBase {
+class PostsController extends ControllerBase {
   //put your code here
 }
