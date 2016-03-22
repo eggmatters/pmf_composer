@@ -67,10 +67,48 @@ abstract class Connector {
   }
   
   protected function setAPI($connector) {
-    
+  
   }
   
-  protected function parseResource() {
-    
+  /**
+   * This method sets and returns an array of values to be used by the ORM.
+   * It will filter API requests and DB requests, setting dependencies to be 
+   * handled by the Connectors for each.
+   * 
+   * @param array $resourceArray
+   * 
+   */
+  public function parseResources($resourceArray) {
+    $rv = [];
+    $resourcesIterator = new SimpleIterator($resourceArray);
+    $current = $resourcesIterator->current();
+    while ($next = $resourcesIterator->next()) {    
+      $currentType = CoreApp::getResourceType($current);
+      $nextType = CoreApp::getResourceType($next);
+      $currentValid = $this->validateResource($current);
+      if ($currentType == 'controller' && $currentValid) {
+        $rv['joins'][] = $current;
+      }
+      if ($nextType == 'int' && $currentValid) {
+        $rv['constraints'][] = $current . "." . $next;
+      }
+    }
+  }
+  
+  private function getModelInstanceName() {
+    $modelReflector = new \ReflectionClass($this->modelInstance);
+    $modelName  = $modelReflector->getName();
+    return preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelName);
+  }
+  
+  private function validateResource($resource) {
+    global $modelConnections;
+    if (!isset($modelConnections[Inflector::singularize($resource)])) {
+      return false;
+    }
+    if ($modelConnections[Inflector::singularize($resource)]['ConnectorType'] != $this->conntype) {
+      return false;
+    }
+    return true;
   }
 }

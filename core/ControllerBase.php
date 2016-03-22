@@ -64,7 +64,7 @@ abstract class ControllerBase {
           $this->request->setRequestedId($resourceValue);
           break;
         case "string":
-          //call method if exists.
+          //call setRequestedTag and then figure out what to do (method, fetch by value etc.)
           $this->request->setRequestedTag($resourceValue);
           break;
       }
