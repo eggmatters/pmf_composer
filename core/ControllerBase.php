@@ -24,6 +24,8 @@ abstract class ControllerBase {
    * @var string
    */
   protected $controllerName;
+  
+  protected $model;
   /**
    * Constructor accepts the Request object and an optional array of resources.
    * The resources are values obtained from the URL by the Request object.
@@ -79,10 +81,10 @@ abstract class ControllerBase {
    * Also responsible for rendering forms for "update" and "new" requests.
    */
   protected function get() {
-    $modelBase = $this->loadModel();
-    $modelBase->get($this->request->getRequestedId());
+    $modelBase = $this->getModelClass();
+    $this->model = $modelBase::get($this->request->getRequestedId());
     echo "<pre>";
-    print_r($modelBase);
+    print_r($this->model);
     echo "</pre>";
   }
   /**
@@ -177,15 +179,6 @@ abstract class ControllerBase {
     } else {
       $this->delete();
     }
-  }
-  
-  private function loadModel() {
-    $modelClass = $this->getModelClass();
-    if (is_null($modelClass)) {
-      return null;
-    }
-    $reflectionClass = new \ReflectionClass($modelClass);
-    return $reflectionClass->newInstance($this->request);
   }
 
 }

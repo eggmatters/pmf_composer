@@ -24,11 +24,16 @@ abstract class ModelBase {
     $this->setConnector();
   }
   
-  public function get($id = null) {
-    $rs = $this->connector->get($id);
+  public static function get($id = null, $resources = null) {
+    $request = new Request($resources);
+    $calledClass = get_called_class();
+    $modelReflector = new \ReflectionClass($calledClass);
+    $modelClass = $modelReflector->newInstance($request, $resources);
+    $rs = $modelClass->connector->get($id);
     if ($rs) {
-      $this->setAttributes($rs[0]);
+      $modelClass->setAttributes($rs[0]);
     }
+    return $modelClass;
   }
   
   public function getAll() {
@@ -55,6 +60,10 @@ abstract class ModelBase {
         $this->$name = $value;
       }
     }
+  }
+  
+  private static function setInstanceFromRequest(Request $request) {
+    
   }
   
   private function setArray($array) {
@@ -96,4 +105,5 @@ abstract class ModelBase {
         break;
     }
   }
+  
 }
