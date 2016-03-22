@@ -46,7 +46,7 @@ abstract class ControllerBase {
   }
   /**
    * init() parses the resources array, determining the resource type from url 
-   * paramaters set in the Request->resources array.
+   * parameters set in the Request->resources array.
    * This method "delegates" requests to nested controllers. If an additional controller
    * is on the route, we stop processing and instantiate the next controller.
    * 
@@ -82,7 +82,7 @@ abstract class ControllerBase {
    */
   protected function get() {
     $modelBase = $this->getModelClass();
-    $this->model = $modelBase::get($this->request->getRequestedId());
+    $this->model = $modelBase::get($this->request->getRequestedId(), $this->request->getRequestUri());
     echo "<pre>";
     print_r($this->model);
     echo "</pre>";

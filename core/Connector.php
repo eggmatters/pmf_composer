@@ -97,7 +97,7 @@ abstract class Connector {
   
   }
   
-  protected function getModelInstanceName() {
+  protected static function getModelInstanceName() {
     $modelReflector = new \ReflectionClass($this->modelInstance);
     $modelName  = $modelReflector->getName();
     return preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelName);

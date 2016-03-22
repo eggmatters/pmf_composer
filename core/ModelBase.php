@@ -21,29 +21,27 @@ abstract class ModelBase {
   public function __construct(Request $request, $modelAttributes = null) {
     $this->request = $request;
     $this->setAttributes($modelAttributes);
-    $this->setConnector();
+    $this->connector = self::setConnector();
   }
   
   public static function get($id = null, $resources = null) {
-    $request = new Request($resources);
-    $calledClass = get_called_class();
-    $modelReflector = new \ReflectionClass($calledClass);
-    $modelClass = $modelReflector->newInstance($request, $resources);
-    $rs = $modelClass->connector->get($id);
+    $modelClass = self::setInstanceFromResources($resources);
+    $connector = self::setConnector();
+    $rs = $connector->get($id);
     if ($rs) {
       $modelClass->setAttributes($rs[0]);
     }
     return $modelClass;
   }
   
-  public function getAll() {
+  public static function getAll() {
   }
   
-  public function update($id, $params) {
+  public static function update($id, $params) {
     
   }
   
-  public function create($params) {
+  public static function create($params) {
     
   }
   
@@ -62,8 +60,11 @@ abstract class ModelBase {
     }
   }
   
-  private static function setInstanceFromRequest(Request $request) {
-    
+  private static function setInstanceFromResources($resources) {
+    $request = new Request($resources);
+    $calledClass = get_called_class();
+    $modelReflector = new \ReflectionClass($calledClass);
+    return $modelReflector->newInstance($request, $resources);
   }
   
   private function setArray($array) {
@@ -91,19 +92,18 @@ abstract class ModelBase {
     return $modelObject;
   }
   
-  private function setConnector() {
+  private static function setConnector() {
     global $modelConnections;
-    $modelReflector = new \ReflectionClass($this);
-    $this->connector = null;
-    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelReflector->getName());
+    $connector = null;
+    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", get_called_class());
     switch ($modelConnections[$className]['ConnectorType']) {
       case Connector::DBCONN:
-        $this->connector = new DBConnector($modelConnections[$className], $this->request, $this);
+        $connector = new DBConnector($modelConnections[$className], $this->request, $this);
         break;
       case Connector::APICONN:
-        $this->connector = new APIConnector($modelConnections[$className], $this);
+        $connector = new APIConnector($modelConnections[$className], $this);
         break;
     }
+    return $connector;
   }
-  
 }

@@ -14,7 +14,7 @@ class DBConnector extends Connector {
   private $lastInserted;
   private $resultSet;
   private $numRows;
-  
+
   public function getAll() {
     
   }
