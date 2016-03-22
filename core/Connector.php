@@ -69,4 +69,8 @@ abstract class Connector {
   protected function setAPI($connector) {
     
   }
+  
+  protected function parseResource() {
+    
+  }
 }
