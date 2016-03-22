@@ -7,7 +7,15 @@ namespace core;
  */
 abstract class ModelBase {
   
+  /**
+   *
+   * @var Request 
+   */
   protected $request;
+  /**
+   *
+   * @var Connector 
+   */
   protected $connector;
   
   public function __construct(Request $request, $modelAttributes = null) {
@@ -21,7 +29,6 @@ abstract class ModelBase {
     if ($rs) {
       $this->setAttributes($rs[0]);
     }
-    
   }
   
   public function getAll() {

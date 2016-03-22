@@ -25,7 +25,7 @@ abstract class Connector {
   protected $conntype;
   /**
    *
-   * @var core\Request 
+   * @var Request 
    */
   protected $request;
   protected $modelInstance;
@@ -56,20 +56,6 @@ abstract class Connector {
     $this->modelInstance = $modelInstance;
   }
   
-  protected function setDb($connector) {
-    $reflectionClass = new \ReflectionClass($this);
-    $className = $reflectionClass->getName();
-    foreach($connector as $property => $value) {
-      if (property_exists($className, $property)) {
-        $this->$property = $value;
-      }
-    }
-  }
-  
-  protected function setAPI($connector) {
-  
-  }
-  
   /**
    * This method sets and returns an array of values to be used by the ORM.
    * It will filter API requests and DB requests, setting dependencies to be 
@@ -90,12 +76,28 @@ abstract class Connector {
         $rv['joins'][] = $current;
       }
       if ($nextType == 'int' && $currentValid) {
-        $rv['constraints'][] = $current . "." . $next;
+        $rv['constraints'][] = (object) array("resource" => $current, "value" => $next);
+      }
+      $current = $next;
+    }
+    return $rv;
+  }
+  
+  protected function setDb($connector) {
+    $reflectionClass = new \ReflectionClass($this);
+    $className = $reflectionClass->getName();
+    foreach($connector as $property => $value) {
+      if (property_exists($className, $property)) {
+        $this->$property = $value;
       }
     }
   }
   
-  private function getModelInstanceName() {
+  protected function setAPI($connector) {
+  
+  }
+  
+  protected function getModelInstanceName() {
     $modelReflector = new \ReflectionClass($this->modelInstance);
     $modelName  = $modelReflector->getName();
     return preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelName);
@@ -103,10 +105,14 @@ abstract class Connector {
   
   private function validateResource($resource) {
     global $modelConnections;
-    if (!isset($modelConnections[Inflector::singularize($resource)])) {
+    $resourceModel = Inflector::camelize(Inflector::singularize($resource)) . "Model";
+    if ($resourceModel == $this->getModelInstanceName()) {
       return false;
     }
-    if ($modelConnections[Inflector::singularize($resource)]['ConnectorType'] != $this->conntype) {
+    if (!isset($modelConnections[$resourceModel])) {
+      return false;
+    }
+    if ($modelConnections[$resourceModel]['ConnectorType'] != $this->conntype) {
       return false;
     }
     return true;

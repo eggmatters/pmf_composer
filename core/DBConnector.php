@@ -19,15 +19,30 @@ class DBConnector extends Connector {
     
   }
   
-  public function get($id = null) {
+  public function get($id = null) { 
+    $selectTable = QueryBase::tableizeModelName($this->getModelInstanceName());
+    $parsedResources = $this->parseResources($this->request->getResourceArray());
     $queryBase = new QueryBase($this->modelInstance);
     $constraint = new Constraints();
     if (empty($id)) {
       $resourceArray = $this->request->getResourceArray();
       $id = $resourceArray[count($resourceArray) - 1];
     }
-    $constraint->term("id", "=", $id);
-    $queryBase->Select()->Where($constraint);
+    
+    $queryBase->Select();
+    if (!empty($parsedResources['joins'])) {
+      $joinsArray = array_map("core\Inflector::tableize", $parsedResources['joins']);
+      $queryBase->Join($joinsArray);
+    }
+    $constraint->term("$selectTable" . ".id", "=", $id);
+    if (!empty($parsedResources['constraints'])) {
+      foreach ($parsedResources['constraints'] as $kv) {
+        $table = Inflector::tableize($kv->resource) . ".id";
+        $value = $kv->value;
+        $constraint->andTerm($table, "=", $value);
+      }
+    }
+    $queryBase->Where($constraint);
     $sql = $queryBase->getSelect();
     $bindValues = $queryBase->getBindValues();
     if ($this->query($sql, $bindValues)) {
@@ -54,8 +69,9 @@ class DBConnector extends Connector {
     try {
       $this->stmt->execute($bindValues);
     } catch (\PDOException $e) {
-      $errorMessage = "Database error: Code $e->getCode\n"
-        . "Message: $e->getMessage()";
+      $errorMessage = "Database error: Code {$e->getCode()}\n"
+        . "Message: {$e->getMessage()}";
+      error_log($errorMessage);
       return $errorMessage;
     }
     if ($this->stmt->columnCount() > 0) {
@@ -104,5 +120,5 @@ class DBConnector extends Connector {
       throw new Exception($e->getMessage());
     }
     $this->pdoConn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-  }  
+  }
 }

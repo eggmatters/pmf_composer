@@ -34,13 +34,20 @@ class QueryBase {
   public function __construct($currentModel) {
     global $schemaConnector;
     $reflectionClass = new \ReflectionClass($currentModel);
-    $this->currentTable = $this->tableizeModelName($reflectionClass->getName());
+    $this->currentTable = self::tableizeModelName($reflectionClass->getName());
     $this->query = [];
     $this->columnsList = [];
     $this->tablesList = [];
     $this->bindings = [];
     $this->dbConn = new DBConnector($schemaConnector);
   }
+  
+  public static function tableizeModelName($modelName) {
+    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelName);
+    $classBase = str_replace('Model', '', $className);
+    return Inflector::tableize($classBase);
+  }
+  
   /**
    * Columns list may be either an array or comma seperated string.
    * Columns list must be in table_name.column_name format.
@@ -129,12 +136,6 @@ class QueryBase {
   
   private function setBindValueStrings($array) {
     return array_map(create_function('$str', 'return ":$str";'), $array);
-  }
-  
-  private function tableizeModelName($modelName) {
-    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelName);
-    $classBase = str_replace('Model', '', $className);
-    return Inflector::tableize($classBase);
   }
   
   private function foreignKeyConstraints($tablesList) {

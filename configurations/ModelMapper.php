@@ -14,15 +14,19 @@ $schemaConnector = array(
 );
 
 $modelConnections = array(
-   'IndexModel' => array(
-     'ConnectorType' => 'none'
-   ),
-   'TestModel' => array(
-     'ConnectorType' => \core\Connector::DBCONN,
-     'Connector' => $devDbConn
-   ),
+  'IndexModel' => array(
+    'ConnectorType' => 'none'
+  ),
+  'PostModel' => array(
+    'ConnectorType' => \core\Connector::DBCONN,
+    'Connector' => $devDbConn
+  ),
   'UserModel' => array(
-   'ConnectorType' => \core\Connector::DBCONN,
-   'Connector' => $devDbConn
- )
+    'ConnectorType' => \core\Connector::DBCONN,
+    'Connector' => $devDbConn
+  ),
+  'TagModel' => array(
+    'ConnectorType' => \core\Connector::DBCONN,
+    'Connector' => $devDbConn
+  )
 );
