@@ -31,7 +31,7 @@ class QueryBase {
    * Constructor accepts the class path of the model it is selecting from
    * @param string $currentModel
    */
-  public function __construct($currentModel) {
+  public function __construct($currentModel, $eagerLoading = false) {
     global $schemaConnector;
     $reflectionClass = new \ReflectionClass($currentModel);
     $this->currentTable = self::tableizeModelName($reflectionClass->getName());
@@ -66,7 +66,7 @@ class QueryBase {
     if (count($this->columnsList) > 0 ) {
       $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
     } else {
-      $this->query['SELECT'] = "SELECT * FROM $this->currentTable";
+      $this->query['SELECT'] = "SELECT $this->currentTable.* FROM $this->currentTable";
     }
     return $this;
   }

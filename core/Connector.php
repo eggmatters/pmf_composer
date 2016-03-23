@@ -23,12 +23,7 @@ abstract class Connector {
   protected $port;
   protected $pass;
   protected $conntype;
-  /**
-   *
-   * @var Request 
-   */
-  protected $request;
-  protected $modelInstance;
+  protected $modelClass;
   
   const DBCONN=1;
   const APICONN=2;
@@ -43,7 +38,7 @@ abstract class Connector {
   
   abstract public function delete($params = null);
 
-  public function __construct($modelConnector, Request $request = null, $modelInstance = null) {
+  public function __construct($modelConnector, $modelClass = null) {
     if ($modelConnector['ConnectorType'] == self::DBCONN) {
       $this->setDb($modelConnector['Connector']);
       $this->conntype = self::DBCONN;
@@ -52,8 +47,7 @@ abstract class Connector {
       $this->setAPI($modelConnector['Connector']);
       $this->conntype = self::APICONN;
     }
-    $this->request = $request;
-    $this->modelInstance = $modelInstance;
+    $this->modelClass = $modelClass;
   }
   
   /**
@@ -97,16 +91,11 @@ abstract class Connector {
   
   }
   
-  protected static function getModelInstanceName() {
-    $modelReflector = new \ReflectionClass($this->modelInstance);
-    $modelName  = $modelReflector->getName();
-    return preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelName);
-  }
-  
   private function validateResource($resource) {
     global $modelConnections;
     $resourceModel = Inflector::camelize(Inflector::singularize($resource)) . "Model";
-    if ($resourceModel == $this->getModelInstanceName()) {
+    $modelName = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $this->modelClass);
+    if ($resourceModel == $modelName) {
       return false;
     }
     if (!isset($modelConnections[$resourceModel])) {

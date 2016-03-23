@@ -34,10 +34,10 @@ abstract class ControllerBase {
    * @param \core\Request $request
    * @param array $resources
    */
-  public function __construct(Request $request, $resources = null) {
-    $this->request = $request;
+  public function __construct($resources = null) {
+    $this->request = CoreApp::getRequest();
     if (is_null($resources)) {
-      $this->resources = $request->getResourceArray();
+      $this->resources = $this->request->getResourceArray();
     } else {
       $this->resources = $resources;
     }

@@ -7,26 +7,13 @@ namespace core;
  */
 abstract class ModelBase {
   
-  /**
-   *
-   * @var Request 
-   */
-  protected $request;
-  /**
-   *
-   * @var Connector 
-   */
-  protected $connector;
-  
-  public function __construct(Request $request, $modelAttributes = null) {
-    $this->request = $request;
+  public function __construct($modelAttributes = null) {
     $this->setAttributes($modelAttributes);
-    $this->connector = self::setConnector();
   }
   
   public static function get($id = null, $resources = null) {
     $modelClass = self::setInstanceFromResources($resources);
-    $connector = self::setConnector();
+    $connector = self::setConnector($modelClass);
     $rs = $connector->get($id);
     if ($rs) {
       $modelClass->setAttributes($rs[0]);
@@ -60,11 +47,26 @@ abstract class ModelBase {
     }
   }
   
-  private static function setInstanceFromResources($resources) {
-    $request = new Request($resources);
+  private static function setInstanceFromResources() {
     $calledClass = get_called_class();
     $modelReflector = new \ReflectionClass($calledClass);
-    return $modelReflector->newInstance($request, $resources);
+    return $modelReflector->newInstance();
+  }
+  
+  private static function setConnector() {
+    global $modelConnections;
+    $connector = null;
+    $modelClass = get_called_class(); 
+    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelClass);
+    switch ($modelConnections[$className]['ConnectorType']) {
+      case Connector::DBCONN:
+        $connector = new DBConnector($modelConnections[$className], $modelClass);
+        break;
+      case Connector::APICONN:
+        $connector = new APIConnector($modelConnections[$className], $modelClass);
+        break;
+    }
+    return $connector;
   }
   
   private function setArray($array) {
@@ -90,20 +92,5 @@ abstract class ModelBase {
       return $classInstance;
     }
     return $modelObject;
-  }
-  
-  private static function setConnector() {
-    global $modelConnections;
-    $connector = null;
-    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", get_called_class());
-    switch ($modelConnections[$className]['ConnectorType']) {
-      case Connector::DBCONN:
-        $connector = new DBConnector($modelConnections[$className], $this->request, $this);
-        break;
-      case Connector::APICONN:
-        $connector = new APIConnector($modelConnections[$className], $this);
-        break;
-    }
-    return $connector;
   }
 }

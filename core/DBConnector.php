@@ -20,12 +20,13 @@ class DBConnector extends Connector {
   }
   
   public function get($id = null) { 
-    $selectTable = QueryBase::tableizeModelName($this->getModelInstanceName());
-    $parsedResources = $this->parseResources($this->request->getResourceArray());
-    $queryBase = new QueryBase($this->modelInstance);
+    $request = CoreApp::getRequest();
+    $selectTable = QueryBase::tableizeModelName($this->modelClass);
+    $parsedResources = $this->parseResources($request->getResourceArray());
+    $queryBase = new QueryBase($this->modelClass);
     $constraint = new Constraints();
     if (empty($id)) {
-      $resourceArray = $this->request->getResourceArray();
+      $resourceArray = $request->getResourceArray();
       $id = $resourceArray[count($resourceArray) - 1];
     }
     
@@ -72,7 +73,7 @@ class DBConnector extends Connector {
       $errorMessage = "Database error: Code {$e->getCode()}\n"
         . "Message: {$e->getMessage()}";
       error_log($errorMessage);
-      return $errorMessage;
+      return false;
     }
     if ($this->stmt->columnCount() > 0) {
       $this->resultSet = $this->stmt->fetchAll(\PDO::FETCH_ASSOC);

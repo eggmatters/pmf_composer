@@ -15,14 +15,14 @@ class CoreApp {
    * @param string $requestUri
    */
   public static function routeRequest($requestUri = null) {
-    $request = new Request($requestUri);
+    $request = self::getRequest();
     $controllerClass = self::getControllerClassPath('Index');
     if (!empty($request->getResourceArray())) {
       $controllerClass = self::getControllerClassPath($request->getResourceArray()[0]);
     }
     if (class_exists($controllerClass)) {
       $reflectionClass = new \ReflectionClass($controllerClass);
-      $controller  = $reflectionClass->newInstance($request);
+      $controller  = $reflectionClass->newInstance();
       $controller->init();
     } else {
       self::issue("404");
@@ -47,6 +47,11 @@ class CoreApp {
       return "int";
     }   
     return "string";
+  }
+  
+  public static function getRequest() {
+    global $httpRequest;
+    return $httpRequest;
   }
   
   /**
