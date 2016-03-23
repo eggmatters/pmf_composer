@@ -17,6 +17,9 @@ abstract class ModelBase {
     }
     $modelClass = self::setModelInstance($resources);
     $connector = self::setConnector($modelClass);
+    if (is_null($connector)) { 
+      return $connector;
+    }
     $rs = $connector->get($id);
     if ($rs) {
       $modelClass->setAttributes($rs[0]);
@@ -30,6 +33,9 @@ abstract class ModelBase {
     }
     $modelClass = self::setModelInstance();
     $connector = self::setConnector($modelClass);
+    if (is_null($connector)) { 
+      return $connector;
+    }
     $models = [];
     $rs = $connector->getAll();
     if (is_array($rs)) {

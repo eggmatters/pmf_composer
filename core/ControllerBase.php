@@ -61,8 +61,8 @@ abstract class ControllerBase {
       $resourceType = CoreApp::getResourceType($resourceValue);
       switch ($resourceType) {
         case "controller":
-          $this->loadController($resourceValue, $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex()));
           $renderFlag = false;
+          $this->loadController($resourceValue, $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex()));
           return;
         case "int":
           $this->request->setRequestedIds($resourceValue, $this->controllerName);
@@ -135,7 +135,7 @@ abstract class ControllerBase {
       return;
     }
     $reflectionClass = new \ReflectionClass($controllerName);
-    $controllerInstance = $reflectionClass->newInstance($this->request, $resourceStack);
+    $controllerInstance = $reflectionClass->newInstance($resourceStack);
     $controllerInstance->init();
   }
 
