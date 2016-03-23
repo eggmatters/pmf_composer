@@ -81,36 +81,29 @@ abstract class ControllerBase {
    * Also responsible for rendering forms for "update" and "new" requests.
    */
   protected function get() {
-    $modelBase = $this->getModelClass();
-    $this->model = $modelBase::get($this->request->getRequestedId(), $this->request->getRequestUri());
-    echo "<pre>";
-    print_r($this->model);
-    echo "</pre>";
+    
   }
-  /**
-   * Default method, loads all models (if required to) and
-   * render the "index" view for this controller
-   */
+
   protected function index() {
-    echo "got here with index in $this->controllerName";
+    
   }
   /**
    * Default method. Called from PUT requests.
    */
   protected function update() {
-    echo "got here with update in $this->controllerName";
+    
   }
   /**
    * Default method. Called from CREATE requests
    */
   protected function create() {
-    echo "got here with create in $this->controllerName";
+    
   }
   /**
    * Default method. Called from DELETE requests
    */
   protected function delete() {
-    echo "got here with delete in $this->controllerName";
+    
   }
   /**
    * Convention helper. This class simply returns the model associated with this
@@ -158,18 +151,22 @@ abstract class ControllerBase {
     }
   }
   
+  private function prepareIndex() {
+    echo "got here with index in $this->controllerName";
+  }
+  
   private function prepareGet() {
     if (is_null($this->request->getRequestedId())) {
-      $this->index();
+      $this->prepareIndex();
     } else {
-      $this->get();
+      $this->loadModel();
     }
   }
   private function prepareDelete() {
     if (is_null($this->request->getRequestedId())) {
       CoreApp::issue("404");
     } else {
-      $this->delete();
+      $this->loadModel();
     }
   }
   
@@ -177,8 +174,13 @@ abstract class ControllerBase {
     if (is_null($this->request->getRequestedId())) {
       CoreApp::issue("404");
     } else {
-      $this->delete();
+      $this->loadModel();
     }
+  }
+  
+  private function loadModel() {
+    $modelBase = $this->getModelClass();
+    $this->model = $modelBase::get($this->request->getRequestedId(), $this->request->getRequestUri());
   }
 
 }
