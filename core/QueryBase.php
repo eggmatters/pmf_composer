@@ -106,8 +106,11 @@ class QueryBase {
    * @return \core\QueryBase
    */
   public function Where(Constraints $constraint) {
-    $this->query['WHERE'] = "WHERE " . $constraint->getConstraints();
-    $this->bindings = array_merge($this->bindings, $constraint->getBindings());
+    $constraints = $constraint->getConstraints();
+    if (!empty($constraints)) {
+      $this->query['WHERE'] = "WHERE " . $constraints;
+      $this->bindings = array_merge($this->bindings, $constraint->getBindings());
+    }
     return $this;
   }
   

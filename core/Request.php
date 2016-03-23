@@ -52,7 +52,7 @@ class Request {
    * set if path contains an id (by controller)
    * @var int 
    */
-  private $id;
+  private $requestedIds;
   /**
    * set if path contains an arbitrary string (by controller
    * @var string 
@@ -83,7 +83,7 @@ class Request {
     if (!empty($_POST)) {
       $this->postParams = $this->filterRequestArray('POST', $_POST);
     }
-    $this->id = null;
+    $this->requestedIds = [];
   }
   
   public function getRequestUri() {
@@ -114,12 +114,20 @@ class Request {
     return $this->postParams;
   }
   
-  public function setRequestedId($id) {
-    $this->id = $id;
+  public function setRequestedIds($id, $controllerName) {
+    $this->requestedIds[] = (object) array("controller" => $controllerName, "id" => $id );
   }
   
-  public function getRequestedId() {
-    return $this->id;
+  public function getRequestedIds($controllerName = null) {
+    if (is_null($controllerName)) {
+      return $this->requestedIds;
+    }
+    foreach ($this->requestedIds as $requestedId) {
+      if ($requestedId->controller == $controllerName) {
+        return $requestedId;
+      }
+    }
+    return null;
   }
   
   public function setRequestedTag($tag) {

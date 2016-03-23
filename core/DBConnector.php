@@ -16,6 +16,33 @@ class DBConnector extends Connector {
   private $numRows;
 
   public function getAll() {
+    $request = CoreApp::getRequest();
+    $parsedResources = $this->parseResources($request->getResourceArray());
+    $queryBase = new QueryBase($this->modelClass);
+    $constraint = new Constraints();
+    $queryBase->Select();
+    if (!empty($parsedResources['joins'])) {
+      $joinsArray = array_map("core\Inflector::tableize", $parsedResources['joins']);
+      $queryBase->Join($joinsArray);
+    }
+    if (!empty($parsedResources['constraints'])) {
+      foreach ($parsedResources['constraints'] as $index => $kv) {
+        $table = Inflector::tableize($kv->resource) . ".id";
+        $value = $kv->value;
+        if ($index == 0 ) {
+          $constraint->term($table, "=", $value);
+        } else {
+          $constraint->andTerm($table, "=", $value);
+        }
+      }
+    }
+    $queryBase->Where($constraint);
+    $sql = $queryBase->getSelect();
+    $bindValues = $queryBase->getBindValues();
+    if ($this->query($sql, $bindValues)) {
+      return $this->getResultsSet();
+    }
+    return false;
     
   }
   

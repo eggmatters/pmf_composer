@@ -12,7 +12,10 @@ abstract class ModelBase {
   }
   
   public static function get($id = null, $resources = null) {
-    $modelClass = self::setInstanceFromResources($resources);
+    if (is_null($resources)) {
+      $resources = CoreApp::getRequest()->getResources();
+    }
+    $modelClass = self::setModelInstance($resources);
     $connector = self::setConnector($modelClass);
     $rs = $connector->get($id);
     if ($rs) {
@@ -21,7 +24,22 @@ abstract class ModelBase {
     return $modelClass;
   }
   
-  public static function getAll() {
+  public static function getAll($resources = null) {
+    if (is_null($resources)) {
+      $resources = CoreApp::getRequest()->getResources();
+    }
+    $modelClass = self::setModelInstance();
+    $connector = self::setConnector($modelClass);
+    $models = [];
+    $rs = $connector->getAll();
+    if (is_array($rs)) {
+      foreach ($rs as $row) {
+        $rowModel = self::setModelInstance();
+        $rowModel->setAttributes($row);
+        $models[] = $rowModel;
+      }
+    }
+    return $models;
   }
   
   public static function update($id, $params) {
@@ -47,7 +65,7 @@ abstract class ModelBase {
     }
   }
   
-  private static function setInstanceFromResources() {
+  private static function setModelInstance() {
     $calledClass = get_called_class();
     $modelReflector = new \ReflectionClass($calledClass);
     return $modelReflector->newInstance();

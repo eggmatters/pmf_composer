@@ -26,6 +26,8 @@ abstract class ControllerBase {
   protected $controllerName;
   
   protected $model;
+  
+  protected $models;
   /**
    * Constructor accepts the Request object and an optional array of resources.
    * The resources are values obtained from the URL by the Request object.
@@ -63,7 +65,7 @@ abstract class ControllerBase {
           $renderFlag = false;
           return;
         case "int":
-          $this->request->setRequestedId($resourceValue);
+          $this->request->setRequestedIds($resourceValue, $this->controllerName);
           break;
         case "string":
           //call setRequestedTag and then figure out what to do (method, fetch by value etc.)
@@ -81,11 +83,15 @@ abstract class ControllerBase {
    * Also responsible for rendering forms for "update" and "new" requests.
    */
   protected function get() {
-    
+    echo "<pre>";
+    print_r($this->model);
+    echo "<pre>";
   }
 
   protected function index() {
-    
+    echo "<pre>";
+    print_r($this->models);
+    echo "<pre>";
   }
   /**
    * Default method. Called from PUT requests.
@@ -152,18 +158,21 @@ abstract class ControllerBase {
   }
   
   private function prepareIndex() {
-    echo "got here with index in $this->controllerName";
+    //make sure we can filter out non-model related request strings.
+    $this->loadModels();
+    $this->index();
   }
   
   private function prepareGet() {
-    if (is_null($this->request->getRequestedId())) {
+    if (is_null($this->request->getRequestedIds($this->controllerName))) {
       $this->prepareIndex();
     } else {
       $this->loadModel();
+      $this->get();
     }
   }
   private function prepareDelete() {
-    if (is_null($this->request->getRequestedId())) {
+    if (is_null($this->request->getRequestedIds($this->controllerName))) {
       CoreApp::issue("404");
     } else {
       $this->loadModel();
@@ -171,7 +180,7 @@ abstract class ControllerBase {
   }
   
   private function prepareUpdate() {
-    if (is_null($this->request->getRequestedId())) {
+    if (is_null($this->request->getRequestedIds($this->controllerName))) {
       CoreApp::issue("404");
     } else {
       $this->loadModel();
@@ -180,7 +189,13 @@ abstract class ControllerBase {
   
   private function loadModel() {
     $modelBase = $this->getModelClass();
-    $this->model = $modelBase::get($this->request->getRequestedId(), $this->request->getRequestUri());
+    $id = $this->request->getRequestedIds($this->controllerName)->id;
+    $this->model = $modelBase::get($id, $this->request->getRequestUri());
+  }
+  
+  private function loadModels() {
+    $modelBase = $this->getModelClass();
+    $this->models = $modelBase::getAll($this->request->getRequestUri());
   }
 
 }
