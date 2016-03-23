@@ -1,0 +1,236 @@
+Chapter Four: Routing and Controllers
+<a href="http://www.eggmatters.com/post.php?pid=43">Previous</a>&nbsp;&nbsp;<a href="http://www.eggmatters.com/category.php?cid=34">Index</a>
+<h3>Before we begin</h3>
+<p>Let's start by checking out and branching changes up until this point:</p>
+<pre>
+  <code>
+    git checkout 17578b0 -b routing_and_controllers
+  </code>
+</pre>
+<p>Whoah! Look out. There's a lot of stuff there. I've been busy. I wanted to have a decent grasp
+of what I was doing before I started posting ahead, describing processes and behaviors which may change 
+or be completely wrong. I mentioned in Chapter one about painting yourself into corners. Well, it happened 
+a couple of times and I definitely went down a couple of rabbit holes. Some of it still kind of wonky or kludged
+but bear with me and things will tighten up.
+</p>
+<h4>Routing and the Declarative Design Pattern</h4>
+<p>Rails, Yii, Zend, Laravel to name a few espouse the "Convention over Configuration" approach to application design.
+ This allows us to be a bit more liberal with application flow. This framework is driven by two things: requests for resources, and 
+ user provided definitions of those resources.
+</p>
+<p>As we mentioned earlier, we treat url's as requests for resources. MVC dictates that we assign resource requests to controllers, which
+ is exactly what we will do.</p>
+<p>Rails dictates that <em>all</em> routes are user defined. Routing in Rails can get cumbersome and obtuse quickly. 
+  Rails routes also support a lot of different ways to achieve the same thing. It's nice to have a concrete map of sorts
+  to get an overhead view of your application but, this is hardly conventional.</p>
+<p>The PMF attempts to avoid this and simply attempts to map a request to valid resources. When I began implementing this,
+  I started writing a routing method that parsed the request uri and determined which controller to call. I set up an abstract
+  controller base class and started banging away. What came out was not a routing method but some reflection on the controllers part
+  to determine a stack of controllers associated with the request. This is the declarative approach and guides the whole process.
+</p>
+<p>When we get to models and data, we need to take a hybrid approach to this.</p>
+<h4>Setting it up: the CoreApp</h4>
+<p>Let's load up our good ol' html/index.php. This is the entry point for every request in the application and this won't change 
+  due to the rewrite rules we established in .htaccess.
+</p>
+<pre>
+  <code>
+require_once dirname(__DIR__) . '/autoload.php';
+require_once dirname(__DIR__) . '/configurations/ModelMapper.php';
+
+$httpRequest = new core\Request();
+core\CoreApp::routeRequest();
+</code>
+</pre>
+<p>You can forget about the model mapper for now. But you see we're immediately requiring the autoloader. Now we have it throughout the 
+  entire application, or in our case, request lifecycle. At some point, we will remove the html but, it will serve us as a kind of debugging
+  sandbox for now.
+</p>
+<p>We set $httpRequest as a Request object instance. This is now a global variable. Since the incoming request will not change, we're kind of ok with this
+  but, not entirely. You will see how we get around this in the CoreApp.
+</p>
+<p>We now call the static method: core\CoreApp::routeRequest();</p>
+<p>CoreApp is going to act as a global container of static methods or implementations shared across multiple implementations.</p>
+<p>We've namespaced the core directory. This is where all of the framework code lives. User classes will live in the app folder.</p>
+<p>So let's take a look at CoreApp::routeRequest():</p>
+<pre>
+  <code>
+  public static function routeRequest($requestUri = null) {
+    $request = self::getRequest();
+    $controllerClass = self::getControllerClassPath('Index');
+    if (!empty($request->getResourceArray())) {
+      $controllerClass = self::getControllerClassPath($request->getResourceArray()[0]);
+    }
+    if (class_exists($controllerClass)) {
+      $reflectionClass = new \ReflectionClass($controllerClass);
+      $controller  = $reflectionClass->newInstance();
+      $controller->init();
+    } else {
+      self::issue("404");
+    }
+  }
+</code>
+</pre>
+<p>Notice the call to the static method getRequest()? We've implemented this method to shield the global $httpRequest variable we set in index.php:</p>
+<pre><code>
+  public static function getRequest() {
+    global $httpRequest;
+    return $httpRequest;
+  }
+</code></pre>
+<p>As long as everybody agrees to access the request with this method, we're ok.</p>
+<p>Next up, we call a static method: self::getControllerClassPath(). This method parses a resource and returns the class path of it's associated controller.
+  We are setting a default path to the "IndexController" here. Next up, we call the same method on the first entry in the resources array. 
+  This is the beginning of the route. We then use PHP's Reflection class to instantiate an instance of that controller and call init.
+  If we don't get a valid controller, then that tells us that we don't have a valid route. We call the static method "issue()" with the http status we want.
+  issue presently just issues a "die" statement echoing the status code. We will actually have it set headers and render the appropriate pages when the time comes.
+</p>
+<p>You may notice that this method doesn't route anything. Not only that, it blindly instantiates a controller with the first entry in the uri. 
+  What about the rest of it? This is where we get declarative. To  see, load up core/ControllerBase.php
+</p>
+<h4>Declarative Routing</h4>
+<p>As you can see, ControllerBase is an abstract class. An abstract class, as you know, is a class which can't be implemented. Only derived classes
+  can be called. So, let's take a look at some sample routes:
+</p>
+<pre>
+  users/
+  users/1
+  users/1/posts/
+  users/1/tags/posts
+</pre>
+<p>Let's shy away from thinking what these routes will do, but simply, how are we going to call their resective controllers:</p>
+<ul>
+  <li>The first two routes should instantiate the Users controller.</li>
+  <li>The third route should call the Posts controller</li>
+  <li>The last route should call the Posts controller</li>
+</ul>
+<p>Let's take a look at ControllerBase to see what we do:</p>
+<pre>
+  <code>
+  public function __construct($resources = null) {
+    $this->request = CoreApp::getRequest();
+    if (is_null($resources)) {
+      $this->resources = $this->request->getResourceArray();
+    } else {
+      $this->resources = $resources;
+    }
+    $reflectionClass = new \ReflectionClass($this);
+    $this->controllerName = $reflectionClass->getName();
+  }
+</code>
+</pre>
+<p>We set a local instance of the Request. Also notice that we dynamically set resources. 
+  This allows us to pass in arbitrary resources to the controller without having to rely on the Request.
+</p>
+<p>The real magic happens when we call $controller->init() from CoreApp::routeRequest() from above:</p>
+<pre>
+  <code>
+   public function init() {
+    $resourcesIterator = new SimpleIterator($this->resources);
+    $renderFlag = true;
+    while ($resourcesIterator->hasNext()) {
+      $resourceValue = $resourcesIterator->next();
+      $resourceType = CoreApp::getResourceType($resourceValue);
+      switch ($resourceType) {
+        case "controller":
+          $renderFlag = false;
+          $this->loadController($resourceValue, $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex()));
+          return;
+        case "int":
+          $this->request->setRequestedIds($resourceValue, $this->controllerName);
+          break;
+        case "string":
+          //call setRequestedTag and then figure out what to do (method, fetch by value etc.)
+          $this->request->setRequestedTag($resourceValue);
+          break;
+      }
+    }
+    if ($renderFlag) {
+      $this->callMethod();
+    }
+  }
+</code>
+</pre>
+<p>I wrote a real simple iterator to traverse the resources array. I did this because I want to look ahead and or 
+  Look back from my current position. Think of users/1. These are two separate array entries. Feel free to look at that class.
+  It is very very simple.
+</p>
+<p>Let's walk through this method with our request: users/1/posts. Let's also assume that we have defined 
+  controllers in app/controllers for each of these routes. routeRequest() grabbed users from the bottom of the
+  array, and instantiated the UsersController from it. That's where we are.
+</p>
+<p>
+  The while loop does the following:
+</p>
+<dl>
+  <dt>Pre-conditions</dt>
+  <dd>We set a boolean renderFlag to true. 
+  </dd>
+  <dt>First Iteration:</dt>
+  <dd>Current resource value is "1" current resource string is users/1</dd>
+  <dd>We call a helper method in CoreApps that returns it's type. This method shortcuts class names 
+    and returns either "controller" or "model" if they're defined.
+  </dd>
+  <dd>1 is an integer, so we add it to a list of requested id's on the request.</dd>
+  <dt>Second Iteration:</dt>
+  <dd>Current resource values is "posts" current resource string is users/1/posts</dd>
+  <dd>posts is a controller.</dd>
+  <dd>We set the render flag false and call a method loadController with the resources string truncated.</dd>
+  <dd>loadController creates an instance of the PostsController and loads it with the truncated resource string</dd>
+  <dd>loadController also calls init() on the PostsController instance.</dd>
+  <dd>Posts controller enters this loop.</dd>
+</dl>
+<p>So, what your seeing here is a bizarre form of pseudo-recursion. It's technically not recursive since 
+  the function pointer on the stack is a new object. It looks that way to us though because we are calling the same method: init()
+  indirectly from itself. This is not the case however since, init() is an abstract class method and is essentially copied into our
+  new instance when we define it.
+</p>
+<p>
+  The render flag is a stopgap to keep upstream controllers from calling their associated methods. We set it to false anytime 
+  we come across another controller in the route.
+</p>
+<p>
+  Later on, we can add a child / parent properties to the controllers and create a callable stack. This will give us a crude form of caching. 
+  That's not a needed feature right now though.
+</p>
+<p>
+  So, routing kind of takes care of itself. The resources array does exactly what we want it to do: define resources. We have a controller stack
+  that is self validating. This is convention at work.
+</p>
+<p>
+  You can also see where I patched in routes that are strings. Examples of this would be:
+<pre>
+  users/1/posts/how-I-got-my-groove-back
+  and
+  users/1/posts/bobby'); drop table students; --/
+</pre>
+<p>One is valid, the other is not. Or both are not.</p>
+<p>When we get to it, we're going to create a method that accepts these strings and figures out if they're valid or not.</p>
+<p>We will cross that bridge when we get to it though.</p>
+<h4>Calling Methods</h4>
+<p>The controller's job from here on out is gravy. Look at the private callMethod() method:</p>
+<pre>
+  <code>
+    private function callMethod() {
+    switch ($this->request->getHttpMethod()) {
+      case "GET":
+        $this->prepareGet();
+        break;
+      case "PUT":
+        $this->prepareUpdate();
+        break;
+      case "POST":
+        $this->create();
+        break;
+      case "DELETE":
+        $this->prepareDelete();
+        break;
+    }
+  }
+</code>
+</pre>
+<p>We pull the HTTP method from our request and call prepareXXX on the appropriate value.</p>
+<p>
+  The prepare methods will load the apporpriate models and eventually call render() on them. Remember though,
+  get, index, create etc. Will all be overridden (in most cases) by child controllers.
+</p>
