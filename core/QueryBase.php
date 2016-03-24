@@ -89,11 +89,15 @@ class QueryBase {
     $this->tablesList = array_map('core\Inflector::tableize', $tablesList);
     $this->fkConstraints = $this->foreignKeyConstraints($tablesList);
     foreach ($this->fkConstraints as $constraint) {
+      if ($this->isJoinTable($constraint)) {
+        $this->setJoinTableConditions($constraint);
+      }
       if (in_array($constraint['REFERENCED_TABLE_NAME'], $tablesList)) {
         $this->query['JOINS'][] = "JOIN {$constraint['REFERENCED_TABLE_NAME']}"
           . " ON {$constraint['TABLE_NAME']}.{$constraint['COLUMN_NAME']} ="
           . " {$constraint['REFERENCED_TABLE_NAME']}.id ";
       }
+      
     }
     return $this;
   }
@@ -155,6 +159,26 @@ class QueryBase {
        return $this->dbConn->getResultsSet();
     } else {
       return false;
+    }
+  }
+  
+  private function isJoinTable($currentConstraint) {
+    if ($currentConstraint['TABLE_NAME'] != $this->currentTable  && 
+        !in_array($currentConstraint['TABLE_NAME'], $this->tablesList)) {
+      return true;
+    }
+    return false;
+  }
+  
+  private function setJoinTableConditions($currentConstraint) {
+    if ($currentConstraint['REFERENCED_TABLE_NAME'] == $this->currentTable) {
+      $jq  = "JOIN {$currentConstraint['TABLE_NAME']}"
+          . " ON $this->currentTable.id = {$currentConstraint['TABLE_NAME']}.{$currentConstraint['COLUMN_NAME']} ";
+      if (count($this->query['JOINS']) > 0) {
+        $this->query['JOINS'] = array_merge([$jq], $this->query['JOINS']);
+      } else {
+        $this->query['JOINS'][] = $jq;
+      }
     }
   }
 }

@@ -1,7 +1,7 @@
 <?php
 
 namespace app\controllers;
-
+use core\ControllerBase;
 /**
  * Description of TagsController
  *
