@@ -71,10 +71,10 @@ abstract class ModelBase {
     }
   }
   
-  private static function setModelInstance() {
+  private static function setModelInstance($modelAttributes = null) {
     $calledClass = get_called_class();
     $modelReflector = new \ReflectionClass($calledClass);
-    return $modelReflector->newInstance();
+    return $modelReflector->newInstance($modelAttributes);
   }
   
   private static function setConnector() {

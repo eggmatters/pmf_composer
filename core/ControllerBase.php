@@ -184,6 +184,7 @@ abstract class ControllerBase {
       CoreApp::issue("404");
     } else {
       $this->loadModel();
+      $this->update();
     }
   }
   

@@ -97,7 +97,6 @@ class QueryBase {
           . " ON {$constraint['TABLE_NAME']}.{$constraint['COLUMN_NAME']} ="
           . " {$constraint['REFERENCED_TABLE_NAME']}.id ";
       }
-      
     }
     return $this;
   }
