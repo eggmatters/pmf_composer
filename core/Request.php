@@ -29,6 +29,12 @@ class Request {
    */
   private $resourceArray;
   /**
+   * An array of metadata about a resource.
+   * @var array
+   */
+  private $resourceData;
+  
+  /**
    * SERVER['HTTP_METHOD']
    * @var string 
    */
@@ -84,6 +90,8 @@ class Request {
       $this->postParams = $this->filterRequestArray('POST', $_POST);
     }
     $this->requestedIds = [];
+    $this->resourceData = [];
+    $this->setResourceData($this->resourceArray);
   }
   
   public function getRequestUri() {
@@ -138,6 +146,15 @@ class Request {
     return $this->tag;
   }
   
+  public function setResourceData($resources = null) {
+    if (empty($resources)) {
+      $resources = $this->resourceArray;
+    }
+    foreach ($resources as $resource) {
+      $this->setResourceClassData($resource);
+    }
+  }
+  
   private function filterRequestArray($filter, $requestArray) {
     $filterConstant = $this->getFilterConstant($filter);
     $returnArray = [];
@@ -177,4 +194,35 @@ class Request {
     }
     return -1;
   }
+  
+  
+  
+  private function setResourceClassData($resource) {
+    $needle = Inflector::camelize($resource);
+    $controllerValue = "controllers/$needle";
+    $modelValue = "models/$needle";
+    $viewValue = "views/$needle";
+    foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator("../app")) as $key=>$val) {
+      if (strpos($key, $controllerValue) > 0) {
+        $this->resourceData['CONTROLLERS'][$resource] = array(
+          'path' => realpath($key),
+          'className' => substr(str_replace("/","\\",$key),2,-4),
+        );
+      } else if (strpos($key, $modelValue) > 0) {
+        $this->resourceData['MODELS'][$resource] = array(
+          'path' => realpath($key),
+          'className' => substr(str_replace("/","\\",$key),2,-4),
+          'modelName' => $needle,
+          'tableName' => Inflector::tableize($needle)
+        );
+      } else if (strpos($key, $viewValue) > 0) {
+        $this->resourceData['VIEWS'][$resource] = array (
+          'path' => realpath($key),
+          'className' => substr(str_replace("/","\\",$key),2,-4),
+        );
+      }
+    }
+  }
+  
+  
 }

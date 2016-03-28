@@ -1,0 +1,57 @@
+Class Inclusion with Autoloading
+<h5>PHP File Inclusion</h5>
+<p>
+  When I first developed this site, eggmatters.com. I didn't use an autoloader. And 
+  now I'm the sorrier for it. I followed an MVC pattern but - any classes I generated 
+  had to be manually inserted.
+</p>
+<p>
+  If you know what autoloaders in PHP are and how they work, then you can skip this. 
+  Our autoloader will be namespace-based to reduce calls to the filesystem
+</p>
+<p>
+  We can't do this project without some sort of dynamic file inclusion. Because of 
+  convention over configuration, users will be generating classes on the fly that
+  the application just needs to know about.
+</p>
+<p>
+  We can't have users, as part of their development process, update <i>all</i> of
+  the core scripts with their own include directives. That would be insane. Think 
+  about the amount of technical debt that would generate. 
+</p>
+<p>
+  Luckily, PHP provides a mechanism where we can intercept class object instantiations
+  as well as static method calls.
+</p>
+<h5>SPL Autoload Register</h5>
+<p>
+  Luckily, we have an answer. PHP's spl_autoload_register() function kind of acts like 
+  an event listener which fires anytime a class instance from our application is put on the
+  stack. Namely, these two invocations will trigger spl_autoload_register():
+</p>
+<pre>
+  <code>
+    $myFoo = new Foo();
+    $myStaticFoo = Foo::staticMethod();
+</code>
+</pre>
+<p>
+  This is a great boon for us, because now we can actually include the resource that defines Foo,
+  only when it is needed.
+</p>
+<p>
+  The SPL autoloader takes as it's argument, an anonymous function (or lambda). More often, 
+  we see the function defined in place in the signature of the spl_autoloader:
+</p>
+<h5>Anonymous Functions in PHP</h5>
+<p>
+  These will come up, so let's go ahead and tackle this concept right off the bat. 
+</p>
+<p>
+  A function in any language can accept arguments of any type. Well, one of those types can 
+  be a function. PHP (as well as Javascript) will often refer to these functions as Callbacks.
+  They're a way of customizing the behavior of any given method with user provided functionality.
+</p>
+<p>
+  Let's look at a set of functions in php so we can understand anonymous functions
+</p>
