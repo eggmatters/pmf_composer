@@ -111,6 +111,10 @@ abstract class ControllerBase {
   protected function delete() {
     
   }
+  
+  protected function render() {
+    
+  }
   /**
    * Convention helper. This class simply returns the model associated with this
    * controller or null. We want to allow controllers to not be tied with models,
