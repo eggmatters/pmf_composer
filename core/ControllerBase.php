@@ -9,15 +9,12 @@ namespace core;
 
 abstract class ControllerBase {
   /**
-   * determinants provided from URI
-   * @var array $resources
-   */
-  protected $resources;
-  /**
    * Instantiate Request object
    * @var Request $request
    */
   protected $request;
+  
+  protected $resources;
 
   /**
    * Reflection property called by contructor setting name of child controller.
@@ -55,22 +52,24 @@ abstract class ControllerBase {
    */
   public function init() {
     $resourcesIterator = new SimpleIterator($this->resources);
+    $resourcesData = $this->request->getResourceData();
     $renderFlag = true;
     while ($resourcesIterator->hasNext()) {
       $resourceValue = $resourcesIterator->next();
-      $resourceType = CoreApp::getResourceType($resourceValue);
-      switch ($resourceType) {
-        case "controller":
-          $renderFlag = false;
-          $this->loadController($resourceValue, $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex()));
-          return;
-        case "int":
-          $this->request->setRequestedIds($resourceValue, $this->controllerName);
-          break;
-        case "string":
-          //call setRequestedTag and then figure out what to do (method, fetch by value etc.)
-          $this->request->setRequestedTag($resourceValue);
-          break;
+      if (!empty($resourcesData['CONTROLLERS'][$resourceValue])) {
+        $renderFlag = false;
+        $truncatedResources = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
+        $controller = new $resourcesData['CONTROLLERS'][$resourceValue]->className($truncatedResources);
+        $controller->init();
+        return;
+      }
+      if (is_numeric($resourceValue)) {
+        $this->request->setRequestedIds($resourceValue, $this->controllerName);
+        continue;
+      }
+      if (is_string($resourceValue)) {
+        //call setRequestedTag and then figure out what to do (method, fetch by value etc.)
+        $this->request->setRequestedTag($resourceValue);
       }
     }
     if ($renderFlag) {
