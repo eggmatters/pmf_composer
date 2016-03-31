@@ -88,16 +88,7 @@ class QueryBase {
     }
     $this->tablesList = array_map('core\Inflector::tableize', $tablesList);
     $this->fkConstraints = $this->foreignKeyConstraints($tablesList);
-    foreach ($this->fkConstraints as $constraint) {
-      if ($this->isJoinTable($constraint)) {
-        $this->setJoinTableConditions($constraint);
-      }
-      if (in_array($constraint['REFERENCED_TABLE_NAME'], $tablesList)) {
-        $this->query['JOINS'][] = "JOIN {$constraint['REFERENCED_TABLE_NAME']}"
-          . " ON {$constraint['TABLE_NAME']}.{$constraint['COLUMN_NAME']} ="
-          . " {$constraint['REFERENCED_TABLE_NAME']}.id ";
-      }
-    }
+    print_r($tablesList);
     return $this;
   }
   
@@ -122,9 +113,9 @@ class QueryBase {
    * @return string
    */
   public function getSelect() {
-    $queryString =  isset($this->query['SELECT']) ? $this->query['SELECT'] ." " : "";
+    $queryString  = isset($this->query['SELECT']) ? $this->query['SELECT'] ." " : "";
     $queryString .= isset($this->query['JOINS']) ? implode("",$this->query['JOINS']) . " " : "";
-    $queryString .= isset($this->query['WHERE'] ) ? $this->query['WHERE'] . " " : "";
+    $queryString .= isset($this->query['WHERE']) ? $this->query['WHERE'] . " " : "";
     return $queryString;
   }
   
@@ -144,8 +135,8 @@ class QueryBase {
     return array_map(create_function('$str', 'return ":$str";'), $array);
   }
   
-  private function foreignKeyConstraints($tablesList) {
-    $tablesList[] = $this->currentTable;
+  public function foreignKeyConstraints($tablesList) {
+    //$tablesList[] = $this->currentTable;
     $tablesListBindStrings = implode(',',$this->setBindValueStrings($tablesList));
     $tablesListBindValues  = $this->setBindValues($tablesList);
     $sql = "SELECT i.TABLE_NAME, k.COLUMN_NAME, k.REFERENCED_TABLE_NAME"
@@ -161,23 +152,138 @@ class QueryBase {
     }
   }
   
-  private function isJoinTable($currentConstraint) {
-    if ($currentConstraint['TABLE_NAME'] != $this->currentTable  && 
-        !in_array($currentConstraint['TABLE_NAME'], $this->tablesList)) {
+  private function setJoinConditions($tableFrom) {
+    $tableFromRow = $this->getFKConstraint('REFERENCED_TABLE_NAME', $tableFrom);
+    if ($tableFromRow == false) {
+      return;
+    }
+    if (cont($tableFromRow) > 1) {
+      //now determine which join table is relevant to our mapping.
+      //with the addition of users_tags, we are in a sticky situation:
+      //we're not interested in joining users on tags for a request like:
+      //users/1/posts/tags
+      //nor are we interested in joining posts on tags for a request like:
+      //posts/1/users/tags
+    }
+    
+  }
+  
+  public function getFKConstraints($key, $table) {
+    return array_filter($this->fkConstraints, 
+      function($current) use ($key, $table) { 
+        return $current[$key] == $table;
+      });
+  }
+  
+  private function addJoin($referencedTable, $tableName, $columnName) {
+    if (in_array($referencedTable, $this->tablesList) || in_array($tableName, $this->tablesList)) {
+      $this->query['JOINS'][] = "JOIN $referencedTable"
+          . " ON {$referencedTable}.id ="
+          . " {$tableName}.{$columnName} ";
       return true;
     }
     return false;
   }
-  
-  private function setJoinTableConditions($currentConstraint) {
-    if ($currentConstraint['REFERENCED_TABLE_NAME'] == $this->currentTable) {
-      $jq  = "JOIN {$currentConstraint['TABLE_NAME']}"
-          . " ON $this->currentTable.id = {$currentConstraint['TABLE_NAME']}.{$currentConstraint['COLUMN_NAME']} ";
-      if (count($this->query['JOINS']) > 0) {
-        $this->query['JOINS'] = array_merge([$jq], $this->query['JOINS']);
-      } else {
-        $this->query['JOINS'][] = $jq;
-      }
-    }
-  }
 }
+/**
+ * Join Table:
+ * /posts/1/tags
+ *  [0] => Array
+        (
+            [TABLE_NAME] => posts_tags
+            [COLUMN_NAME] => posts_id
+            [REFERENCED_TABLE_NAME] => posts
+        )
+
+    [1] => Array
+        (
+            [TABLE_NAME] => posts_tags
+            [COLUMN_NAME] => tags_id
+            [REFERENCED_TABLE_NAME] => tags
+        )
+SELECT 
+    tags.*
+FROM
+    -- current table
+    tags	
+		JOIN
+    -- current table = [2] => Array ([REFERENCED_TABLE_NAME] => tags)
+    posts_tags ON tags.id = posts_tags.tags_id
+    -- next table = [2] => Array ([TABLE_NAME] => posts_tags)
+		JOIN
+	  -- [2] => Array ([TABLE_NAME] => posts_tags)
+    -- [1] => Array ([REFERENCED_TABLE_NAME] => posts_             
+    posts ON posts.id = posts_tags.posts_id
+WHERE
+    posts.id = 1;
+ * 
+ * 
+ * Straight Join:
+ * /users/2/posts
+ *  [0] => Array
+        (
+            [TABLE_NAME] => posts
+            [COLUMN_NAME] => users_id
+            [REFERENCED_TABLE_NAME] => users
+        )
+
+    [1] => Array
+        (
+            [TABLE_NAME] => posts_tags
+            [COLUMN_NAME] => posts_id
+            [REFERENCED_TABLE_NAME] => posts
+        )
+ * 
+SELECT 
+    posts.*
+FROM
+    -- current table
+    posts	
+		JOIN
+    -- current table = [2] => Array ([REFERENCED_TABLE_NAME] => users)
+    users ON users.id = posts.users_id
+WHERE
+    posts.id = 1;
+ * Mutli Join:
+ * users/1/posts/tags
+ *  [0] => Array
+        (
+            [TABLE_NAME] => posts
+            [COLUMN_NAME] => users_id
+            [REFERENCED_TABLE_NAME] => users
+        )
+
+    [1] => Array
+        (
+            [TABLE_NAME] => posts_tags
+            [COLUMN_NAME] => posts_id
+            [REFERENCED_TABLE_NAME] => posts
+        )
+
+    [2] => Array
+        (
+            [TABLE_NAME] => posts_tags
+            [COLUMN_NAME] => tags_id
+            [REFERENCED_TABLE_NAME] => tags
+        )
+SELECT 
+    tags.*
+FROM
+    -- current table
+    tags	
+		JOIN
+    -- current table = [2] => Array ([REFERENCED_TABLE_NAME] => tags)
+    posts_tags ON tags.id = posts_tags.tags_id
+    -- next table = [2] => Array ([TABLE_NAME] => posts_tags)
+		JOIN
+	-- [2] => Array ([TABLE_NAME] => posts_tags)
+    -- [1] => Array ([REFERENCED_TABLE_NAME] => posts_             
+    posts ON posts.id = posts_tags.posts_id
+    -- 
+		JOIN
+	-- [0] => Array ([TABLE_NAME] => posts)
+    -- [0] => Array ([REFERENCED_TABLE_NAME] => users)
+    users on users.id = posts.users_id
+WHERE
+    users.id = 1;
+ */

@@ -206,23 +206,26 @@ class Request {
     $controllerValue = "controllers/$needle";
     $modelValue = "models/$needle";
     $viewValue = "views/$needle";
-    foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator("../app")) as $key=>$val) {
-      if (strpos($key, $controllerValue) > 0) {
+    $baseDir = dirname(__DIR__);
+    foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator("$baseDir/app")) as $key=>$val) {
+      $namespaceDir = substr($key, strlen($baseDir));
+      echo "$namespaceDir\n";
+      if (strpos($namespaceDir, $controllerValue) > 0) {
         $this->resourceData['CONTROLLERS'][$resource] = (object) array(
           'path' => realpath($key),
-          'className' => substr(str_replace("/","\\",$key),3,-4),
+          'className' => substr(str_replace("/","\\",$namespaceDir),1,-4),
         );
-      } else if (strpos($key, $modelValue) > 0) {
+      } else if (strpos($namespaceDir, $modelValue) > 0) {
         $this->resourceData['MODELS'][$resource] = (object) array(
           'path' => realpath($key),
-          'className' => substr(str_replace("/","\\",$key),3,-4),
+          'className' => substr(str_replace("/","\\",$namespaceDir),1,-4),
           'modelName' => $needle,
           'tableName' => Inflector::tableize($needle)
         );
-      } else if (strpos($key, $viewValue) > 0) {
+      } else if (strpos($namespaceDir, $viewValue) > 0) {
         $this->resourceData['VIEWS'][$resource] = (object) array (
           'path' => realpath($key),
-          'className' => substr(str_replace("/","\\",$key),3,-4),
+          'className' => substr(str_replace("/","\\",$namespaceDir),1,-4),
         );
       }
     }
