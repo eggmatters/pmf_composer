@@ -204,12 +204,11 @@ class Request {
   private function setResourceClassData($resource) {
     $needle = Inflector::camelize(preg_replace('/(.*)(\..*)?$/U', "$1", $resource));
     $controllerValue = "controllers/$needle";
-    $modelValue = "models/$needle";
+    $modelValue = "models/" . Inflector::singularize($needle);
     $viewValue = "views/$needle";
     $baseDir = dirname(__DIR__);
     foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator("$baseDir/app")) as $key=>$val) {
       $namespaceDir = substr($key, strlen($baseDir));
-      echo "$namespaceDir\n";
       if (strpos($namespaceDir, $controllerValue) > 0) {
         $this->resourceData['CONTROLLERS'][$resource] = (object) array(
           'path' => realpath($key),
