@@ -199,36 +199,14 @@ class Request {
     return -1;
   }
   
-  
-  
   private function setResourceClassData($resource) {
     $needle = Inflector::camelize(preg_replace('/(.*)(\..*)?$/U', "$1", $resource));
-    $controllerValue = "controllers/$needle";
-    $modelValue = "models/" . Inflector::singularize($needle);
-    $viewValue = "views/$needle";
     $baseDir = dirname(__DIR__);
-    foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator("$baseDir/app")) as $key=>$val) {
-      $namespaceDir = substr($key, strlen($baseDir));
-      if (strpos($namespaceDir, $controllerValue) > 0) {
-        $this->resourceData['CONTROLLERS'][$resource] = (object) array(
-          'path' => realpath($key),
-          'className' => substr(str_replace("/","\\",$namespaceDir),1,-4),
-        );
-      } else if (strpos($namespaceDir, $modelValue) > 0) {
-        $this->resourceData['MODELS'][$resource] = (object) array(
-          'path' => realpath($key),
-          'className' => substr(str_replace("/","\\",$namespaceDir),1,-4),
-          'modelName' => $needle,
-          'tableName' => Inflector::tableize($needle)
-        );
-      } else if (strpos($namespaceDir, $viewValue) > 0) {
-        $this->resourceData['VIEWS'][$resource] = (object) array (
-          'path' => realpath($key),
-          'className' => substr(str_replace("/","\\",$namespaceDir),1,-4),
-        );
-      }
-    }
+    
+//    foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator("$baseDir/app")) as $key=>$val) {
+//      $namespaceDir = substr($key, strlen($baseDir));
+//    }
   }
-  
+    
   
 }
