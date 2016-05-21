@@ -58,12 +58,8 @@ class Request {
    * set if path contains an id (by controller)
    * @var int 
    */
-  private $requestedIds;
-  /**
-   * set if path contains an arbitrary string (by controller
-   * @var string 
-   */
-  private $tag;
+  private $requestObjects;
+
   
   /**
    * parses the path from the incoming request uri. If no argument, filters it 
@@ -88,10 +84,8 @@ class Request {
     $this->postParams = [];
     if (!empty($_POST)) {
       $this->postParams = $this->filterRequestArray('POST', $_POST);
-    }
-    $this->requestedIds = [];
-    $this->resourceData = [];
-    $this->setResourceData($this->resourceArray);
+    }  
+    $this->requestObjects = RequestObject::setFromResources($this->resourceArray);
   }
   
   public function getRequestUri() {
@@ -124,39 +118,6 @@ class Request {
   
   public function getPostParams() {
     return $this->postParams;
-  }
-  
-  public function setRequestedIds($id, $controllerName) {
-    $this->requestedIds[] = (object) array("controller" => $controllerName, "id" => $id );
-  }
-  
-  public function getRequestedIds($controllerName = null) {
-    if (is_null($controllerName)) {
-      return $this->requestedIds;
-    }
-    foreach ($this->requestedIds as $requestedId) {
-      if ($requestedId->controller == $controllerName) {
-        return $requestedId;
-      }
-    }
-    return null;
-  }
-  
-  public function setRequestedTag($tag) {
-    $this->tag = $tag;
-  }
-  
-  public function getRequestedTag() {
-    return $this->tag;
-  }
-  
-  public function setResourceData($resources = null) {
-    if (empty($resources)) {
-      $this->setResourceClassData("Index");
-    }
-    foreach ($resources as $resource) {
-      $this->setResourceClassData($resource);
-    }
   }
   
   private function filterRequestArray($filter, $requestArray) {
@@ -198,15 +159,4 @@ class Request {
     }
     return -1;
   }
-  
-  private function setResourceClassData($resource) {
-    $needle = Inflector::camelize(preg_replace('/(.*)(\..*)?$/U', "$1", $resource));
-    $baseDir = dirname(__DIR__);
-    
-//    foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator("$baseDir/app")) as $key=>$val) {
-//      $namespaceDir = substr($key, strlen($baseDir));
-//    }
-  }
-    
-  
 }
