@@ -45,14 +45,12 @@ class RequestObject {
   public static function setFromResources($resources) {
     $resourcesIterator = new SimpleIterator($resources);
     $requestObject = new RequestObject("app", dirname(__DIR__) . "/app");
-    return $this->setRequestObjects($resourcesIterator, $requestObject, []);
+    return self::setRequestObjects($resourcesIterator, $requestObject, []);
   }
   
-  private static function setRequestObjects(SimpleIterator &$resource, RequestObject &$requestObject, &$requestObjectsArray) {
-    if (!$resource->hasNext()) {
-      return $requestObjectsArray;
-    }
-    $currentResource = $resource->next();
+  private static function setRequestObjects(SimpleIterator &$resource, RequestObject &$requestObject, $requestObjectsArray) {
+    $currentResource = $resource->current();
+    $resource->next();
     $filesystemPath = $requestObject->filesystemPath . '/' . $currentResource;
     if (is_dir($filesystemPath)) {
       $requestObject->filesystemPath = $filesystemPath;
@@ -73,6 +71,10 @@ class RequestObject {
     $requestObject->uri = (empty($requestObject->uri)) ? $currentResource : $requestObject->uri . "/" . $currentResource;
     $requestObjectsArray[] = $requestObject;
     $newRequestObject = new RequestObject("app", dirname(__DIR__) . "/app");
-    $this->setRequestObjects($resource, $newRequestObject, $requestObjectsArray);
+    if ($resource->hasNext()) {
+      $this->setRequestObjects($resource, $newRequestObject, $requestObjectsArray);
+    } else {
+      return $requestObjectsArray;
+    }
   }
 }
