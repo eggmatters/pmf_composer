@@ -13,25 +13,34 @@ class RequestObject {
   const MODEL = 2;
   const VIEW = 3;
   
-  private $namespacePath;
-  private $filesystemPath;
-  private $controllerClass;
-  private $modelClass;
+  private $parent;
+  private $modelNamespace;
+  private $controllerNamespace;
+  private $modelClassPath;
+  private $controllerClassPath;
+  private $tableName;
+  private $viewPath;
   private $uri;
+  private $app;
   
   public function __construct(
-    $namespacePath     = ""
-    , $filesystemPath  = ""
-    , $controllerClass = ""
-    , $modelClass      = ""
-    , $tableName       = "" 
-    , $uri             = "") {
-    $this->namespacePath   = $namespacePath;
-    $this->filesystemPath  = $filesystemPath;
-    $this->controllerClass = $controllerClass;
-    $this->modelClass      = $modelClass;
-    $this->tableName       = $tableName;
-    $this->uri             = $uri;
+    \core\RequestObject $parent = null
+    , $modelNamespace           = ""
+    , $controllerNamespace = ""
+    , $modelClassPath      = ""
+    , $controllerClassPath = ""
+    , $tableName           = ""
+    , $viewPath            = ""
+    , $uri                 = "") {
+    $this->app = dirname(__DIR__) . '/app';
+    $this->parent = $parent;
+    $this->modelNamespace      = empty($modelNamespace) ? 'app\\models' : $modelNamespace;
+    $this->controllerNamespace = empty($controllerNamespace) ? 'app\\controllers' : $controllerNamespace;
+    $this->modelClassPath      = empty($modelClassPath) ? $this->app . "/models" : $modelClassPath;
+    $this->controllerClassPath = empty($controllerClassPath) ? $this->app . "/controllers" : $controllerClassPath;
+    $this->viewPath            = emtpy($viewPath) ? $this->app . "/views" : $viewPath;
+    $this->tableName           = $tableName;
+    $this->uri                 = $uri;
   }
   
   public function __set($name, $value) {
@@ -49,32 +58,11 @@ class RequestObject {
   }
   
   private static function setRequestObjects(SimpleIterator &$resource, RequestObject &$requestObject, $requestObjectsArray) {
-    $currentResource = $resource->current();
-    $resource->next();
-    $filesystemPath = $requestObject->filesystemPath . '/' . $currentResource;
-    if (is_dir($filesystemPath)) {
-      $requestObject->filesystemPath = $filesystemPath;
-      $requestObject->namespacePath .= '\\' . $currentResource;
-      $this->setRequestObjects($resource, $requestObject, $requestObjectsArray);
-    } 
-    $controllerName = Inflector::camelize($currentResource) . 'Controller';
-    $modelName = Inflector::camelize(Inflector::singularize($currentResource)) . 'Model';
-    $controllerClass = $requestObject->namespacePath .= '\\controllers\\' . $controllerName;
-    $modelClass = $requestObject->namespacePath .= '\\models\\' . $modelName;
-    if (class_exists($modelClass)) {
-      $requestObject->modelClass = $modelClass;
-    }
-    if (class_exists($controllerClass)) {
-      $requestObject->controllerClass = $controllerClass;
-      $this->setRequestObjects($resource, $requestObject, $requestObjectsArray);
-    }
-    $requestObject->uri = (empty($requestObject->uri)) ? $currentResource : $requestObject->uri . "/" . $currentResource;
-    $requestObjectsArray[] = $requestObject;
-    $newRequestObject = new RequestObject("app", dirname(__DIR__) . "/app");
-    if ($resource->hasNext()) {
-      $this->setRequestObjects($resource, $newRequestObject, $requestObjectsArray);
-    } else {
-      return $requestObjectsArray;
-    }
+    
+    
+  }
+  
+  private static function buildRequestPropsFromResource($resource) {
+    
   }
 }

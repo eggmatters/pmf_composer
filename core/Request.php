@@ -85,7 +85,7 @@ class Request {
     if (!empty($_POST)) {
       $this->postParams = $this->filterRequestArray('POST', $_POST);
     }  
-    $this->requestObjects = RequestObject::setFromResources($this->resourceArray);
+    //$this->requestObject = RequestObject::setFromResources($this->resourceArray);
   }
   
   public function getRequestUri() {
