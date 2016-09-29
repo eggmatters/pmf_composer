@@ -51,29 +51,19 @@ abstract class ControllerBase {
    * 
    */
   public function init() {
-    $resourcesIterator = new SimpleIterator($this->resources);
-    $resourcesData = $this->request->getResourceData();
+    $resourcesIterator = new SimpleIterator($this->resources);;
     $renderFlag = true;
+    $baseDir = dirname(__DIR__);
+    $controllerBaseDir = $baseDir . '/controllers/';
     while ($resourcesIterator->hasNext()) {
-      $resourceValue = $resourcesIterator->next();
-      if (!empty($resourcesData['CONTROLLERS'][$resourceValue])) {
-        $renderFlag = false;
-        $truncatedResources = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
-        $controller = new $resourcesData['CONTROLLERS'][$resourceValue]->className($truncatedResources);
-        $controller->init();
-        return;
+      $current = $resourcesIterator->current();
+      if (is_dir($controllerBase . $current)) {
+        
       }
-      if (is_numeric($resourceValue)) {
-        $this->request->setRequestedIds($resourceValue, $this->controllerName);
-        continue;
+      if (class_exists($controllerBase)) {
+        
       }
-      if (is_string($resourceValue)) {
-        //call setRequestedTag and then figure out what to do (method, fetch by value etc.)
-        $this->request->setRequestedTag($resourceValue);
-      }
-    }
-    if ($renderFlag) {
-      $this->callMethod();
+      
     }
   }
   /**

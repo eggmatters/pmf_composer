@@ -16,9 +16,10 @@ class CoreApp {
    */
   public static function routeRequest($requestUri = null) {
     $request = self::getRequest();
-    $controllerClass = self::getControllerClassPath('Index');
-    if (!empty($request->getResourceArray())) {
-      $controllerClass = self::getControllerClassPath($request->getResourceArray()[0]);
+    $controllerClass = "app\\controllers\\IndexController";
+    $resourceArray = new SimpleIterator($request->getResourceArray());
+    if ($resourceArray->getSize() > 0) {
+      $controllerClass = self::getControllerClassPath($resourceArray);
     }
     if (class_exists($controllerClass)) {
       $reflectionClass = new \ReflectionClass($controllerClass);
@@ -66,12 +67,13 @@ class CoreApp {
   }
    /**
    * Returns a fully qualified classpath to a defined controller from 
-   * a url path.
+   * the top-level of a url path.
    * 
    * @param string $resourceValue
    * @return string
    */
-  public static function getControllerClassPath($resourceValue) {
+  public static function getControllerClassPath(SimpleIterator $resourceArray) {
+    $resourceValue = $resourceArray->current();
     if ($resourceValue == "index.php") {
       return "app\\controllers\\IndexController";
     }
