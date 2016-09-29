@@ -24,8 +24,7 @@ class RequestObject {
   private $app;
   
   public function __construct(
-    \core\RequestObject $parent = null
-    , $modelNamespace           = ""
+    $modelNamespace        = ""
     , $controllerNamespace = ""
     , $modelClassPath      = ""
     , $controllerClassPath = ""
@@ -33,7 +32,6 @@ class RequestObject {
     , $viewPath            = ""
     , $uri                 = "") {
     $this->app = dirname(__DIR__) . '/app';
-    $this->parent = $parent;
     $this->modelNamespace      = empty($modelNamespace) ? 'app\\models' : $modelNamespace;
     $this->controllerNamespace = empty($controllerNamespace) ? 'app\\controllers' : $controllerNamespace;
     $this->modelClassPath      = empty($modelClassPath) ? $this->app . "/models" : $modelClassPath;
@@ -53,16 +51,19 @@ class RequestObject {
   
   public static function setFromResources($resources) {
     $resourcesIterator = new SimpleIterator($resources);
-    $requestObject = new RequestObject("app", dirname(__DIR__) . "/app");
-    return self::setRequestObjects($resourcesIterator, $requestObject, []);
+    $resourcesIterator->preparePrevious();
+    $requestObject = new RequestObject();
+    return self::setRequestObject($resourcesIterator, $requestObject, []);
   }
   
-  private static function setRequestObjects(SimpleIterator &$resource, RequestObject &$requestObject, $requestObjectsArray) {
+  private static function setRequestObjects(SimpleIterator &$resource, RequestObject &$requestObject) {
+    $resource->preparePrevious();
+    $namespaceBase = 'app';
+    while($resource->hasPrevious()) {
+      $current = $resource->current();
+      
+    }
     
-    
-  }
-  
-  private static function buildRequestPropsFromResource($resource) {
     
   }
 }

@@ -14,7 +14,7 @@ class CoreApp {
    * 
    * @param string $requestUri
    */
-  public static function routeRequest($requestUri = null) {
+  public static function routeRequest() {
     $request = self::getRequest();
     $controllerClass = "app\\controllers\\IndexController";
     $resourceArray = new SimpleIterator($request->getResourceArray());
