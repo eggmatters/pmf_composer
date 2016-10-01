@@ -19,6 +19,9 @@ class SimpleIterator {
   }
   
   public function hasNext() {
+    if ($this->index == 0) {
+      return true;
+    }
     if ($this->index + 1 < $this->size) {
       return true;
     }
