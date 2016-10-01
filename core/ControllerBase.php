@@ -9,21 +9,37 @@ namespace core;
 
 abstract class ControllerBase {
   /**
-   * Instantiate Request object
+   *
+   * @var ControllerBase|null
+   */
+  protected $parent;
+  /**
    * @var Request $request
    */
   protected $request;
   
-  protected $resources;
-
   /**
-   * Reflection property called by contructor setting name of child controller.
-   * @var string
+   *
+   * @var array 
    */
-  protected $controllerName;
+  protected $resources;
   
+  /**
+   *
+   * @var RequestObject
+   */
+  protected $requestObject;
+  
+  /**
+   *
+   * @var ModelBase
+   */
   protected $model;
   
+  /**
+   *
+   * @var array
+   */
   protected $models;
   /**
    * Constructor accepts the Request object and an optional array of resources.
@@ -33,37 +49,48 @@ abstract class ControllerBase {
    * @param \core\Request $request
    * @param array $resources
    */
-  public function __construct($resources = null) {
+  public function __construct(RequestObject $requestObject, $resources, $parent = null) {
     $this->request = CoreApp::getRequest();
-    if (is_null($resources)) {
-      $this->resources = $this->request->getResourceArray();
-    } else {
-      $this->resources = $resources;
-    }
-    $reflectionClass = new \ReflectionClass($this);
-    $this->controllerName = $reflectionClass->getName();
+    $this->requestObject = $requestObject;
+    $this->resources = $resources;
+    $this->parent = $parent;
+    $this->getModelClass();
   }
   /**
    * init() parses the resources array, determining the resource type from url 
-   * parameters set in the Request->resources array.
-   * This method "delegates" requests to nested controllers. If an additional controller
-   * is on the route, we stop processing and instantiate the next controller.
+   * parameters. 
+   * init() will be called from either CoreApp or a parent controller's init
+   * method
    * 
    */
   public function init() {
-    $resourcesIterator = new SimpleIterator($this->resources);;
+    $resourcesIterator = new SimpleIterator($this->resources);
+    $resourcesData = $this->request->getResourceData();
     $renderFlag = true;
-    $baseDir = dirname(__DIR__);
-    $controllerBaseDir = $baseDir . '/controllers/';
+    $requestObject = new RequestObject();
     while ($resourcesIterator->hasNext()) {
-      $current = $resourcesIterator->current();
-      if (is_dir($controllerBase . $current)) {
-        
+      $resourceValue = $resourcesIterator->next();
+      $controllerSet = $requestObject->setControllerNamespace($resourceValue);
+      $dirSet = $requestObject->isResourceDirectory($resourceValue);
+      if ($controllerSet) {
+        $reflectionClass = new \ReflectionClass($requestObject->getControllerNamespace());
+        $resourcesArray = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
+        $controllerClass = $reflectionClass->newInstance($requestObjec, $resourcesArray, $this);
+        $controllerClass->init();
+        $renderFlag = false;
+        $truncatedResources = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
+        $controller = new $resourcesData['CONTROLLERS'][$resourceValue]->className($truncatedResources);
+        $controller->init();
+        return;
       }
-      if (class_exists($controllerBase)) {
-        
+      if ($dirSet) {
+        $resourcesIterator->next();
+      } else {
+        $requestObject->setRequestArgument($resourceValue);
       }
-      
+    }
+    if ($renderFlag) {
+      $this->callMethod();
     }
   }
   /**
@@ -112,14 +139,11 @@ abstract class ControllerBase {
    * @return string
    */
   protected function getModelClass() {
-    $reflectionClass = new \ReflectionClass($this);
-    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $reflectionClass->getName());
-    $classBase = str_replace('Controller', '', $className);
-    $testModel = "app\\models\\" . Inflector::singularize($classBase) . "Model";
-    if (class_exists($testModel)) {
-      return $testModel;
+    if (!$this->requestObject->getModelNamespace()) {
+      return null;
     }
-    return null;
+    $reflectionClass = new \ReflectionClass($this->requestObject->getModelNamespace());
+    $this->model = $reflectionClass->newInstance();
   }
   
   private function loadController($resourceValue, $resourceStack) {

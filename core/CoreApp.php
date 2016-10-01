@@ -21,12 +21,15 @@ class CoreApp {
     while ($resourcesIterator->hasNext()) {
       $resourceValue = $resourcesIterator->current();
       $controllerSet = $requestObject->setControllerNamespace($resourceValue);
-      $dirSet = $requestObject->isResourceDirectory($resource);
-      $index = $resourcesIterator->getIndex();
+      $dirSet = $requestObject->isResourceDirectory($resourceValue);
       if ($controllerSet) {
-        
+        $resourcesArray = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
+        $reflectionClass = new \ReflectionClass($requestObject->getControllerNamespace());
+        $controllerClass = $reflectionClass->newInstance($requestObject, $resourcesArray);
+        $controllerClass->init();
+        return;
       }
-      if ($index == 0 && !$controllerSet && !$dirSet) {
+      if ( !$dirSet) {
         self::issue(404);
         return;
       }
@@ -69,8 +72,5 @@ class CoreApp {
     die("Issue $httpCode here");
   }
   
-  private static function setController(RequestObject $requestObject) {
-    
-  }
 }
 
