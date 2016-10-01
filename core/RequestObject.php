@@ -9,61 +9,96 @@ namespace core;
  */
 
 class RequestObject {
-  const CONTROLLER = 1;
-  const MODEL = 2;
-  const VIEW = 3;
-  
-  private $parent;
+
   private $modelNamespace;
   private $controllerNamespace;
-  private $modelClassPath;
-  private $controllerClassPath;
   private $tableName;
   private $viewPath;
-  private $uri;
+  private $requestArguments;
   private $app;
   
   public function __construct(
     $modelNamespace        = ""
     , $controllerNamespace = ""
-    , $modelClassPath      = ""
-    , $controllerClassPath = ""
     , $tableName           = ""
     , $viewPath            = ""
-    , $uri                 = "") {
+    , $requestArguments    = []) {
     $this->app = dirname(__DIR__) . '/app';
     $this->modelNamespace      = empty($modelNamespace) ? 'app\\models' : $modelNamespace;
     $this->controllerNamespace = empty($controllerNamespace) ? 'app\\controllers' : $controllerNamespace;
-    $this->modelClassPath      = empty($modelClassPath) ? $this->app . "/models" : $modelClassPath;
-    $this->controllerClassPath = empty($controllerClassPath) ? $this->app . "/controllers" : $controllerClassPath;
-    $this->viewPath            = emtpy($viewPath) ? $this->app . "/views" : $viewPath;
+    $this->viewPath            = empty($viewPath) ? $this->app . "/views" : $viewPath;
     $this->tableName           = $tableName;
-    $this->uri                 = $uri;
+    $this->requestArguments    = $requestArguments;
   }
   
-  public function __set($name, $value) {
-    $this->$name = $value;
+  public function getModelNamespace() {
+    return $this->modelNamespace;
   }
   
-  public function __get($name) {
-    return $this->$name;
+  public function getControllerNamespace() {
+    return $this->controllerNamespace;
   }
   
-  public static function setFromResources($resources) {
-    $resourcesIterator = new SimpleIterator($resources);
-    $resourcesIterator->preparePrevious();
-    $requestObject = new RequestObject();
-    return self::setRequestObject($resourcesIterator, $requestObject, []);
+  public function getViewPath() {
+    return $this->viewPath;
   }
   
-  private static function setRequestObjects(SimpleIterator &$resource, RequestObject &$requestObject) {
-    $resource->preparePrevious();
-    $namespaceBase = 'app';
-    while($resource->hasPrevious()) {
-      $current = $resource->current();
-      
+  public function getRequestArguments() {
+    return $this->requestArguments;
+  }
+  /**
+   * Sets the model namespace from a resource array entry
+   * @param type $resourceValue
+   * @param \core\RequestObject $requestObject
+   * @return boolean|\core\RequestObject
+   */
+  public function setModelNamespace($resourceValue) {
+    if ($resourceValue == "index.php") {
+      $this->modelNamespace = $this->get('modelNamespace') . '\\IndexModel';
+      return true;
     }
-    
+    $modelName = Inflector::camelize($resourceValue) . "Model";
+    $modelNamespace = $this->modelNamespace . '\\' . $modelName;
+    if (class_exists($modelNamespace)) {
+      $this->modelNamespace = $modelNamespace;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Sets the controller namespace from a resource array
+   * @param string $resourceValue
+   * @param \core\RequestObject $requestObject
+   * @return boolean|\core\RequestObject
+   */
+  public function setControllerNamespace($resourceValue) {
+    if ($resourceValue == "index.php") {
+      $this->controllerNamespace = $this->controllerNamespace . '\\IndexController';
+      return true;
+    }
+    $controllerName = Inflector::camelize($resourceValue) . "Controller";
+    $controllerNamespace = $this->controllerNamespace . '\\' . $controllerName;
+    if (class_exists($controllerNamespace)) {
+      $this->controllerNamespace = $controllerNamespace;
+      return true;
+    }
+    return false;
+  }
+  
+  public function setRequestArgument($requestArgument) {
+    $this->requestArguments[] = $requestArgument;
+  }
+  
+  public function isResourceDirectory($resource) {
+    $pathBase = $this->app;
+    $namespacePath = preg_replace("/\\/", "/", $this->controllerNamespace) . $resource;
+    if (is_dir($pathBase . '/' . $namespacePath)) {
+      $this->controllerNamespace .= '\\' . $resource;
+      $this->modelNamespace .= '\\' . $resource;
+      return true;
+    }
+    return false;
     
   }
 }

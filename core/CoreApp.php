@@ -16,17 +16,20 @@ class CoreApp {
    */
   public static function routeRequest() {
     $request = self::getRequest();
-    $controllerClass = "app\\controllers\\IndexController";
-    $resourceArray = new SimpleIterator($request->getResourceArray());
-    if ($resourceArray->getSize() > 0) {
-      $controllerClass = self::getControllerClassPath($resourceArray);
-    }
-    if (class_exists($controllerClass)) {
-      $reflectionClass = new \ReflectionClass($controllerClass);
-      $controller  = $reflectionClass->newInstance();
-      $controller->init();
-    } else {
-      self::issue("404");
+    $requestObject = new RequestObject();
+    $resourcesIterator = new SimpleIterator($request->getResourceArray());
+    while ($resourcesIterator->hasNext()) {
+      $resourceValue = $resourcesIterator->current();
+      $controllerSet = $requestObject->setControllerNamespace($resourceValue);
+      $dirSet = $requestObject->isResourceDirectory($resource);
+      $index = $resourcesIterator->getIndex();
+      if ($controllerSet) {
+        
+      }
+      if ($index == 0 && !$controllerSet && !$dirSet) {
+        self::issue(404);
+        return;
+      }
     }
   }
   
@@ -34,8 +37,8 @@ class CoreApp {
    * Helper method used by controllers. Inspects a value from the URL 
    * and returns its corresponding MVC role.
    * 
-   * @param string $resourceValue - a path in the URL
-   * @return string
+   * @global Request $httpRequest
+   * @return Request 
    */
   public static function getResourceType($resourceValue) {
     if (class_exists(self::getControllerClassPath($resourceValue))) {
@@ -55,30 +58,7 @@ class CoreApp {
     return $httpRequest;
   }
   
-  /**
-   * Returns a fully qualified classpath to a defined model from 
-   * a url path.
-   * 
-   * @param string $resourceValue
-   * @return string
-   */
-  public static function getModelClassPath($resourceValue) {
-    return "app\\models\\" . Inflector::camelize($resourceValue) . "Model";
-  }
-   /**
-   * Returns a fully qualified classpath to a defined controller from 
-   * the top-level of a url path.
-   * 
-   * @param string $resourceValue
-   * @return string
-   */
-  public static function getControllerClassPath(SimpleIterator $resourceArray) {
-    $resourceValue = $resourceArray->current();
-    if ($resourceValue == "index.php") {
-      return "app\\controllers\\IndexController";
-    }
-    return "app\\controllers\\" . Inflector::camelize($resourceValue) . "Controller"; 
-  }
+  
   /**
    * responsible for issuing error pages (404, 500 etc.)
    * Will attempt to load corresponding template in application 
@@ -87,6 +67,10 @@ class CoreApp {
    */
   public static function issue($httpCode) {
     die("Issue $httpCode here");
+  }
+  
+  private static function setController(RequestObject $requestObject) {
+    
   }
 }
 
