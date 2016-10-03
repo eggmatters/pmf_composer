@@ -18,21 +18,19 @@ class CoreApp {
     $request = self::getRequest();
     $requestObject = new RequestObject();
     $resourcesIterator = new SimpleIterator($request->getResourceArray());
-    while ($resourcesIterator->hasNext()) {
-      $resourceValue = $resourcesIterator->current();
-      $controllerSet = $requestObject->setControllerNamespace($resourceValue);
-      $dirSet = $requestObject->isResourceDirectory($resourceValue);
-      if ($controllerSet) {
-        $resourcesArray = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
-        $reflectionClass = new \ReflectionClass($requestObject->getControllerNamespace());
-        $controllerClass = $reflectionClass->newInstance($requestObject, $resourcesArray);
-        $controllerClass->init();
-        return;
-      }
-      if ( !$dirSet) {
-        self::issue(404);
-        return;
-      }
+    $resourceValue = $resourcesIterator->current();
+    $controllerSet = $requestObject->setControllerNamespace($resourceValue);
+    $dirSet = $requestObject->isResourceDirectory($resourceValue);
+    if ($controllerSet) {
+      $resourcesArray = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
+      $reflectionClass = new \ReflectionClass($requestObject->getControllerNamespace());
+      $controllerClass = $reflectionClass->newInstance($requestObject, $resourcesArray);
+      $controllerClass->init();
+      return;
+    }
+    if ( !$dirSet) {
+      self::issue(404);
+      return;
     }
   }
   

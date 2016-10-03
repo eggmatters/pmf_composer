@@ -54,10 +54,10 @@ class RequestObject {
    */
   public function setModelNamespace($resourceValue) {
     if ($resourceValue == "index.php") {
-      $this->modelNamespace = $this->get('modelNamespace') . '\\IndexModel';
+      $this->modelNamespace = $this->modelNamespace . '\\IndexModel';
       return true;
     }
-    $modelName = Inflector::camelize($resourceValue) . "Model";
+    $modelName = Inflector::camelize(Inflector::singularize($resourceValue)) . "Model";
     $modelNamespace = $this->modelNamespace . '\\' . $modelName;
     if (class_exists($modelNamespace)) {
       $this->modelNamespace = $modelNamespace;
@@ -92,7 +92,7 @@ class RequestObject {
   
   public function isResourceDirectory($resource) {
     $pathBase = $this->app;
-    $namespacePath = preg_replace("/\\/", "/", $this->controllerNamespace) . $resource;
+    $namespacePath = preg_replace("/\\//", "/", $this->controllerNamespace) . $resource;
     if (is_dir($pathBase . '/' . $namespacePath)) {
       $this->controllerNamespace .= '\\' . $resource;
       $this->modelNamespace .= '\\' . $resource;

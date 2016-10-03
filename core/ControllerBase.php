@@ -31,17 +31,6 @@ abstract class ControllerBase {
   protected $requestObject;
   
   /**
-   *
-   * @var ModelBase
-   */
-  protected $model;
-  
-  /**
-   *
-   * @var array
-   */
-  protected $models;
-  /**
    * Constructor accepts the Request object and an optional array of resources.
    * The resources are values obtained from the URL by the Request object.
    * Nested controller instances (i.e. /controllerA/id/Controller/b) will receive
@@ -54,6 +43,7 @@ abstract class ControllerBase {
     $this->requestObject = $requestObject;
     $this->resources = $resources;
     $this->parent = $parent;
+    $this->requestObject->setModelNamespace($resources[0]);
     $this->getModelClass();
   }
   /**
@@ -75,7 +65,7 @@ abstract class ControllerBase {
       if ($controllerSet) {
         $reflectionClass = new \ReflectionClass($requestObject->getControllerNamespace());
         $resourcesArray = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
-        $controllerClass = $reflectionClass->newInstance($requestObjec, $resourcesArray, $this);
+        $controllerClass = $reflectionClass->newInstance($requestObject, $resourcesArray, $this);
         $controllerClass->init();
         $renderFlag = false;
         $truncatedResources = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
@@ -181,7 +171,7 @@ abstract class ControllerBase {
   }
   
   private function prepareGet() {
-    if (is_null($this->request->getRequestedIds($this->controllerName))) {
+    if (empty($this->requestObject->getRequestArguments())) {
       $this->prepareIndex();
     } else {
       $this->loadModel();
