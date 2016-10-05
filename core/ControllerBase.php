@@ -44,7 +44,6 @@ abstract class ControllerBase {
     $this->resources = $resources;
     $this->parent = $parent;
     $this->requestObject->setModelNamespace($resources[0]);
-    $this->getModelClass();
   }
   /**
    * init() parses the resources array, determining the resource type from url 
@@ -90,13 +89,13 @@ abstract class ControllerBase {
    */
   protected function get() {
     echo "<pre>";
-    print_r($this->model);
+    echo "got here with get";
     echo "<pre>";
   }
 
   protected function index() {
     echo "<pre>";
-    print_r($this->models);
+    echo "got here with index";
     echo "<pre>";
   }
   /**
@@ -121,30 +120,6 @@ abstract class ControllerBase {
   protected function render() {
     
   }
-  /**
-   * Convention helper. This class simply returns the model associated with this
-   * controller or null. We want to allow controllers to not be tied with models,
-   * (i.e. default IndexController) so the callers shouldn't freak out if they get 
-   * null.
-   * @return string
-   */
-  protected function getModelClass() {
-    if (!$this->requestObject->getModelNamespace()) {
-      return null;
-    }
-    $reflectionClass = new \ReflectionClass($this->requestObject->getModelNamespace());
-    $this->model = $reflectionClass->newInstance();
-  }
-  
-  private function loadController($resourceValue, $resourceStack) {
-    $controllerName = CoreApp::getControllerClassPath($resourceValue);
-    if ($controllerName == $this->controllerName) {
-      return;
-    }
-    $reflectionClass = new \ReflectionClass($controllerName);
-    $controllerInstance = $reflectionClass->newInstance($resourceStack);
-    $controllerInstance->init();
-  }
 
   
   private function callMethod() {
@@ -166,7 +141,6 @@ abstract class ControllerBase {
   
   private function prepareIndex() {
     //make sure we can filter out non-model related request strings.
-    $this->loadModels();
     $this->index();
   }
   
@@ -174,36 +148,24 @@ abstract class ControllerBase {
     if (empty($this->requestObject->getRequestArguments())) {
       $this->prepareIndex();
     } else {
-      $this->loadModel();
       $this->get();
     }
   }
   private function prepareDelete() {
-    if (is_null($this->request->getRequestedIds($this->controllerName))) {
-      CoreApp::issue("404");
-    } else {
-      $this->loadModel();
-    }
+
+    
   }
   
   private function prepareUpdate() {
-    if (is_null($this->request->getRequestedIds($this->controllerName))) {
-      CoreApp::issue("404");
-    } else {
-      $this->loadModel();
-      $this->update();
-    }
+
   }
   
   private function loadModel() {
-    $modelBase = $this->getModelClass();
-    $id = $this->request->getRequestedIds($this->controllerName)->id;
-    $this->model = $modelBase::get($id, $this->request->getRequestUri());
+
   }
   
   private function loadModels() {
-    $modelBase = $this->getModelClass();
-    $this->models = $modelBase::getAll($this->request->getRequestUri());
+
   }
 
 }
