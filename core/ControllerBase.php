@@ -31,6 +31,12 @@ abstract class ControllerBase {
   protected $requestObject;
   
   /**
+   *
+   * @var ModelBase
+   */
+  protected $model;
+  
+  /**
    * Constructor accepts the Request object and an optional array of resources.
    * The resources are values obtained from the URL by the Request object.
    * Nested controller instances (i.e. /controllerA/id/Controller/b) will receive
@@ -151,21 +157,38 @@ abstract class ControllerBase {
       $this->get();
     }
   }
+  
+  private function prepareCreate() {
+    
+  }
   private function prepareDelete() {
-
     
   }
   
   private function prepareUpdate() {
 
   }
-  
-  private function loadModel() {
-
+  /**
+   * iterates through controller instances and collects 
+   * request level arguments,
+   * using reflection to obtain method signatures 
+   */
+  private function prepareArguments() {
+    $current = $this;
+    $returnArray = [];
+    while ($current != null) {
+      $requestArguments = $current->requestObject->getRequestArguments();
+      $rf = new \ReflectionClass($current);
+      $className = $rf->getName();
+      for ($i = 0; $i < count($requestArguments); $i++) {
+        $requestArg = $requestArguments[$i];
+        
+        
+      }
+    }
   }
   
-  private function loadModels() {
-
+  private function prepareFilters() {
+    
   }
-
 }

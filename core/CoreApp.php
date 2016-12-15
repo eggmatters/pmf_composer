@@ -14,10 +14,8 @@ class CoreApp {
    * 
    * @param string $requestUri
    */
-  public static function routeRequest() {
-    $request = self::getRequest();
+  public static function routeRequest(Request $request, SimpleIterator $resourcesIterator) {
     $requestObject = new RequestObject();
-    $resourcesIterator = new SimpleIterator($request->getResourceArray());
     $resourceValue = $resourcesIterator->current();
     $controllerSet = $requestObject->setControllerNamespace($resourceValue);
     $dirSet = $requestObject->isResourceDirectory($resourceValue);

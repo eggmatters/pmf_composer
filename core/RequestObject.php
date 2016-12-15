@@ -91,8 +91,8 @@ class RequestObject {
   }
   
   public function isResourceDirectory($resource) {
-    $pathBase = $this->app;
-    $namespacePath = preg_replace("/\\//", "/", $this->controllerNamespace) . $resource;
+    $pathBase = dirname(__DIR__);
+    $namespacePath = preg_replace("/\\\/", "/", $this->controllerNamespace) . '/' . $resource;
     if (is_dir($pathBase . '/' . $namespacePath)) {
       $this->controllerNamespace .= '\\' . $resource;
       $this->modelNamespace .= '\\' . $resource;
