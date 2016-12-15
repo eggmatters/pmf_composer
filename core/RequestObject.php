@@ -78,8 +78,9 @@ class RequestObject {
       return true;
     }
     $controllerName = Inflector::camelize($resourceValue) . "Controller";
-    $controllerNamespace = $this->controllerNamespace . '\\' . $controllerName;
+    $controllerNamespace = '\\' . $this->controllerNamespace . '\\' . $controllerName;
     if (class_exists($controllerNamespace)) {
+      
       $this->controllerNamespace = $controllerNamespace;
       return true;
     }
