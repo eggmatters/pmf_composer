@@ -62,15 +62,15 @@ abstract class ControllerBase {
     $resourcesIterator = new SimpleIterator($this->resources);
     $resourcesData = $this->request->getResourceData();
     $renderFlag = true;
-    $requestObject = new RequestObject();
+    $this->requestObject = new RequestObject();
     while ($resourcesIterator->hasNext()) {
       $resourceValue = $resourcesIterator->next();
-      $controllerSet = $requestObject->setControllerNamespace($resourceValue);
-      $dirSet = $requestObject->isResourceDirectory($resourceValue);
+      $controllerSet = $this->requestObject->setControllerNamespace($resourceValue);
+      $dirSet = $this->requestObject->isResourceDirectory($resourceValue);
       if ($controllerSet) {
-        $reflectionClass = new \ReflectionClass($requestObject->getControllerNamespace());
+        $reflectionClass = new \ReflectionClass($this->requestObject->getControllerNamespace());
         $resourcesArray = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
-        $controllerClass = $reflectionClass->newInstance($requestObject, $resourcesArray, $this);
+        $controllerClass = $reflectionClass->newInstance($this->requestObject, $resourcesArray, $this);
         $controllerClass->init();
         $renderFlag = false;
         $truncatedResources = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
@@ -81,7 +81,7 @@ abstract class ControllerBase {
       if ($dirSet) {
         $resourcesIterator->next();
       } else {
-        $requestObject->setRequestArgument($resourceValue);
+        $this->requestObject->setRequestArgument($resourceValue);
       }
     }
     if ($renderFlag) {
@@ -104,9 +104,7 @@ abstract class ControllerBase {
     if (is_null($instance->getParent())) {
       return $params;
     }
-    $parent->getParams($parent, $params);
-    return $params;
-    
+    return $parent->getParams($parent, $params);
   }
   /**
    * Default method, will load model from id set in init
@@ -114,32 +112,29 @@ abstract class ControllerBase {
    * Also responsible for rendering forms for "update" and "new" requests.
    */
   protected function get() {
-    $params = $this->getParams($this);
-    print_r($params);
+    CoreApp::issue("404");
   }
 
   protected function index() {
-    echo "<pre>";
-    echo "got here with index";
-    echo "<pre>";
+    CoreApp::issue("404");
   }
   /**
    * Default method. Called from PUT requests.
    */
   protected function update() {
-    
+    CoreApp::issue("404");
   }
   /**
    * Default method. Called from CREATE requests
    */
   protected function create() {
-    
+    CoreApp::issue("404");
   }
   /**
    * Default method. Called from DELETE requests
    */
   protected function delete() {
-    
+    CoreApp::issue("404");
   }
   
   protected function render() {
