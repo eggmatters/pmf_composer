@@ -88,15 +88,34 @@ abstract class ControllerBase {
       $this->callMethod();
     }
   }
+  
+  public function getRequestObject() {
+    return $this->requestObject;
+  }
+  
+  public function getParent() {
+    return $this->parent;
+  }
+  
+  public function getParams(ControllerBase $instance, $params = []) {
+    $rf = new \ReflectionClass($instance);
+    $params[$rf->name] = $instance->requestObject->getRequestArguments();
+    $parent = $instance->getParent();
+    if (is_null($instance->getParent())) {
+      return $params;
+    }
+    $parent->getParams($parent, $params);
+    return $params;
+    
+  }
   /**
    * Default method, will load model from id set in init
    * and render the "get" view for this controller.
    * Also responsible for rendering forms for "update" and "new" requests.
    */
   protected function get() {
-    echo "<pre>";
-    echo "got here with get";
-    echo "<pre>";
+    $params = $this->getParams($this);
+    print_r($params);
   }
 
   protected function index() {
@@ -151,7 +170,9 @@ abstract class ControllerBase {
   }
   
   private function prepareGet() {
-    if (empty($this->requestObject->getRequestArguments())) {
+    $params = $this->getParams($this);
+    print_r($params);
+    if (empty($params)) {
       $this->prepareIndex();
     } else {
       $this->get();
@@ -167,28 +188,5 @@ abstract class ControllerBase {
   
   private function prepareUpdate() {
 
-  }
-  /**
-   * iterates through controller instances and collects 
-   * request level arguments,
-   * using reflection to obtain method signatures 
-   */
-  private function prepareArguments() {
-    $current = $this;
-    $returnArray = [];
-    while ($current != null) {
-      $requestArguments = $current->requestObject->getRequestArguments();
-      $rf = new \ReflectionClass($current);
-      $className = $rf->getName();
-      for ($i = 0; $i < count($requestArguments); $i++) {
-        $requestArg = $requestArguments[$i];
-        
-        
-      }
-    }
-  }
-  
-  private function prepareFilters() {
-    
   }
 }
