@@ -34,7 +34,7 @@ abstract class Connector {
   
   abstract public function create($params);
   
-  abstract public function update($params);
+  abstract public function update($id, $params);
   
   abstract public function delete($params = null);
 

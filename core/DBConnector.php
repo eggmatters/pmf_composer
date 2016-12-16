@@ -16,6 +16,20 @@ class DBConnector extends Connector {
   private $numRows;
 
   public function getAll() {
+    $queryBase = new QueryBase($this->modelClass);
+    $constraint = new Constraints();
+    $sql = $queryBase
+      ->Select()
+      ->Where($constraint)
+      ->getSelect();
+    $bindValues = $queryBase->getBindValues();
+    if ($this->query($sql, $bindValues)) {
+      return $this->getResultsSet();
+    }
+    return false;  
+  }
+  
+  public function getFromControllerParams(array $controllerParams = []) {
     $request = CoreApp::getRequest();
     $parsedResources = $this->parseResources($request->getResourceArray());
     $queryBase = new QueryBase($this->modelClass);
@@ -43,7 +57,6 @@ class DBConnector extends Connector {
       return $this->getResultsSet();
     }
     return false;
-    
   }
   
   public function get($id = null) { 
@@ -83,7 +96,7 @@ class DBConnector extends Connector {
     
   }
   
-  public function update($params) {
+  public function update($id, $params) {
     
   }
   

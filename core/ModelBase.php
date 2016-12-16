@@ -10,11 +10,9 @@ require_once CoreApp::rootDir() . '/configurations/ModelMapper.php';
 
 abstract class ModelBase {
   
-  private $connector;
-  
   public function __construct($modelAttributes = null) {
     $this->setAttributes($modelAttributes);
-    $this->connector = $this->getConfiguredConnector();
+    return $this;
   }
 
   public function setAttributes($modelAttributes = null) {
@@ -36,7 +34,16 @@ abstract class ModelBase {
     $this->connector = $connector;
   }
   
-  private function getConfiguredConnector() {
+  public function getConnector() {
+    return $this->connector;
+  }
+  
+  public static function getAll() {
+    $results = self::getConfiguredConnector()->getAll();
+    return self::setCollectionFromPDOArray($results);
+  }
+  
+  private static function getConfiguredConnector() {
     global $modelConnections;
     $connector = null;
     $modelClass = get_called_class(); 
@@ -52,7 +59,23 @@ abstract class ModelBase {
     return $connector;
   }
   
-  public function getConnector() {
-    return $this->connector;
+  private function setObject($name, \stdClass $modelObject) {
+    $className = 'app\\models\\' . Inflector::camelize($name) . "Model";
+    if (\class_exists($className)) {
+      $classReflector = new \ReflectionClass($className);
+      $classInstance = $classReflector->newInstance($modelObject);
+      return $classInstance;
+    }
+    return $modelObject;
+  }
+  
+  private static function setCollectionFromPDOArray($collection) {
+    $modelsCollection = [];
+    foreach($collection as $entity) {
+      $rf = new \ReflectionClass(get_called_class());
+      $modelInstance = $rf->newInstance($entity);
+      $modelsCollection[] = $modelInstance;
+    }
+    return $modelsCollection;
   }
 }
