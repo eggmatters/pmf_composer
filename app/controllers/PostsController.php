@@ -9,4 +9,8 @@ use core\ControllerBase;
  */
 class PostsController extends ControllerBase {
   //put your code here
+  protected function index() {
+    $posts = new \app\models\PostModel();
+    
+  }
 }

@@ -145,7 +145,11 @@ abstract class ControllerBase {
   private function callMethod() {
     switch ($this->request->getHttpMethod()) {
       case "GET":
-        $this->prepareGet();
+        if (count($this->requestObject->getRequestArguments()) == 0) {
+          $this->prepareIndex();
+        } else {
+          $this->prepareGet();
+        }
         break;
       case "PUT":
         $this->prepareUpdate();
