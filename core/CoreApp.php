@@ -59,6 +59,10 @@ class CoreApp {
     return $httpRequest;
   }
   
+  public static function rootDir() {
+    return dirname(__DIR__);
+  }
+  
   
   /**
    * responsible for issuing error pages (404, 500 etc.)
