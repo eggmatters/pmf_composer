@@ -31,12 +31,6 @@ abstract class ControllerBase {
   protected $requestObject;
   
   /**
-   *
-   * @var ModelBase
-   */
-  protected $model;
-  
-  /**
    * Constructor accepts the Request object and an optional array of resources.
    * The resources are values obtained from the URL by the Request object.
    * Nested controller instances (i.e. /controllerA/id/Controller/b) will receive
@@ -145,11 +139,7 @@ abstract class ControllerBase {
   private function callMethod() {
     switch ($this->request->getHttpMethod()) {
       case "GET":
-        if (count($this->requestObject->getRequestArguments()) == 0) {
-          $this->prepareIndex();
-        } else {
-          $this->prepareGet();
-        }
+        $this->prepareGet();
         break;
       case "PUT":
         $this->prepareUpdate();
@@ -170,7 +160,6 @@ abstract class ControllerBase {
   
   private function prepareGet() {
     $params = $this->getParams($this);
-    print_r($params);
     if (empty($params)) {
       $this->prepareIndex();
     } else {

@@ -15,5 +15,9 @@ use core\ControllerBase;
  * @author meggers
  */
 class UsersController extends ControllerBase {
-  //put your code here
+  public function get() {
+    echo "<pre>";
+    print_r($this->getParams($this));
+    echo "</pre>";
+  }
 }

@@ -9,4 +9,9 @@ use core\ControllerBase;
  */
 class TagsController extends ControllerBase {
   //put your code here
+  public function get() {
+    echo "<pre>";
+    print_r($this->getParams($this));
+    echo "</pre>";
+  } 
 }
