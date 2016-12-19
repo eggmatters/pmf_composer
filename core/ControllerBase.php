@@ -46,15 +46,33 @@ abstract class ControllerBase {
     $this->requestObject->setModelNamespace($resources[0]);
   }
   /**
-   * init() parses the resources array, determining the resource type from url 
-   * parameters. 
-   * init() will be called from either CoreApp or a parent controller's init
-   * method
+   * init() parses the resources array, determining which controller
+   * is to be called, compiles controller arguments and methods.
    * 
    */
   public function init() {
     $resourcesIterator = new SimpleIterator($this->resources);
-    $resourcesData = $this->request->getResourceData();
+    $this->requestObject = new RequestObject();
+    while ($resourcesIterator->hasNext()) {
+      $resourceValue = $resourcesIterator->next();
+      // Get resource "type":
+      // is part of namespace?
+      //  -- determine if current namespace is part of directory structure. 
+      //     -- add and continue.
+      //  -- determine if namespace is a controller.
+      //     -- collect contstraint arguments
+      //     -- call init().
+      // is method?
+      //  -- deterimine which method.
+      //  -- place method on controller call stack.
+      //  -- continue.
+      // is param?
+      //  -- associate with method.
+      //  -- place on controller call stack.
+    }
+    
+    
+    
     $renderFlag = true;
     $this->requestObject = new RequestObject();
     while ($resourcesIterator->hasNext()) {
@@ -67,10 +85,6 @@ abstract class ControllerBase {
         $controllerClass = $reflectionClass->newInstance($this->requestObject, $resourcesArray, $this);
         $controllerClass->init();
         $renderFlag = false;
-        $truncatedResources = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
-        $controller = new $resourcesData['CONTROLLERS'][$resourceValue]->className($truncatedResources);
-        $controller->init();
-        return;
       }
       if ($dirSet) {
         $resourcesIterator->next();
