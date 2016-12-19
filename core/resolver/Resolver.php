@@ -23,6 +23,8 @@ class Resolver {
   private $controllerNamespaceArray;
   
   private $modelNamespaceArray;
+  
+  private $benchmark;
 
   
   public function __construct($appPath = null) {
