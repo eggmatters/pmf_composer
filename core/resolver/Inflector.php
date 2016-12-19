@@ -348,6 +348,10 @@ class Inflector {
       }
     }
   }
+  
+  static function pathToNamespace($path) {
+    return str_replace(array("\\", "/"), "\\", $path);
+  }
 
   // }}}
 }

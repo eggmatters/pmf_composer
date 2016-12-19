@@ -16,17 +16,38 @@ class Resolver {
   
   private $resourceArray;
   
-  private $fileArray;
+  private $controllerIterator;
+  
+  private $modelIterator;
   
   private $controllerNamespaceArray;
   
   private $modelNamespaceArray;
+
   
-  public function __construct(array $resourceArray, $appPath = null) {
+  public function __construct($appPath = null) {
     $this->appPath = (is_null($appPath)) ? \core\CoreApp::rootDir() . DIRECTORY_SEPARATOR . "app"
       : \core\CoreApp::rootDir() . DIRECTORY_SEPARATOR . $appPath;
-    $this->resourceArray = $resourceArray;
-    $this->fileArray = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->appPath), RecursiveIteratorIterator::SELF_FIRST);
+    $this->controllerIterator = $this->getIterator($this->appPath . "/controllers");
+    $this->modelIterator = $this->getIterator($this->appPath . "/models"); 
+  }
+  
+  private function getIterator($path) {
+    return new \RecursiveIteratorIterator(
+      new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::SELF_FIRST);
+  }
+  
+  public function setControllerNamespaces() {
+    foreach ($this->controllerIterator as $controllerFile) {
+      if($controllerFile->isFile()) {
+        $filename = $controllerFile->getFilename();
+        $namespace = Inflector::pathToNamespace(substr
+            ($controllerFile->getPath(), strlen(\core\CoreApp::rootDir() ) )
+          ) . "\\" . substr($filename, 0, strpos($filename, ".php") );
+        echo $namespace . "\n";
+        
+      }
+    }
   }
   
 }
