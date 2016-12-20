@@ -1,3 +1,4 @@
+-- CREATE SCHEMA `pmf_db` DEFAULT CHARACTER SET utf8 ;
 CREATE TABLE `pmf_db`.`users`(
   `id` INT NOT NULL AUTO_INCREMENT,
   `user_name` VARCHAR(45) NOT NULL,

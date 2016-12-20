@@ -23,8 +23,6 @@ class Resolver {
   private $controllerNamespaceArray;
   
   private $modelNamespaceArray;
-  
-  private $benchmark;
 
   
   public function __construct($appPath = null) {
@@ -40,16 +38,28 @@ class Resolver {
   }
   
   public function setControllerNamespaces() {
-    foreach ($this->controllerIterator as $controllerFile) {
-      if($controllerFile->isFile()) {
-        $filename = $controllerFile->getFilename();
+    $this->controllerNamespaceArray = $this->setNamespaceArray($this->controllerIterator);
+  }
+  
+  public function setModelNamespaces() {
+    $this->modelNamespaceArray = $this->setNamespaceArray($this->modelIterator);
+  }
+  
+  private function setNamespaceArray(\RecursiveIteratorIterator $iterator) {
+    $namespaceArray = [];
+    foreach ($iterator as $appFile) {
+      if($appFile->isFile()) {
+        $filename = $appFile->getFilename();
         $namespace = Inflector::pathToNamespace(substr
-            ($controllerFile->getPath(), strlen(\core\CoreApp::rootDir() ) )
+            ($appFile->getPath(), strlen(\core\CoreApp::rootDir() ) )
           ) . "\\" . substr($filename, 0, strpos($filename, ".php") );
-        echo $namespace . "\n";
+        if (class_exists($namespace)) {
+          $namespaceArray[] = $namespace;
+        }
         
       }
     }
+    return $namespaceArray;
   }
   
 }
