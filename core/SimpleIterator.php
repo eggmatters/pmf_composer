@@ -19,14 +19,10 @@ class SimpleIterator {
   }
   
   public function hasNext() {
-    if ($this->index + 1 < $this->size) {
+    if ($this->index < $this->size) {
       return true;
     }
     return false;
-  }
-  
-  public function hasNextOrLast() {
-    return ( $this->hasNext() || ($this->index + 1 == $this->size ) );
   }
   
   public function hasPrevious() {
@@ -43,7 +39,9 @@ class SimpleIterator {
   public function next() {
     if ($this->hasNext()) {
       $this->index++;
-      return $this->collection[$this->index];
+      return isset($this->collection[$this->index]) ?
+        $this->collection[$this->index] :
+          false;
     }
     return false;
   }

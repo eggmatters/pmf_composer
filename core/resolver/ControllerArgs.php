@@ -20,11 +20,25 @@ class ControllerArgs {
    * @var \ReflectionClass $reflectionClass
    */
   private $reflectionClass;
+  
+  /**
+   *
+   * @var array $arguments 
+   */
+  private $arguments;
 
   public function __construct($namespace) 
   {
       $this->namespace = $namespace;
       $this->reflectionClass = new \ReflectionClass($namespace);
+      $this->arguments = [];
+  }
+  /**
+   * 
+   * @param string $param
+   */
+  public function setArgument($param) {
+    $this->arguments[] = $param;
   }
   /**
    * 
@@ -46,12 +60,12 @@ class ControllerArgs {
    * @param string $method
    * @return array
    */
-  public function getParameters($method) {
+  public function getControllerParameters($method) {
     $rfm = new \ReflectionMethod($this->namespace, $method);
     return $rfm->getParameters();
   }
   
-  public function isParam($method, $param) {
+  public function isControllerParameter($method, $param) {
     $params = $this->getParameters($method);
     return (empty(array_filter($params, function ($k, $v) use ($param) {
       return ($k == $param);

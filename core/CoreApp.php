@@ -16,7 +16,10 @@ class CoreApp {
    */
   public static function routeRequest(Request $request) {
     $resolver = new resolver\Resolver();
-    
+    $controllerArgs = $resolver->resolveRequest($request);
+    echo "<pre>";
+    print_r($controllerArgs);
+    echo "</pre>";
     /**
      * Resolver will determine list of ControllerArgs to call, determining 
      * final method from url:
