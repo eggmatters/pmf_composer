@@ -76,6 +76,14 @@ class SimpleIterator {
     return $this->index;
   }
   
+  public function setIndex($index) {
+    if ($this->size > $index) {
+      $this->index = $index;
+      return true;
+    }
+    return false;
+  }
+  
   public function truncateFromIndex($index) {
     $collection = [];
     for ($i = $index; $i < count($this->collection); $i++) {

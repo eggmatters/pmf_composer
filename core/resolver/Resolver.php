@@ -87,7 +87,6 @@ class Resolver {
         if (class_exists($namespace)) {
           $namespaceArray[] = $namespace;
         }
-        
       }
     }
     return $namespaceArray;
@@ -96,25 +95,40 @@ class Resolver {
   private function parseResourceArray(SimpleIterator $resourcesIterator) {
     $returnArray = [];
     $controllerArgs = null;
-    $namespaceBase = "\\app\\controllers";
     while ($resourcesIterator->hasNext()) {
-      $currentResource = $resourcesIterator->current();
-      $controllerNamespace = $namespaceBase . "\\" . $this->resolveNamespaceFromResource($currentResource, "Controller");
-      if (in_array($controllerNamespace, $this->controllerNamespaces)) {
-        $controllerArgs = null;
-        $controllerArgs = new ControllerArgs($controllerNamespace);
-        $returnArray[] = $controllerArgs;
-        $namespaceBase = "\\app\\controllers";
-      }
-      else if (!is_null($controllerArgs)) {
-        $controllerArgs->setArgument($currentResource);
-        $namespaceBase .= "\\" . $currentResource;
-      }
-      else {
-        $namespaceBase .= "\\" . $currentResource;
+      $ns = $this->fetchNamespaceFromResource($resourcesIterator->getIndex(), $resourcesIterator);
+      if (is_array($ns)) {
+        if (!is_null($controllerArgs)) {
+          $returnArray[] = $controllerArgs;
+          $controllerArgs = null;
+        }
+        $controllerArgs = new ControllerArgs($ns['namespace']);
+        $resourcesIterator->setIndex($ns['position']);
+      } else { 
+        $controllerArgs->setArgument($resourcesIterator->current());
       }
       $resourcesIterator->next();
     }
     return $returnArray;
+  }
+  
+  private function fetchNamespaceFromResource($posistion, SimpleIterator $resourcesIterator) {
+    $returnArray = [];
+    $resourcesIterator->setIndex($posistion);
+    $namespaceBase = "\\app\\controllers";
+    while ($resourcesIterator->hasNext()) {
+      $currentResource = $resourcesIterator->current();
+      $controllerBase  = self::resolveNamespaceFromResource($currentResource, "Controller");
+      $currentNamespace = $namespaceBase . "\\" . $controllerBase;
+      if (in_array($currentNamespace, $this->controllerNamespaces)) {
+        $returnArray['namespace'] = $currentNamespace;
+        $returnArray['positon'] = $resourcesIterator->getIndex();
+        return $returnArray;
+      } else {
+        $namespaceBase .= "\\" . $currentResource;
+      }
+      $resourcesIterator->next();
+    }
+    return false;
   }
 }
