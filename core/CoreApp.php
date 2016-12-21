@@ -15,8 +15,36 @@ class CoreApp {
    * @param string $requestUri
    */
   public static function routeRequest(Request $request) {
-    $indexController = new \app\controllers\IndexController($request, $request->getResourceArray());
-    $indexController->init();
+    $resolver = new resolver\Resolver();
+    
+    /**
+     * Resolver will determine list of ControllerArgs to call, determining 
+     * final method from url:
+     * 
+     * /users/1:
+     * Users->getUsers(1)
+     * 
+     * /users/1/posts
+     * Posts->getUserPosts(ControllerArgs $users)
+     * 
+     * /users/1/tags/smelly/funny/posts
+     * Posts->getUserPostsByTag(ControllerArgs $users, ControllerArg $tags)
+     * 
+     * $users = (
+     *   "UsersController" ; 
+     *   "UsersModel", 
+     *   view_file,
+     *   $args => 1 )
+     * 
+     * $tags  = ( . . .
+     *   $args => "smelly","funny"
+     * 
+     * The ControllerArgs is merely a meta-data container containing resolvable
+     * information about the request. 
+     */
+    
+    
+    
   }
   
   /**

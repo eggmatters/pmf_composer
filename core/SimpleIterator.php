@@ -25,6 +25,10 @@ class SimpleIterator {
     return false;
   }
   
+  public function hasNextOrLast() {
+    return ( $this->hasNext() || ($this->index + 1 == $this->size ) );
+  }
+  
   public function hasPrevious() {
     if ($this->index - 1 >= 0) {
       return true;

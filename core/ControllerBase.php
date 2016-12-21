@@ -7,6 +7,8 @@
  */
 namespace core;
 
+use core\resolver\Resolver;
+
 abstract class ControllerBase {
   /**
    *
@@ -28,7 +30,7 @@ abstract class ControllerBase {
    *
    * @var RequestObject
    */
-  protected $requestObject;
+  protected $resolver;
   
   /**
    * Constructor accepts the Request object and an optional array of resources.
@@ -38,12 +40,12 @@ abstract class ControllerBase {
    * @param \core\Request $request
    * @param array $resources
    */
-  public function __construct(RequestObject $requestObject, $resources, $parent = null) {
+  public function __construct(RequestObject $requestObject, Resolver $resolver, $parent = null) {
     $this->request = CoreApp::getRequest();
     $this->requestObject = $requestObject;
     $this->resources = $resources;
     $this->parent = $parent;
-    $this->requestObject->setModelNamespace($resources[0]);
+    $this->resolver = $resolver;
   }
   /**
    * init() parses the resources array, determining which controller
