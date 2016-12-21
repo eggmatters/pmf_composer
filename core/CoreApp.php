@@ -14,24 +14,9 @@ class CoreApp {
    * 
    * @param string $requestUri
    */
-  public static function routeRequest(Request $request, SimpleIterator $resourcesIterator, $requestObject = null) {
-    $requestObject = is_null($requestObject) ? new RequestObject() : $requestObject;
-    $resourceValue = $resourcesIterator->current();
-    if ( $requestObject->setControllerNamespace($resourceValue) ) {
-      $resourcesArray = $resourcesIterator->truncateFromIndex($resourcesIterator->getIndex());
-      $reflectionClass = new \ReflectionClass($requestObject->getControllerNamespace());
-      $controllerClass = $reflectionClass->newInstance($requestObject, $resourcesArray);
-      $controllerClass->init();
-      return;
-    }
-    if ( $requestObject->isResourceDirectory($resourceValue) ) {
-      $resourcesIterator->next();
-      self::routeRequest($request, $resourcesIterator, $requestObject);
-    } else {
-      //Determine whether or not to redirect here.
-      self::issue(404);
-      return;
-    }
+  public static function routeRequest(Request $request) {
+    $indexController = new \app\controllers\IndexController($request, $request->getResourceArray());
+    $indexController->init();
   }
   
   /**
@@ -62,8 +47,6 @@ class CoreApp {
   public static function rootDir() {
     return dirname(__DIR__);
   }
-  
-  
   /**
    * responsible for issuing error pages (404, 500 etc.)
    * Will attempt to load corresponding template in application 

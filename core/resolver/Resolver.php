@@ -14,15 +14,13 @@ class Resolver {
   
   private $appPath;
   
-  private $resourceArray;
-  
   private $controllerIterator;
   
   private $modelIterator;
   
-  private $controllerNamespaceArray;
+  private $controllerNamespaces;
   
-  private $modelNamespaceArray;
+  private $modelNamespaces;
 
   
   public function __construct($appPath = null) {
@@ -32,17 +30,29 @@ class Resolver {
     $this->modelIterator = $this->getIterator($this->appPath . "/models"); 
   }
   
-  private function getIterator($path) {
-    return new \RecursiveIteratorIterator(
-      new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::SELF_FIRST);
+  public function setControllerNamespaces() {
+    $this->controllerNamespaces = $this->setNamespaceArray($this->controllerIterator);
   }
   
-  public function setControllerNamespaces() {
-    $this->controllerNamespaceArray = $this->setNamespaceArray($this->controllerIterator);
+  public function getControllerNamespaces() {
+    return $this->controllerNamespaces;
   }
   
   public function setModelNamespaces() {
-    $this->modelNamespaceArray = $this->setNamespaceArray($this->modelIterator);
+    $this->modelNamespaces = $this->setNamespaceArray($this->modelIterator);
+  }
+  
+  public function getModelNamespaces() {
+    return $this->modelNamespaces;
+  }
+  
+  public static function resolveMethodFromResource($resourceValue, $httpMethod) {
+    return strtolower($httpMethod) . Inflector::camelize($resourceValue);
+  }
+  
+  private function getIterator($path) {
+    return new \RecursiveIteratorIterator(
+      new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::SELF_FIRST);
   }
   
   private function setNamespaceArray(\RecursiveIteratorIterator $iterator) {

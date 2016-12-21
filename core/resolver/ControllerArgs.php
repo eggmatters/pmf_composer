@@ -11,23 +11,51 @@ class ControllerArgs {
 
   /**
    *
-   * @var string type 
+   * @var string $namespace 
    */
   private $namespace;
+  
+  /**
+   *
+   * @var \ReflectionClass $reflectionClass
+   */
+  private $reflectionClass;
 
-  public function __construct(
-    $namespace) 
+  public function __construct($namespace) 
   {
       $this->namespace = $namespace;
+      $this->reflectionClass = new \ReflectionClass($namespace);
   }
-  
+  /**
+   * 
+   * @return Array
+   */
   public function getMethods() {
-    $rf = new \ReflectionClass($this->namespace);
-    return $rf->getMethods();
+    return $this->reflectionClass->getMethods();
+  }
+  /**
+   * 
+   * @param string $method
+   * @return boolean
+   */
+  public function isMethod($method) {
+    return $this->reflectionClass->hasMethod($method);
+  }
+  /**
+   * 
+   * @param string $method
+   * @return array
+   */
+  public function getParameters($method) {
+    $rfm = new \ReflectionMethod($this->namespace, $method);
+    return $rfm->getParameters();
   }
   
-  public function isMethod($method) {
-    
+  public function isParam($method, $param) {
+    $params = $this->getParameters($method);
+    return (empty(array_filter($params, function ($k, $v) use ($param) {
+      return ($k == $param);
+    }, ARRAY_FILTER_USE_BOTH)));
   }
 }
 /**

@@ -29,12 +29,6 @@ class Request {
    */
   private $resourceArray;
   /**
-   * An array of metadata about a resource.
-   * @var array
-   */
-  private $resourceData;
-  
-  /**
    * SERVER['HTTP_METHOD']
    * @var string 
    */
@@ -54,11 +48,6 @@ class Request {
    * @var array 
    */
   private $postParams;
-  /**
-   * set if path contains an id (by controller)
-   * @var int 
-   */
-  private $requestObjects;
 
   
   /**
