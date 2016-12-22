@@ -35,10 +35,17 @@ class ControllerArgs {
   }
   /**
    * 
-   * @param string $param
+   * @param string $argument
    */
-  public function setArgument($param) {
-    $this->arguments[] = $param;
+  public function setArgument($argument) {
+    $this->arguments[] = $argument;
+  }
+  /**
+   * 
+   * @param array $arguments
+   */
+  public function setArguments(array $arguments) {
+    $this->arguments = $arguments;
   }
   /**
    * 

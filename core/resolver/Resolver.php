@@ -25,6 +25,8 @@ class Resolver {
   private $controllerNamespaces;
   
   private $modelNamespaces;
+  
+  private $namespaceDirectories;
 
   
   public function __construct($appPath = null) {
@@ -32,6 +34,7 @@ class Resolver {
       : CoreApp::rootDir() . DIRECTORY_SEPARATOR . $appPath;
     $this->controllerIterator = $this->getIterator($this->appPath . "/controllers");
     $this->modelIterator = $this->getIterator($this->appPath . "/models"); 
+    $this->namespaceDirectories = [];
     $this->collectData(); 
   }
   
@@ -79,56 +82,46 @@ class Resolver {
   private function setNamespaceArray(\RecursiveIteratorIterator $iterator) {
     $namespaceArray = [];
     foreach ($iterator as $appFile) {
+      $filename = $appFile->getFilename();
       if($appFile->isFile()) {
-        $filename = $appFile->getFilename();
         $namespace = Inflector::pathToNamespace(substr
             ($appFile->getPath(), strlen(CoreApp::rootDir() ) )
           ) . "\\" . substr($filename, 0, strpos($filename, ".php") );
-        if (class_exists($namespace)) {
+        if (\class_exists($namespace)) {
           $namespaceArray[] = $namespace;
         }
+      }
+      if($appFile->isDir() && strpos($filename, '.') === false) {
+        $this->namespaceDirectories[] = $filename;
       }
     }
     return $namespaceArray;
   }
   
-  private function parseResourceArray(SimpleIterator $resourcesIterator) {
-    $returnArray = [];
-    $controllerArgs = null;
+  private function parseResourceArray(SimpleIterator $resourcesIterator, ControllerArgs $controllerArgs = null, &$returnArray = []) {
+    $namespaceBase = "\\app\\controllers";
+    $currentNamespace = $namespaceBase;
     while ($resourcesIterator->hasNext()) {
-      $ns = $this->fetchNamespaceFromResource($resourcesIterator->getIndex(), $resourcesIterator);
-      if (is_array($ns)) {
-        if (!is_null($controllerArgs)) {
-          $returnArray[] = $controllerArgs;
-          $controllerArgs = null;
-        }
-        $controllerArgs = new ControllerArgs($ns['namespace']);
-        $resourcesIterator->setIndex($ns['position']);
-      } else { 
-        $controllerArgs->setArgument($resourcesIterator->current());
+      $currentResource      = $resourcesIterator->current();
+      $controllerBase       = self::resolveNamespaceFromResource($currentResource, "Controller");
+      $controllerNamespace  = $currentNamespace . "\\" . $controllerBase;
+      if (in_array($controllerNamespace, $this->controllerNamespaces)) {
+        $controllerArgs = new ControllerArgs($controllerNamespace);
+        $returnArray[]  = $controllerArgs;
+        $resourcesIterator->next();
+        $this->parseResourceArray($resourcesIterator, $controllerArgs, $returnArray);
+      }
+      else if (in_array($currentResource, $this->namespaceDirectories)) {
+        $currentNamespace .= "\\"  . $currentResource;
+      }
+      else if (!is_null($controllerArgs)) {
+        $controllerArgs->setArgument($currentResource);
+      }
+      else {
+        return null;
       }
       $resourcesIterator->next();
     }
     return $returnArray;
-  }
-  
-  private function fetchNamespaceFromResource($posistion, SimpleIterator $resourcesIterator) {
-    $returnArray = [];
-    $resourcesIterator->setIndex($posistion);
-    $namespaceBase = "\\app\\controllers";
-    while ($resourcesIterator->hasNext()) {
-      $currentResource = $resourcesIterator->current();
-      $controllerBase  = self::resolveNamespaceFromResource($currentResource, "Controller");
-      $currentNamespace = $namespaceBase . "\\" . $controllerBase;
-      if (in_array($currentNamespace, $this->controllerNamespaces)) {
-        $returnArray['namespace'] = $currentNamespace;
-        $returnArray['positon'] = $resourcesIterator->getIndex();
-        return $returnArray;
-      } else {
-        $namespaceBase .= "\\" . $currentResource;
-      }
-      $resourcesIterator->next();
-    }
-    return false;
   }
 }
