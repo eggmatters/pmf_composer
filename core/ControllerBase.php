@@ -40,7 +40,7 @@ abstract class ControllerBase {
    * @param \core\Request $request
    * @param array $resources
    */
-  public function __construct(RequestObject $requestObject, Resolver $resolver, $parent = null) {
+  public function __construct(Request $request, Resolver $resolver, $parent = null) {
     $this->request = CoreApp::getRequest();
     $this->requestObject = $requestObject;
     $this->resources = $resources;
@@ -53,25 +53,8 @@ abstract class ControllerBase {
    * 
    */
   public function init() {
-    $resourcesIterator = new SimpleIterator($this->resources);
-    $this->requestObject = new RequestObject();
-    while ($resourcesIterator->hasNext()) {
-      $resourceValue = $resourcesIterator->next();
-      // Get resource "type":
-      // is part of namespace?
-      //  -- determine if current namespace is part of directory structure. 
-      //     -- add and continue.
-      //  -- determine if namespace is a controller.
-      //     -- collect contstraint arguments
-      //     -- call init().
-      // is method?
-      //  -- deterimine which method.
-      //  -- place method on controller call stack.
-      //  -- continue.
-      // is param?
-      //  -- associate with method.
-      //  -- place on controller call stack.
-    }
+    
+    
     
     
     

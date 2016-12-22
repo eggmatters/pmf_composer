@@ -18,6 +18,8 @@ class Resolver {
   
   private $appPath;
   
+  private $namespaceBase;
+  
   private $controllerIterator;
   
   private $modelIterator;
@@ -32,15 +34,50 @@ class Resolver {
   public function __construct($appPath = null) {
     $this->appPath = (is_null($appPath)) ? CoreApp::rootDir() . DIRECTORY_SEPARATOR . "app"
       : CoreApp::rootDir() . DIRECTORY_SEPARATOR . $appPath;
+    $this->namespaceBase = (is_null($appPath)) ? "\\app" : "\\" . $appPath;
     $this->controllerIterator = $this->getIterator($this->appPath . "/controllers");
     $this->modelIterator = $this->getIterator($this->appPath . "/models"); 
     $this->namespaceDirectories = [];
     $this->collectData(); 
   }
   
+  /**
+   * Resolver will determine list of ControllerArgs to call, determining 
+   * final method from url:
+   * 
+   * /users/1:
+   * Users->getUsers(1)
+   * 
+   * /users/1/posts
+   * Posts->getUserPosts(ControllerArgs $users)
+   * 
+   * /users/1/tags/smelly/funny/posts
+   * Posts->getUserPostsByTag(ControllerArgs $users, ControllerArg $tags)
+   * 
+   * $users = (
+   *   "UsersController" ; 
+   *   "UsersModel", 
+   *   view_file,
+   *   $args => 1 )
+   * 
+   * $tags  = ( . . .
+   *   $args => "smelly","funny"
+   * 
+   * The ControllerArgs is merely a meta-data container containing resolvable
+   * information about the request. 
+   * 
+   * @param Request $request
+   * @return type
+   */
   public function resolveRequest(Request $request) {
     $resourcesIterator = new SimpleIterator($request->getResourceArray());
-    return $this->parseResourceArray($resourcesIterator);
+    $controllerArgs = $this->parseResourceArray($resourcesIterator);
+    if (count($controllerArgs == 0)) {
+      return array(self::resolveIndex($this->namespaceBase));
+    }
+    else {
+      return $controllerArgs;
+    }
     
   }
   
@@ -74,6 +111,10 @@ class Resolver {
     return strtolower($httpMethod) . Inflector::camelize($resourceValue);
   }
   
+  public static function resolveIndex($namespaceBase = "\\app") {
+    return array(new ControllerArgs($namespaceBase . "\\controllers\IndexController"));
+  }
+  
   private function getIterator($path) {
     return new \RecursiveIteratorIterator(
       new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::SELF_FIRST);
@@ -99,7 +140,7 @@ class Resolver {
   }
   
   private function parseResourceArray(SimpleIterator $resourcesIterator, ControllerArgs $controllerArgs = null, &$returnArray = []) {
-    $namespaceBase = "\\app\\controllers";
+    $namespaceBase = $this->namespaceBase . "\\controllers";
     $currentNamespace = $namespaceBase;
     while ($resourcesIterator->hasNext()) {
       $currentResource      = $resourcesIterator->current();
@@ -116,6 +157,9 @@ class Resolver {
       }
       else if (!is_null($controllerArgs)) {
         $controllerArgs->setArgument($currentResource);
+      }
+      else if ($currentResource == "index.php") {
+        $returnArray[] = self::resolveIndex();
       }
       else {
         return null;
