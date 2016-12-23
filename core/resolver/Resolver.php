@@ -72,13 +72,38 @@ class Resolver {
   public function resolveRequest(Request $request) {
     $resourcesIterator = new SimpleIterator($request->getResourceArray());
     $controllerArgs = $this->parseResourceArray($resourcesIterator);
-    if (count($controllerArgs == 0)) {
-      return array(self::resolveIndex($this->namespaceBase));
+    return (count($controllerArgs) == 0) 
+      ? array(self::resolveIndex($this->namespaceBase))
+        : $controllerArgs;
+  }
+  
+  public function resolveController(Request $request, array $controllerArgs) {
+    /* @var $calledController ControllerArgs */
+    $calledController = array_pop($controllerArgs);
+    foreach($controllerArgs as $controllerArg) {
+      $calledController->setArgument($controllerArg);
     }
-    else {
-      return $controllerArgs;
+    $method = $this->resolveControllerMethod($request, $calledController);
+    if (is_null($method)) {
+      return null;
     }
+    $calledController->matchMethodParametersWithArguments($method);
     
+    
+  }
+  
+  public function resolveControllerMethod(Request $request, ControllerArgs $controllerArg) {
+    $requestMethod      = $request->getHttpMethod();
+    $methodArguments    = $controllerArg->getArguments();
+    $controllerMethods  = $controllerArg->getMethods();
+    if (count($methodArguments) == 0) {
+      return strtolower($requestMethod);
+    }
+    $methodCandidate = strtolower($requestMethod) . Inflector::camelize($methodArguments[0]);
+    if (in_array($methodCandidate, $controllerMethods)) {
+      return $methodCandidate;
+    }
+    return null;
   }
   
   public function collectData() {
@@ -112,7 +137,7 @@ class Resolver {
   }
   
   public static function resolveIndex($namespaceBase = "\\app") {
-    return array(new ControllerArgs($namespaceBase . "\\controllers\IndexController"));
+    return new ControllerArgs($namespaceBase . "\\controllers\IndexController");
   }
   
   private function getIterator($path) {
@@ -167,5 +192,12 @@ class Resolver {
       $resourcesIterator->next();
     }
     return $returnArray;
+  }
+  
+  private function setMethodPrefix($httpMethod, ControllerArgs $controllerArg) {
+    if ($httpMethod == "GET" && empty($controllerArg->getArguments())) {
+      return "index";
+    }
+    return strtolower($httpMethod);
   }
 }

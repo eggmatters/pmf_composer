@@ -54,6 +54,10 @@ class ControllerArgs {
   public function getMethods() {
     return $this->reflectionClass->getMethods();
   }
+  
+  public function getArguments() {
+    return $this->arguments;
+  }
   /**
    * 
    * @param string $method
@@ -67,72 +71,35 @@ class ControllerArgs {
    * @param string $method
    * @return array
    */
-  public function getControllerParameters($method) {
+  public function getMethodParameters($method) {
     $rfm = new \ReflectionMethod($this->namespace, $method);
     return $rfm->getParameters();
   }
+
+  public function getMethodBySignature() {
+    $methods = $this->getMethods();
+    foreach($methods as $method) {
+      $this->matchMethodParametersWithArguments($method);
+    }
+  }
   
-  public function isControllerParameter($method, $param) {
-    $params = $this->getParameters($method);
-    return (empty(array_filter($params, function ($k, $v) use ($param) {
-      return ($k == $param);
-    }, ARRAY_FILTER_USE_BOTH)));
+  public function matchMethodParametersWithArguments($method) {
+    $parameters = $this->getMethodParameters($method);
+    if (count($parameters != count($this->arguments))) {
+      return 0;
+    }
+    $argumentTypes = array_map(function($argument) {
+       if (gettype($argument) == "object") {
+        return get_class($argument);
+      } else {
+        return gettype($argument);
+      }
+    }, $this->arguments);
+    $matches = array_reduce($parameters, function($count, $param) use ($argumentTypes) {
+      $type = $param->getType();
+      if (in_array($param->getType(), $argumentTypes)) {
+        return $count++;
+      }
+    }, 0);
   }
 }
-/**
- * Interactive mode enabled
-
-php > class S {
-php { public function foo($a,$b,$c) {}
-php { }
-php > $s = new S();
-php > $rf = new ReflectionClass('S');
-php > $m = $rf->getMethods();
-php > print_r($m);
-Array
-(
-    [0] => ReflectionMethod Object
-        (
-            [name] => foo
-            [class] => S
-        )
-
-)
-php > $rfm = new ReflectionMethod('S','foo');
-php > $params = $rfm->getParameters();
-php > print_r($params);
-Array
-(
-    [0] => ReflectionParameter Object
-        (
-            [name] => a
-        )
-
-    [1] => ReflectionParameter Object
-        (
-            [name] => b
-        )
-
-    [2] => ReflectionParameter Object
-        (
-            [name] => c
-        )
-
-)
-php > foreach($params as $p) {
-php { echo $p->getName() . "\n" . $p->getType() . "\n" . $p->getPosition(); . "\n"; }
-PHP Parse error:  syntax error, unexpected '.' in php shell code on line 2
-php > foreach($params as $p) {
-php { echo $p->getName() . "\n" . $p->getType() . "\n" . $p->getPosition() . "\n"; }
-a
-
-0
-b
-
-1
-c
-
-2
-php > 
-
- */

@@ -15,9 +15,15 @@ use core\ControllerBase;
  * @author meggers
  */
 class UsersController extends ControllerBase {
-  public function get() {
-    echo "<pre>";
-    print_r($this->getParams($this));
-    echo "</pre>";
+  public function get($argument) {
+    $this->renderDebug("GOT HERE IN Users WITH GET");
+  }
+  
+  public function index() {
+    $this->renderDebug("GOT HERE IN USers WITH INDEX");
+  }
+  
+  public function renderDebug($msg) {
+    echo "<pre>$msg</pre>";
   }
 }

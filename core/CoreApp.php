@@ -17,37 +17,10 @@ class CoreApp {
   public static function routeRequest(Request $request) {
     $resolver = new resolver\Resolver();
     $controllerArgs = $resolver->resolveRequest($request);
+    $calledController = $resolver->resolveController($request, $controllerArgs);
     echo "<pre>";
     print_r($controllerArgs);
-    echo "</pre>";
-    /**
-     * Resolver will determine list of ControllerArgs to call, determining 
-     * final method from url:
-     * 
-     * /users/1:
-     * Users->getUsers(1)
-     * 
-     * /users/1/posts
-     * Posts->getUserPosts(ControllerArgs $users)
-     * 
-     * /users/1/tags/smelly/funny/posts
-     * Posts->getUserPostsByTag(ControllerArgs $users, ControllerArg $tags)
-     * 
-     * $users = (
-     *   "UsersController" ; 
-     *   "UsersModel", 
-     *   view_file,
-     *   $args => 1 )
-     * 
-     * $tags  = ( . . .
-     *   $args => "smelly","funny"
-     * 
-     * The ControllerArgs is merely a meta-data container containing resolvable
-     * information about the request. 
-     */
-    
-    
-    
+    echo "</pre>";    
   }
   
   /**
