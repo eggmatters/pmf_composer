@@ -132,7 +132,7 @@ class Resolver {
     return strtolower($httpMethod) . Inflector::camelize($resourceValue);
   }
   
-  public static function resolveIndex($namespaceBase = "\\app") {
+  public static function resolveIndex($namespaceBase = "app") {
     return new ControllerArgs($namespaceBase . "\\controllers\IndexController");
   }
   

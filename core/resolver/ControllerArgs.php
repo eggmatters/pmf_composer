@@ -67,9 +67,9 @@ class ControllerArgs {
   public function setClassMethods($namespace) {
     $methods =  $this->reflectionClass->getMethods();
     $this->classMethods = array_filter($methods, function($method) use ($namespace) {
-      $c = $method->class;
       return ($method->class == $namespace);
     });
+    return $this->classMethods;
   }
   
   public function getClassMethods() {
@@ -110,7 +110,7 @@ class ControllerArgs {
     $methods = $this->getClassMethods();
     foreach($methods as $method) {
       $matches = $this->matchMethodParametersWithArguments($method);
-      if ($matches = count($this->arguments)) {
+      if ($matches == count($this->arguments)) {
         return $method;
       }
     }
