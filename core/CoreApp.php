@@ -19,7 +19,7 @@ class CoreApp {
     $controllerArgs = $resolver->resolveRequest($request);
     $calledController = $resolver->resolveController($request, $controllerArgs);
     echo "<pre>";
-    print_r($controllerArgs);
+    print_r($calledController);
     echo "</pre>";    
   }
   

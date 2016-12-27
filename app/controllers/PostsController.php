@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 use core\ControllerBase;
+use core\resolver\ControllerArgs;
 /**
  * Description of TestController
  *
@@ -23,5 +24,12 @@ class PostsController extends ControllerBase {
   
   public function renderDebug($msg) {
     echo "<pre>$msg</pre>";
+  }
+  
+  public function getUserPosts(ControllerArgs $user) {
+    
+    echo "<pre>";
+    print_r($user);
+    echo "</pre>";
   }
 }

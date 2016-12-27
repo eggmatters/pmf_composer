@@ -34,7 +34,7 @@ class Resolver {
   public function __construct($appPath = null) {
     $this->appPath = (is_null($appPath)) ? CoreApp::rootDir() . DIRECTORY_SEPARATOR . "app"
       : CoreApp::rootDir() . DIRECTORY_SEPARATOR . $appPath;
-    $this->namespaceBase = (is_null($appPath)) ? "\\app" : "\\" . $appPath;
+    $this->namespaceBase = (is_null($appPath)) ? "app" : "\\" . $appPath;
     $this->controllerIterator = $this->getIterator($this->appPath . "/controllers");
     $this->modelIterator = $this->getIterator($this->appPath . "/models"); 
     $this->namespaceDirectories = [];
@@ -87,23 +87,19 @@ class Resolver {
     if (is_null($method)) {
       return null;
     }
-    $calledController->matchMethodParametersWithArguments($method);
-    
-    
+    $calledController->setMethod($method);
+    return $calledController; 
   }
   
   public function resolveControllerMethod(Request $request, ControllerArgs $controllerArg) {
     $requestMethod      = $request->getHttpMethod();
-    $methodArguments    = $controllerArg->getArguments();
-    $controllerMethods  = $controllerArg->getMethods();
-    if (count($methodArguments) == 0) {
-      return strtolower($requestMethod);
-    }
-    $methodCandidate = strtolower($requestMethod) . Inflector::camelize($methodArguments[0]);
-    if (in_array($methodCandidate, $controllerMethods)) {
-      return $methodCandidate;
-    }
-    return null;
+    $methodPrefix       = $this->setMethodPrefix($requestMethod, $controllerArg);
+    $methodCandidate    = array_reduce($controllerArg->getArguments(), function($currentArgument) 
+      use ($controllerArg, $methodPrefix) {
+        $method = $methodPrefix . Inflector::camelize($currentArgument);
+        return ($controllerArg->isMethod($method)) ? $method : null;
+      }, "");
+    return (empty($methodCandidate)) ? $controllerArg->getMethodBySignature() : $methodCandidate;
   }
   
   public function collectData() {
@@ -151,7 +147,7 @@ class Resolver {
       $filename = $appFile->getFilename();
       if($appFile->isFile()) {
         $namespace = Inflector::pathToNamespace(substr
-            ($appFile->getPath(), strlen(CoreApp::rootDir() ) )
+            ($appFile->getPath(), strlen(CoreApp::rootDir()) + 1 )
           ) . "\\" . substr($filename, 0, strpos($filename, ".php") );
         if (\class_exists($namespace)) {
           $namespaceArray[] = $namespace;
@@ -195,9 +191,30 @@ class Resolver {
   }
   
   private function setMethodPrefix($httpMethod, ControllerArgs $controllerArg) {
-    if ($httpMethod == "GET" && empty($controllerArg->getArguments())) {
+    $arguments = (count($controllerArg->getArguments()) > 0) ? true : false;
+    $new = array_search("new", $controllerArg->getArguments());
+    $edit = array_search("edit", $controllerArg->getArguments());
+    
+    if ($httpMethod == "GET" && ($new !== false)) {
+      return "new";
+    }
+    if ($httpMethod == "GET" && ($edit !== false)) {
+      return "edit";
+    }
+    if ($httpMethod == "GET" && $arguments) {
+      return "get";
+    }
+    if ($httpMethod == "GET" && $arguments === false) {
       return "index";
     }
-    return strtolower($httpMethod);
+    if ($httpMethod == "PUT" || $httpMethod == "PATCH") {
+      return "update";
+    }
+    if ($httpMethod == "POST") {
+      return "create";
+    }
+    if ($httpMethod == "DELETE") {
+      return "delete";
+    }
   }
 }

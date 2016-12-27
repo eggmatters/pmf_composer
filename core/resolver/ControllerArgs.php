@@ -17,21 +17,34 @@ class ControllerArgs {
   
   /**
    *
-   * @var \ReflectionClass $reflectionClass
+   * @var array $classMethods
    */
-  private $reflectionClass;
+  private $classMethods;
   
+  /**
+   *
+   * @var \ReflectionMethod $reflectionMethod 
+   */
+  private $method;
   /**
    *
    * @var array $arguments 
    */
   private $arguments;
+  
+  /**
+   *
+   * @var \ReflectionClass $reflectionClass
+   */
+  private $reflectionClass;
 
   public function __construct($namespace) 
   {
       $this->namespace = $namespace;
       $this->reflectionClass = new \ReflectionClass($namespace);
+      $this->method = null;
       $this->arguments = [];
+      $this->setClassMethods($namespace);
   }
   /**
    * 
@@ -51,13 +64,30 @@ class ControllerArgs {
    * 
    * @return Array
    */
-  public function getMethods() {
-    return $this->reflectionClass->getMethods();
+  public function setClassMethods($namespace) {
+    $methods =  $this->reflectionClass->getMethods();
+    $this->classMethods = array_filter($methods, function($method) use ($namespace) {
+      $c = $method->class;
+      return ($method->class == $namespace);
+    });
+  }
+  
+  public function getClassMethods() {
+    return $this->classMethods;
   }
   
   public function getArguments() {
     return $this->arguments;
   }
+  
+  public function setMethod($method) {
+    if (is_string($method)) {
+      $this->setMethodByString($method);
+    } else if (is_a($method, \ReflectionMethod::class)) {
+      $this->method = $method;
+    }
+  }
+  
   /**
    * 
    * @param string $method
@@ -77,15 +107,19 @@ class ControllerArgs {
   }
 
   public function getMethodBySignature() {
-    $methods = $this->getMethods();
+    $methods = $this->getClassMethods();
     foreach($methods as $method) {
-      $this->matchMethodParametersWithArguments($method);
+      $matches = $this->matchMethodParametersWithArguments($method);
+      if ($matches = count($this->arguments)) {
+        return $method;
+      }
     }
+    return null;
   }
   
-  public function matchMethodParametersWithArguments($method) {
-    $parameters = $this->getMethodParameters($method);
-    if (count($parameters != count($this->arguments))) {
+  private function matchMethodParametersWithArguments(\ReflectionMethod $method) {
+    $parameters = $this->getMethodParameters($method->getName());
+    if (count($parameters) != count($this->arguments)) {
       return 0;
     }
     $argumentTypes = array_map(function($argument) {
@@ -95,11 +129,22 @@ class ControllerArgs {
         return gettype($argument);
       }
     }, $this->arguments);
-    $matches = array_reduce($parameters, function($count, $param) use ($argumentTypes) {
+    $matches =  array_reduce($parameters, function($count, $param) use ($argumentTypes) {
       $type = $param->getType();
-      if (in_array($param->getType(), $argumentTypes)) {
+      if ( is_null($type) || in_array($type, $argumentTypes) ) {
         return $count++;
       }
     }, 0);
+    return $matches;
+  }
+  
+  private function setMethodByString($method) {
+    foreach ($this->getClassMethods() as $classMethod) {
+      /* @var $classMethod \ReflectionMethod */
+      if ($classMethod->getName() == $method) {
+        $this->method = $method;
+        return;
+      }
+    } 
   }
 }
