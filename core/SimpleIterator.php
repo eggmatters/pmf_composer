@@ -91,4 +91,8 @@ class SimpleIterator {
     }
     return $collection;
   }
+  
+  public function size() {
+    return $this->size;
+  }
 }

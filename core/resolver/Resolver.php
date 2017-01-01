@@ -92,14 +92,14 @@ class Resolver {
   }
   
   public function resolveControllerMethod(Request $request, ControllerArgs $controllerArg) {
-    $requestMethod      = $request->getHttpMethod();
-    $methodPrefix       = $this->setMethodPrefix($requestMethod, $controllerArg);
-    $methodCandidate    = array_reduce($controllerArg->getArguments(), function($currentArgument) 
-      use ($controllerArg, $methodPrefix) {
-        $method = $methodPrefix . Inflector::camelize($currentArgument);
-        return ($controllerArg->isMethod($method)) ? $method : null;
-      }, "");
-    return (empty($methodCandidate)) ? $controllerArg->getMethodBySignature() : $methodCandidate;
+//    $requestMethod      = $request->getHttpMethod();
+//    $methodPrefix       = $this->setMethodPrefix($requestMethod, $controllerArg);
+//    $methodCandidate    = array_reduce($controllerArg->getArguments(), function($currentArgument) 
+//      use ($controllerArg, $methodPrefix) {
+//        $method = $methodPrefix . Inflector::camelize($currentArgument);
+//        return ($controllerArg->isMethod($method)) ? $method : null;
+//      }, "");
+    return  $controllerArg->getMethodBySignature();
   }
   
   public function collectData() {
@@ -188,33 +188,5 @@ class Resolver {
       $resourcesIterator->next();
     }
     return $returnArray;
-  }
-  
-  private function setMethodPrefix($httpMethod, ControllerArgs $controllerArg) {
-    $arguments = (count($controllerArg->getArguments()) > 0) ? true : false;
-    $new = array_search("new", $controllerArg->getArguments());
-    $edit = array_search("edit", $controllerArg->getArguments());
-    
-    if ($httpMethod == "GET" && ($new !== false)) {
-      return "new";
-    }
-    if ($httpMethod == "GET" && ($edit !== false)) {
-      return "edit";
-    }
-    if ($httpMethod == "GET" && $arguments) {
-      return "get";
-    }
-    if ($httpMethod == "GET" && $arguments === false) {
-      return "index";
-    }
-    if ($httpMethod == "PUT" || $httpMethod == "PATCH") {
-      return "update";
-    }
-    if ($httpMethod == "POST") {
-      return "create";
-    }
-    if ($httpMethod == "DELETE") {
-      return "delete";
-    }
   }
 }

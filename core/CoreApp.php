@@ -17,32 +17,20 @@ class CoreApp {
   public static function routeRequest(Request $request) {
     $resolver = new resolver\Resolver();
     $controllerArgs = $resolver->resolveRequest($request);
-    $calledController = $resolver->resolveController($request, $controllerArgs);
-    echo "<pre>";
-    print_r($calledController);
-    echo "</pre>";    
+    /* @var $requestedController resolver\ControllerArgs */
+    $requestedController = $resolver->resolveController($request, $controllerArgs);
+    if (is_null($requestedController)) {
+      self::issue("404");
+      return;
+    }
+   
   }
   
   /**
-   * Helper method used by controllers. Inspects a value from the URL 
-   * and returns its corresponding MVC role.
    * 
    * @global Request $httpRequest
-   * @return Request 
+   * @return Request
    */
-  public static function getResourceType($resourceValue) {
-    if (class_exists(self::getControllerClassPath($resourceValue))) {
-      return "controller";
-    }   
-    if (class_exists(self::getModelClassPath($resourceValue))) {
-      return "model";
-    }   
-    if (is_numeric($resourceValue)) {
-      return "int";
-    }   
-    return "string";
-  }
-  
   public static function getRequest() {
     global $httpRequest;
     return $httpRequest;

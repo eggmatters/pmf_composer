@@ -26,7 +26,7 @@ class PostsController extends ControllerBase {
     echo "<pre>$msg</pre>";
   }
   
-  public function getUserPosts(ControllerArgs $user) {
+  public function getUserPosts(UsersController $user) {
     echo "<h1>POSTS</h2>";
     echo "<pre>";
     print_r($user);

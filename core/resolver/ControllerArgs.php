@@ -2,6 +2,7 @@
 
 namespace core\resolver;
 
+use core\CoreApp;
 /**
  * Description of ResourceType
  *
@@ -44,7 +45,12 @@ class ControllerArgs {
       $this->reflectionClass = new \ReflectionClass($namespace);
       $this->method = null;
       $this->arguments = [];
+      $this->classMethods = [];
       $this->setClassMethods($namespace);
+  }
+  
+  public function getNamespace() {
+    return $this->namespace;
   }
   /**
    * 
@@ -107,35 +113,14 @@ class ControllerArgs {
   }
 
   public function getMethodBySignature() {
-    $methods = $this->getClassMethods();
-    foreach($methods as $method) {
-      $matches = $this->matchMethodParametersWithArguments($method);
-      if ($matches == count($this->arguments)) {
-        return $method;
-      }
+    $httpMethod = CoreApp::getRequest()->getHttpMethod();
+    $methodsIterator = new \core\SimpleIterator($this->getClassMethods());
+    $currentMethod = $methodsIterator->current();
+    while ($methodsIterator->hasNext()) {
+      $currentMethod = $methodsIterator->next();
+      
+      
     }
-    return null;
-  }
-  
-  private function matchMethodParametersWithArguments(\ReflectionMethod $method) {
-    $parameters = $this->getMethodParameters($method->getName());
-    if (count($parameters) != count($this->arguments)) {
-      return 0;
-    }
-    $argumentTypes = array_map(function($argument) {
-       if (gettype($argument) == "object") {
-        return get_class($argument);
-      } else {
-        return gettype($argument);
-      }
-    }, $this->arguments);
-    $matches =  array_reduce($parameters, function($count, $param) use ($argumentTypes) {
-      $type = $param->getType();
-      if ( is_null($type) || in_array($type, $argumentTypes) ) {
-        return $count++;
-      }
-    }, 0);
-    return $matches;
   }
   
   private function setMethodByString($method) {
@@ -146,5 +131,66 @@ class ControllerArgs {
         return;
       }
     } 
+  }
+  
+  private function matchMethod(\ReflectionMethod $method, $httpMethod) {
+    $rArray = [];
+    $methodPrefix = $this->getMethodPrefix($httpMethod);
+    if (strpos($method->getName(), $methodPrefix) === false) {
+      return null;
+    }
+    $argumentsIterator = new \core\SimpleIterator($this->arguments);
+    if ($argumentsIterator->size() != count($this->arguments)) {
+      return null;
+    }
+    $currentArgument = $argumentsIterator->current();
+    
+    return $rArray;
+  }
+  
+  private function matchParams($arguments, $params) {
+    
+    /* while ($paramsIterator->hasNext()) {
+      /* @var $currentParam \ReflectionParameter 
+      if (is_a($argument, 'core\\resolver\\ControllerArgs')
+          &&
+          $currentParam->getClass() == $argument->namespace) {
+        return (object) array('reflectionParam' => $currentParam, 'value' => $argument );
+      }
+      if (is_a($argument, 'core\\resolver\\ControllerArgs')
+          &&
+          $currentParam->getClass() != $argument->namespace) {
+        return null;
+      }
+       
+    } * */
+  }
+  
+  private function getMethodPrefix($httpMethod) {
+    $arguments = (count($this->getArguments()) > 0) ? true : false;
+    $new = array_search("new", $this->getArguments());
+    $edit = array_search("edit", $this->getArguments());
+    
+    if ($httpMethod == "GET" && ($new !== false)) {
+      return "new";
+    }
+    if ($httpMethod == "GET" && ($edit !== false)) {
+      return "edit";
+    }
+    if ($httpMethod == "GET" && $arguments) {
+      return "get";
+    }
+    if ($httpMethod == "GET" && $arguments === false) {
+      return "index";
+    }
+    if ($httpMethod == "PUT" || $httpMethod == "PATCH") {
+      return "update";
+    }
+    if ($httpMethod == "POST") {
+      return "create";
+    }
+    if ($httpMethod == "DELETE") {
+      return "delete";
+    }
   }
 }
