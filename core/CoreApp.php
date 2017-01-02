@@ -49,9 +49,17 @@ class CoreApp {
     die("Issue $httpCode here");
   }
   
-  function microtime_float() {
+  public static function microtime_float() {
     list($usec, $sec) = explode(" ", microtime());
     return ((float) $usec + (float) $sec);
+  }
+  
+  public static function getType($value) {
+    $type = gettype($value);
+    if ($type == "object") {
+      $type = get_class($value);
+    }
+    return $type;
   }
 
 }

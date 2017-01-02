@@ -55,16 +55,15 @@ class ControllerArgs {
   /**
    * 
    * @param string $argument
+   * @param int $position
    */
-  public function setArgument($argument) {
-    $this->arguments[] = $argument;
-  }
-  /**
-   * 
-   * @param array $arguments
-   */
-  public function setArguments(array $arguments) {
-    $this->arguments = $arguments;
+  public function setArgument($argument, $position) {
+    $type = CoreApp::getType($argument);
+    $this->arguments[] = (object) array(
+      'value'    => $argument,
+      'type'     => $type,
+      'position' => $position
+    );
   }
   /**
    * 
@@ -117,9 +116,10 @@ class ControllerArgs {
     $methodsIterator = new \core\SimpleIterator($this->getClassMethods());
     $currentMethod = $methodsIterator->current();
     while ($methodsIterator->hasNext()) {
+      if ($this->matchMethod($currentMethod, $httpMethod)) {
+        return $currentMethod;
+      }
       $currentMethod = $methodsIterator->next();
-      
-      
     }
   }
   
@@ -134,36 +134,42 @@ class ControllerArgs {
   }
   
   private function matchMethod(\ReflectionMethod $method, $httpMethod) {
-    $rArray = [];
     $methodPrefix = $this->getMethodPrefix($httpMethod);
     if (strpos($method->getName(), $methodPrefix) === false) {
-      return null;
+      return false;
     }
-    $argumentsIterator = new \core\SimpleIterator($this->arguments);
-    if ($argumentsIterator->size() != count($this->arguments)) {
-      return null;
+    $methodParams = $method->getParameters();
+    if (count($methodParams) != count($this->arguments)) {
+      return false;
     }
-    $currentArgument = $argumentsIterator->current();
-    
-    return $rArray;
+    return $this->matchParams($methodParams);
   }
   
-  private function matchParams($arguments, $params) {
-    
-    /* while ($paramsIterator->hasNext()) {
-      /* @var $currentParam \ReflectionParameter 
-      if (is_a($argument, 'core\\resolver\\ControllerArgs')
-          &&
-          $currentParam->getClass() == $argument->namespace) {
-        return (object) array('reflectionParam' => $currentParam, 'value' => $argument );
+  private function matchParams($params) {
+    $argSort = function($a, $b) {
+      $aPos = (method_exists($a, 'getPosition')) ?
+        $a->getPosition() : $a->position;
+      $bPos = (method_exists($b, 'getPosition')) ?
+        $b->getPosition() : $b->position;
+      if ($aPos == $bPos) {
+        return 0;
       }
-      if (is_a($argument, 'core\\resolver\\ControllerArgs')
-          &&
-          $currentParam->getClass() != $argument->namespace) {
-        return null;
+      return ($aPos < $bPos) ? -1 : 1;
+    };
+    usort($this->arguments, $argSort);
+    usort($params, $argSort);
+    for($i = 0; $i < count($this->arguments); $i++) {
+      $currentArgument = $this->arguments[$i];
+      $currentParam = $params[$i];
+      $paramType = $currentParam->getType();
+      if (is_null($paramType) && (
+        $currentArgument->type != ("string") &&
+        $currentArgument->type != ("integer") 
+        ) ) {
+          return false;
       }
-       
-    } * */
+    }
+    return true;
   }
   
   private function getMethodPrefix($httpMethod) {

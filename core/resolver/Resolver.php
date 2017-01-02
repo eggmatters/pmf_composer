@@ -163,6 +163,7 @@ class Resolver {
   private function parseResourceArray(SimpleIterator $resourcesIterator, ControllerArgs $controllerArgs = null, &$returnArray = []) {
     $namespaceBase = $this->namespaceBase . "\\controllers";
     $currentNamespace = $namespaceBase;
+    $argIndex = 0;
     while ($resourcesIterator->hasNext()) {
       $currentResource      = $resourcesIterator->current();
       $controllerBase       = self::resolveNamespaceFromResource($currentResource, "Controller");
@@ -177,7 +178,7 @@ class Resolver {
         $currentNamespace .= "\\"  . $currentResource;
       }
       else if (!is_null($controllerArgs)) {
-        $controllerArgs->setArgument($currentResource);
+        $controllerArgs->setArgument($currentResource, $argIndex);
       }
       else if ($currentResource == "index.php") {
         $returnArray[] = self::resolveIndex();
@@ -185,6 +186,7 @@ class Resolver {
       else {
         return null;
       }
+      $argIndex++;
       $resourcesIterator->next();
     }
     return $returnArray;
