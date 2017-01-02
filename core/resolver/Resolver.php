@@ -54,15 +54,6 @@ class Resolver {
    * /users/1/tags/smelly/funny/posts
    * Posts->getUserPostsByTag(ControllerArgs $users, ControllerArg $tags)
    * 
-   * $users = (
-   *   "UsersController" ; 
-   *   "UsersModel", 
-   *   view_file,
-   *   $args => 1 )
-   * 
-   * $tags  = ( . . .
-   *   $args => "smelly","funny"
-   * 
    * The ControllerArgs is merely a meta-data container containing resolvable
    * information about the request. 
    * 
@@ -92,13 +83,6 @@ class Resolver {
   }
   
   public function resolveControllerMethod(Request $request, ControllerArgs $controllerArg) {
-//    $requestMethod      = $request->getHttpMethod();
-//    $methodPrefix       = $this->setMethodPrefix($requestMethod, $controllerArg);
-//    $methodCandidate    = array_reduce($controllerArg->getArguments(), function($currentArgument) 
-//      use ($controllerArg, $methodPrefix) {
-//        $method = $methodPrefix . Inflector::camelize($currentArgument);
-//        return ($controllerArg->isMethod($method)) ? $method : null;
-//      }, "");
     return  $controllerArg->getMethodBySignature();
   }
   
@@ -163,7 +147,6 @@ class Resolver {
   private function parseResourceArray(SimpleIterator $resourcesIterator, ControllerArgs $controllerArgs = null, &$returnArray = []) {
     $namespaceBase = $this->namespaceBase . "\\controllers";
     $currentNamespace = $namespaceBase;
-    $argIndex = 0;
     while ($resourcesIterator->hasNext()) {
       $currentResource      = $resourcesIterator->current();
       $controllerBase       = self::resolveNamespaceFromResource($currentResource, "Controller");
@@ -178,7 +161,7 @@ class Resolver {
         $currentNamespace .= "\\"  . $currentResource;
       }
       else if (!is_null($controllerArgs)) {
-        $controllerArgs->setArgument($currentResource, $argIndex);
+        $controllerArgs->setArgument($currentResource);
       }
       else if ($currentResource == "index.php") {
         $returnArray[] = self::resolveIndex();
@@ -186,7 +169,6 @@ class Resolver {
       else {
         return null;
       }
-      $argIndex++;
       $resourcesIterator->next();
     }
     return $returnArray;

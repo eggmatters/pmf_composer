@@ -10,21 +10,21 @@ use core\resolver\ControllerArgs;
  */
 class PostsController extends ControllerBase {
   //put your code here
-  protected function index() {
-    $posts = new \app\models\PostModel();
-    $postsData = $posts->getAll();
-    echo "<pre>";
-    print_r($postsData);
-    echo "</pre>";
-  }
-  
-  public function get($argument) {
-    $this->renderDebug("GOT HERE IN Index WITH GET: $argument");
-  }
-  
-  public function renderDebug($msg) {
-    echo "<pre>$msg</pre>";
-  }
+//  public function index() {
+//    $posts = new \app\models\PostModel();
+//    $postsData = $posts->getAll();
+//    echo "<pre>";
+//    print_r($postsData);
+//    echo "</pre>";
+//  }
+//  
+//  public function get(string $argument) {
+//    $this->renderDebug("GOT HERE IN Index WITH GET: $argument");
+//  }
+//  
+//  public function renderDebug($msg) {
+//    echo "<pre>$msg</pre>";
+//  }
   
   public function getUserPosts(UsersController $user) {
     echo "<h1>POSTS</h2>";

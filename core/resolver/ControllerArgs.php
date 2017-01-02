@@ -57,8 +57,11 @@ class ControllerArgs {
    * @param string $argument
    * @param int $position
    */
-  public function setArgument($argument, $position) {
+  public function setArgument($argument, $position = null) {
     $type = CoreApp::getType($argument);
+    if ($type == 'core\resolver\ControllerArgs') {
+      $type = $argument->namespace;
+    }
     $this->arguments[] = (object) array(
       'value'    => $argument,
       'type'     => $type,
@@ -146,30 +149,17 @@ class ControllerArgs {
   }
   
   private function matchParams($params) {
-    $argSort = function($a, $b) {
-      $aPos = (method_exists($a, 'getPosition')) ?
-        $a->getPosition() : $a->position;
-      $bPos = (method_exists($b, 'getPosition')) ?
-        $b->getPosition() : $b->position;
-      if ($aPos == $bPos) {
-        return 0;
+    return array_walk($this->arguments, function($argument, $index) use ($params) {
+      $type = $argument->type;
+      $matchingParams = array_filter($params, function($param) use ($type) {
+        return ($param->getType()->__toString() == $type);
+      });
+      if (count($matchingParams) > 1) {
+        
+      } else {
+        $argument->position = $matchingParams[0]->getPosition();
       }
-      return ($aPos < $bPos) ? -1 : 1;
-    };
-    usort($this->arguments, $argSort);
-    usort($params, $argSort);
-    for($i = 0; $i < count($this->arguments); $i++) {
-      $currentArgument = $this->arguments[$i];
-      $currentParam = $params[$i];
-      $paramType = $currentParam->getType();
-      if (is_null($paramType) && (
-        $currentArgument->type != ("string") &&
-        $currentArgument->type != ("integer") 
-        ) ) {
-          return false;
-      }
-    }
-    return true;
+    });
   }
   
   private function getMethodPrefix($httpMethod) {

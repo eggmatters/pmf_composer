@@ -17,7 +17,7 @@ class IndexController extends ControllerBase {
     $this->renderDebug("GOT HERE IN Index WITH INDEX");
   }
   
-  public function renderDebug($msg) {
+  private function renderDebug($msg) {
     echo "<pre>$msg</pre>";
   }
 }
