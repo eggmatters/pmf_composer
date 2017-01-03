@@ -120,6 +120,9 @@ class ControllerArgs {
     $currentMethod = $methodsIterator->current();
     while ($methodsIterator->hasNext()) {
       if ($this->matchMethod($currentMethod, $httpMethod)) {
+        usort($this->arguments, function($a, $b) {
+          return ($a->position < $b->position) ? -1 : 1;
+        });
         return $currentMethod;
       }
       $currentMethod = $methodsIterator->next();

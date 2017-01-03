@@ -11,7 +11,7 @@ core\CoreApp::routeRequest($httpRequest);
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>GOT HERE</title>
+    <title>PMF Test Page</title>
   </head>
   <body>
     <pre>
