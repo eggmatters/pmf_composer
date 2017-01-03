@@ -10,6 +10,7 @@ use core\resolver\ControllerArgs;
  */
 class PostsController extends ControllerBase {
   const ARRAY_DELIMITER = ":";
+  
   public function index() {
     $posts = new \app\models\PostModel();
     $postsData = $posts->getAll();
@@ -18,12 +19,8 @@ class PostsController extends ControllerBase {
     echo "</pre>";
   }
   
-  public function get(string $argument) {
+  public function get(int $argument) {
     $this->renderDebug("GOT HERE IN Index WITH GET: $argument");
-  }
-  
-  public function renderDebug($msg) {
-    echo "<pre>$msg</pre>";
   }
   
   public function getUserPostsTest(UsersController $user
