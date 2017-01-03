@@ -23,6 +23,7 @@ class CoreApp {
       self::issue("404");
       return;
     }
+    echo "<pre>"; print_r($requestedController->getArguments()) ; "</pre>";
    
   }
   
@@ -52,14 +53,6 @@ class CoreApp {
   public static function microtime_float() {
     list($usec, $sec) = explode(" ", microtime());
     return ((float) $usec + (float) $sec);
-  }
-  
-  public static function getType($value) {
-    $type = gettype($value);
-    if ($type == "object") {
-      $type = get_class($value);
-    }
-    return $type;
   }
 
 }

@@ -95,4 +95,13 @@ class SimpleIterator {
   public function size() {
     return $this->size;
   }
+  
+  public static function findBy($collection, callable $callback) {
+    foreach ($collection as $current) {
+      if (call_user_func($callback, $current)) {
+        return $current;
+      }
+    }
+    return null;
+  }
 }

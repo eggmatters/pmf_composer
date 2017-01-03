@@ -58,7 +58,7 @@ class ControllerArgs {
    * @param int $position
    */
   public function setArgument($argument, $position = null) {
-    $type = CoreApp::getType($argument);
+    $type = $this->getType($argument);
     if ($type == 'core\resolver\ControllerArgs') {
       $type = $argument->namespace;
     }
@@ -155,9 +155,19 @@ class ControllerArgs {
         return ($param->getType()->__toString() == $type);
       });
       if (count($matchingParams) > 1) {
-        
-      } else {
-        $argument->position = $matchingParams[0]->getPosition();
+        $param = \core\SimpleIterator::findBy($matchingParams, function($currentParam) use ($index, $type) {
+          for($i = 0; $i < $index; $i++) {
+            $currentArgument = $this->arguments[$i];
+            if ($currentArgument->type == $type && $currentArgument->position == $currentParam->getPosition()) {
+              return false;
+            }
+          }
+          return true;
+        });
+        $argument->position = $param->getPosition();
+      } else if (!empty($matchingParams)) {
+        $param = $matchingParams[array_keys($matchingParams)[0]];
+        $argument->position = $param->getPosition();
       }
     });
   }
@@ -188,5 +198,22 @@ class ControllerArgs {
     if ($httpMethod == "DELETE") {
       return "delete";
     }
+  }
+  
+  private function getType($value) {
+    $type = gettype($value);
+    if ($type == "object") {
+      return get_class($value);
+    } 
+    if ($type == "string" && is_numeric($value)) {
+      return (ctype_digit(preg_replace('/-/','',$value))) ?
+        "int" : "float";
+    }
+    if ($type == "string" 
+        && ($delimiter = $this->reflectionClass->getConstant("ARRAY_DELIMITER"))
+          && strpos($value, $delimiter) !== false) {
+      return "array";
+    }
+    return $type;
   }
 }

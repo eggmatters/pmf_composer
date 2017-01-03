@@ -9,7 +9,7 @@ use core\resolver\ControllerArgs;
  * @author meggers
  */
 class PostsController extends ControllerBase {
-  //put your code here
+  const ARRAY_DELIMITER = ":";
 //  public function index() {
 //    $posts = new \app\models\PostModel();
 //    $postsData = $posts->getAll();
@@ -26,10 +26,17 @@ class PostsController extends ControllerBase {
 //    echo "<pre>$msg</pre>";
 //  }
   
-  public function getUserPosts(UsersController $user) {
+  public function getUserPosts(UsersController $user
+    , int $position
+    , string $tag
+    , string $flap
+    , float $float
+    , array $array) {
     echo "<h1>POSTS</h2>";
     echo "<pre>";
     print_r($user);
+    print_r($position);
+    print_r($tag);
     echo "</pre>";
   }
 }
