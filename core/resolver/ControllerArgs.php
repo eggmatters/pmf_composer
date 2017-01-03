@@ -84,6 +84,14 @@ class ControllerArgs {
     return $this->classMethods;
   }
   
+  /**
+   * 
+   * @return \ReflectionMethod $method
+   */
+  public function getMethod() {
+    return $this->method;
+  }
+  
   public function getArguments() {
     return $this->arguments;
   }

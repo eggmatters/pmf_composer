@@ -23,7 +23,10 @@ class CoreApp {
       self::issue("404");
       return;
     }
-    echo "<pre>"; print_r($requestedController->getArguments()) ; "</pre>";
+    echo "<pre>"; 
+    print_r($requestedController->getArguments());
+    print_r($requestedController->getMethod());
+    echo "</pre>";
    
   }
   
