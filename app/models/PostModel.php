@@ -7,5 +7,9 @@ use core\ModelBase;
  * @author matthewe
  */
 class PostModel extends ModelBase {
-  //put your code here
+  /**
+   * schemaConnector is a defined trait which provides the 
+   * required abstract 
+   */
+  use \configurations\schemaConnector;
 }

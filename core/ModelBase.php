@@ -10,6 +10,8 @@ require_once CoreApp::rootDir() . '/configurations/ModelMapper.php';
 
 abstract class ModelBase {
   
+  protected static abstract function getConnectorConfiguration();
+
   public function __construct($modelAttributes = null) {
     $this->setAttributes($modelAttributes);
     return $this;

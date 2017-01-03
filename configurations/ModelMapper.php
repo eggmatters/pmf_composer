@@ -8,25 +8,30 @@ $devDbConn = array(
   'pass'   => 'pmf_pass'
 );
 
+$devAPIConn = array(
+  
+);
+
 $schemaConnector = array(
   'ConnectorType' => \core\Connector::DBCONN,
   'Connector' => $devDbConn
 );
 
-$modelConnections = array(
-  'IndexModel' => array(
-    'ConnectorType' => 'none'
-  ),
-  'PostModel' => array(
-    'ConnectorType' => \core\Connector::DBCONN,
-    'Connector' => $devDbConn
-  ),
-  'UserModel' => array(
-    'ConnectorType' => \core\Connector::DBCONN,
-    'Connector' => $devDbConn
-  ),
-  'TagModel' => array(
-    'ConnectorType' => \core\Connector::DBCONN,
-    'Connector' => $devDbConn
-  )
+$apiConnector = array(
+  'ConnectorType' => \core\Connector::APICONN,
+  'Connector' => $devAPIConn
 );
+
+trait schemaConnector {
+  protected static function getConnectorConfiguration() {
+    global $schemaConnector;
+    return $schemaConnector;
+  }
+}
+
+trait apiConnector {
+  protected static function getConnectorConfiguration() {
+    global $apiConnector;
+    return $apiConnector;
+  }
+}

@@ -19,8 +19,12 @@ class PostsController extends ControllerBase {
     echo "</pre>";
   }
   
-  public function get(int $argument) {
-    $this->renderDebug("GOT HERE IN Index WITH GET: $argument");
+  public function get(int $id) {
+    $posts = new \app\models\PostModel();
+    $postsData = $posts->get($id);
+    echo "<pre>";
+    print_r($postsData);
+    echo "</pre>";
   }
   
   public function getUserPostsTest(UsersController $user

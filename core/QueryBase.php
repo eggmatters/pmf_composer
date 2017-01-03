@@ -13,6 +13,8 @@ namespace core;
  *
  * @author meggers
  */
+use core\resolver\Inflector;
+
 class QueryBase {
 
   private $currentTable;
@@ -62,7 +64,7 @@ class QueryBase {
       $columnsList = explode(',', $columns);
     }
     
-    $this->columnsList = array_map('core\Inflector::underscore', $columnsList);
+    $this->columnsList = array_map('\core\resolver\Inflector::underscore', $columnsList);
     if (count($this->columnsList) > 0 ) {
       $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
     } else {
