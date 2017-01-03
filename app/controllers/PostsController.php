@@ -35,8 +35,16 @@ class PostsController extends ControllerBase {
     echo "<h1>POSTS</h2>";
     echo "<pre>";
     print_r($user);
-    print_r($position);
-    print_r($tag);
+    echo "\n";
+    echo($position);
+    echo "\n";
+    echo($tag);
+    echo "\n";
+    echo($flap);
+    echo "\n";
+    echo($float);
+    echo "\n";
+    print_r(join(",", $array));
     echo "</pre>";
   }
 }

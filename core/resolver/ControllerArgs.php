@@ -52,6 +52,14 @@ class ControllerArgs {
   public function getNamespace() {
     return $this->namespace;
   }
+  
+  /**
+   * 
+   * @return \ReflectionClass 
+   */
+  public function getReflectionClass() {
+    return $this->reflectionClass;
+  }
   /**
    * 
    * @param string $argument
@@ -59,11 +67,18 @@ class ControllerArgs {
    */
   public function setArgument($argument, $position = null) {
     $type = $this->getType($argument);
+    $value = $argument;
     if ($type == 'core\resolver\ControllerArgs') {
       $type = $argument->namespace;
+      /* @var $argument ControllerArgs */
+      $argument->setMethod($argument->getMethodBySignature());
+      $value = \core\ControllerBase::invokeInstance(\core\CoreApp::getRequest(), $argument);
+    }
+    if ($type == 'array') {
+      $value = explode($this->reflectionClass->getConstant('ARRAY_DELIMITER'), $argument);
     }
     $this->arguments[] = (object) array(
-      'value'    => $argument,
+      'value'    => $value,
       'type'     => $type,
       'position' => $position
     );
@@ -94,6 +109,10 @@ class ControllerArgs {
   
   public function getArguments() {
     return $this->arguments;
+  }
+  
+  public function getArgumentsValues() {
+    return array_map(function($current) {return $current->value; }, $this->arguments);
   }
   
   public function setMethod($method) {
@@ -163,6 +182,12 @@ class ControllerArgs {
     return array_walk($this->arguments, function($argument, $index) use ($params) {
       $type = $argument->type;
       $matchingParams = array_filter($params, function($param) use ($type) {
+        if (is_null($param->getType())) {
+          $name = $param->getName();
+          $message = "Controller: $type Parameter $name is not defined in signature." 
+            . "\nPlease typehint parameters in controller methods";
+          throw new \Exception($message );
+        }
         return ($param->getType()->__toString() == $type);
       });
       if (count($matchingParams) > 1) {

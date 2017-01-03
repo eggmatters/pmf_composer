@@ -74,7 +74,7 @@ class Resolver {
     foreach($controllerArgs as $controllerArg) {
       $calledController->setArgument($controllerArg);
     }
-    $method = $this->resolveControllerMethod($request, $calledController);
+    $method = $this->resolveControllerMethod($calledController);
     if (is_null($method)) {
       return null;
     }
@@ -82,7 +82,7 @@ class Resolver {
     return $calledController; 
   }
   
-  public function resolveControllerMethod(Request $request, ControllerArgs $controllerArg) {
+  public function resolveControllerMethod(ControllerArgs $controllerArg) {
     return  $controllerArg->getMethodBySignature();
   }
   

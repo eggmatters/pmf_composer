@@ -17,17 +17,13 @@ class CoreApp {
   public static function routeRequest(Request $request) {
     $resolver = new resolver\Resolver();
     $controllerArgs = $resolver->resolveRequest($request);
-    /* @var $requestedController resolver\ControllerArgs */
-    $requestedController = $resolver->resolveController($request, $controllerArgs);
-    if (is_null($requestedController)) {
+    /* @var $resolvedControllerArg resolver\ControllerArgs */
+    $resolvedControllerArg = $resolver->resolveController($request, $controllerArgs);
+    if (is_null($resolvedControllerArg)) {
       self::issue("404");
       return;
     }
-    echo "<pre>"; 
-    print_r($requestedController->getArguments());
-    print_r($requestedController->getMethod());
-    echo "</pre>";
-   
+    ControllerBase::invokeMethod($request, $resolvedControllerArg);
   }
   
   /**

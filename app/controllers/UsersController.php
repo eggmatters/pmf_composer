@@ -15,7 +15,7 @@ use core\ControllerBase;
  * @author meggers
  */
 class UsersController extends ControllerBase {
-  public function get($argument) {
+  public function get(int $argument) {
     $this->renderDebug("GOT HERE IN Users WITH GET");
   }
   
