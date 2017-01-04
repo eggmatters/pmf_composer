@@ -15,24 +15,9 @@ abstract class ModelBase {
    */
   protected $connector;
   
-  /**
-   *
-   * @var array 
-   */
-  private $connectorConfiguration;
-  
-  /**
-   *
-   * @var \ReflectionClass $reflectionClass;
-   */
-  private $reflectionClass;
-  
   protected static abstract function getConnectorConfiguration();
 
   public function __construct($modelAttributes = null) {
-    $this->connectorConfiguration = $this->getConnectorConfiguration();
-    $this->reflectionClass = new \ReflectionClass($this);
-    $this->connector = Connector::instantiate($this->connectorConfiguration, $this->reflectionClass);
     $this->setAttributes($modelAttributes);
   }
 
@@ -61,6 +46,11 @@ abstract class ModelBase {
   
   public static function getAll() {
     $results = self::getModelConnector()->getAll();
+    return self::setCollectionFromPDOArray($results);
+  }
+  
+  public static function get($id) {
+    $results = self::getModelConnector()->get($id);
     return self::setCollectionFromPDOArray($results);
   }
   /**

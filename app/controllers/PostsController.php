@@ -13,14 +13,13 @@ class PostsController extends ControllerBase {
   
   public function index() {
     $postsData = PostModel::getAll();
-    echo "<pre>got here";
+    echo "<pre>";
     print_r($postsData);
     echo "</pre>";
   }
   
   public function get(int $id) {
-    $posts = new \app\models\PostModel();
-    $postsData = $posts->get($id);
+    $postsData = PostModel::get($id);
     echo "<pre>";
     print_r($postsData);
     echo "</pre>";

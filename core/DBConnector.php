@@ -34,67 +34,22 @@ class DBConnector extends Connector {
     return false;  
   }
   
-  public function getFromControllerParams(array $controllerParams = []) {
-    $request = CoreApp::getRequest();
-    $parsedResources = $this->parseResources($request->getResourceArray());
-    $queryBase = new QueryBase($this->modelClass);
+  public function get($id = null) {
+    if (is_null($id)) {
+      $id = "null";
+    }
+    $queryBase = new QueryBase($this, $this->modelClass);
     $constraint = new Constraints();
-    $queryBase->Select();
-    if (!empty($parsedResources['joins'])) {
-      $joinsArray = array_map("core\Inflector::tableize", $parsedResources['joins']);
-      $queryBase->Join($joinsArray);
-    }
-    if (!empty($parsedResources['constraints'])) {
-      foreach ($parsedResources['constraints'] as $index => $kv) {
-        $table = Inflector::tableize($kv->resource) . ".id";
-        $value = $kv->value;
-        if ($index == 0 ) {
-          $constraint->term($table, "=", $value);
-        } else {
-          $constraint->andTerm($table, "=", $value);
-        }
-      }
-    }
-    $queryBase->Where($constraint);
-    $sql = $queryBase->getSelect();
+    $constraint->term("id", "=", $id);
+    $sql = $queryBase
+      ->Select()
+      ->Where($constraint)
+      ->getSelect();
     $bindValues = $queryBase->getBindValues();
     if ($this->query($sql, $bindValues)) {
       return $this->getResultsSet();
     }
-    return false;
-  }
-  
-  public function get($id = null) { 
-    $request = CoreApp::getRequest();
-    $selectTable = QueryBase::tableizeModelName($this->modelClass);
-    $parsedResources = $this->parseResources($request->getResourceArray());
-    $queryBase = new QueryBase($this->modelClass);
-    $constraint = new Constraints();
-    if (empty($id)) {
-      $resourceArray = $request->getResourceArray();
-      $id = $resourceArray[count($resourceArray) - 1];
-    }
-    
-    $queryBase->Select();
-    if (!empty($parsedResources['joins'])) {
-      $joinsArray = array_map("core\Inflector::tableize", $parsedResources['joins']);
-      $queryBase->Join($joinsArray);
-    }
-    $constraint->term("$selectTable" . ".id", "=", $id);
-    if (!empty($parsedResources['constraints'])) {
-      foreach ($parsedResources['constraints'] as $kv) {
-        $table = Inflector::tableize($kv->resource) . ".id";
-        $value = $kv->value;
-        $constraint->andTerm($table, "=", $value);
-      }
-    }
-    $queryBase->Where($constraint);
-    $sql = $queryBase->getSelect();
-    $bindValues = $queryBase->getBindValues();
-    if ($this->query($sql, $bindValues)) {
-      return $this->getResultsSet();
-    }
-    return false;
+    return false; 
   }
   
   public function create($params) {

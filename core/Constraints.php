@@ -8,6 +8,7 @@
 
 namespace core;
 
+use core\resolver\Inflector;
 /**
  * Description of Constraints
  *
