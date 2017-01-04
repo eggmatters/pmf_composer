@@ -1,6 +1,6 @@
 <?php
 
-namespace core;
+namespace core\connectors;
 
 /**
  * Creates and establishes Connections and queries to a database using PDO

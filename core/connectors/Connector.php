@@ -1,6 +1,6 @@
 <?php
 
-namespace core;
+namespace core\connectors;
 
 /**
  * This class will instigate and abstract the process of fetching persisted data.
@@ -50,14 +50,14 @@ abstract class Connector {
     $thisReflectionClass = new \ReflectionClass($connectorConfiguration['Connector']);
     $conntype = null;
     switch ($thisReflectionClass->name) {
-      case "core\DBConnector":
+      case "core\connectors\DBConnector":
         $conntype = self::DBCONN;
         break;
-      case "core\APIConnector" :
+      case "core\connectors\APIConnector" :
         $conntype = self::APICONN;
         break;
       default:
-        throw new Exception("Conntype for connector {$thisReflectionClass->name} not defined");
+        throw new \Exception("Conntype for connector {$thisReflectionClass->name} not defined");
     }
     $connector = $thisReflectionClass->newInstance($conntype, $modelClass);
     $connector->setProperties($connectorConfiguration, $thisReflectionClass->name);

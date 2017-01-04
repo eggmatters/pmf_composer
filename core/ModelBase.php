@@ -8,6 +8,8 @@ namespace core;
  */
 require_once CoreApp::rootDir() . '/configurations/ModelMapper.php';
 
+use core\connectors\Connector;
+
 abstract class ModelBase {
   /**
    *

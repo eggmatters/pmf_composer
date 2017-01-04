@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-namespace core;
+namespace core\connectors;
 
 /**
  * Description of APIConnector

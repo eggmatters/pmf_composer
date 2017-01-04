@@ -1,5 +1,5 @@
 <?php
-namespace core;
+namespace core\connectors;
 /**
  * This is a basic parser to generate valid sql queries with bound parameters.
  * The only association this class has with the overall framework is the model

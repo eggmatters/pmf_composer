@@ -13,12 +13,12 @@ $devAPIConn = array(
 );
 
 $schemaConnector = array(
-  'Connector' => \core\DBConnector::class,
+  'Connector' => \core\connectors\DBConnector::class,
   'ConnectorConfig' => $devDbConn
 );
 
 $apiConnector = array(
-  'Connector' => \core\APIConnector::class,
+  'Connector' => \core\connectors\APIConnector::class,
   'ConnectorConfig' => $devAPIConn
 );
 
