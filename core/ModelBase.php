@@ -68,9 +68,9 @@ abstract class ModelBase {
    * @return Connector
    */
   private static function getModelConnector() {
-    $modelClass = new \ReflectionClass(self::class);
-    $connectorConfiguration = $modelClass->getMethod('getConnectorConfiguration')->invoke(null);
-    return Connector::instantiate($connectorConfiguration, $modelClass);
+    $className = get_called_class();
+    $modelClass = new \ReflectionClass($className);
+    return Connector::instantiate($className::getConnectorConfiguration(), $modelClass);
   }
   
   private function setObject($name, \stdClass $modelObject) {
