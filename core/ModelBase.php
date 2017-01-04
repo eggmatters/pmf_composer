@@ -19,7 +19,7 @@ abstract class ModelBase {
    *
    * @var array 
    */
-  private $modelConnector;
+  private $connectorConfiguration;
   
   /**
    *
@@ -27,12 +27,12 @@ abstract class ModelBase {
    */
   private $reflectionClass;
   
-  protected static abstract function getModelConnector();
+  protected static abstract function getConnectorConfiguration();
 
   public function __construct($modelAttributes = null) {
-    $this->modelConnector = $this->getModelConnector();
+    $this->connectorConfiguration = $this->getConnectorConfiguration();
     $this->reflectionClass = new \ReflectionClass($this);
-    $this->connector = Connector::instantiate($this->modelConnector, $this->reflectionClass);
+    $this->connector = Connector::instantiate($this->connectorConfiguration, $this->reflectionClass);
     $this->setAttributes($modelAttributes);
   }
 
@@ -60,8 +60,17 @@ abstract class ModelBase {
   }
   
   public static function getAll() {
-    $results = self::getConfiguredConnector()->getAll();
+    $results = self::getModelConnector()->getAll();
     return self::setCollectionFromPDOArray($results);
+  }
+  /**
+   * 
+   * @return Connector
+   */
+  private static function getModelConnector() {
+    $modelClass = new \ReflectionClass(self::class);
+    $connectorConfiguration = $modelClass->getMethod('getConnectorConfiguration')->invoke(null);
+    return Connector::instantiate($connectorConfiguration, $modelClass);
   }
   
   private function setObject($name, \stdClass $modelObject) {

@@ -23,14 +23,14 @@ $apiConnector = array(
 );
 
 trait schemaConnector {
-  protected static function getModelConnector() {
+  protected static function getConnectorConfiguration() {
     global $schemaConnector;
     return $schemaConnector;
   }
 }
 
 trait apiConnector {
-  protected static function getModelConnector() {
+  protected static function getConnectorConfiguration() {
     global $apiConnector;
     return $apiConnector;
   }

@@ -73,8 +73,8 @@ abstract class Connector {
     return $rv;
   }
   
-  public static function instantiate(array $modelConnector, \ReflectionClass $modelClass) {
-    $thisReflectionClass = new \ReflectionClass($modelConnector['Connector']);
+  public static function instantiate(array $connectorConfiguration, \ReflectionClass $modelClass) {
+    $thisReflectionClass = new \ReflectionClass($connectorConfiguration['Connector']);
     $conntype = null;
     switch ($thisReflectionClass->name) {
       case "core\DBConnector":
@@ -87,7 +87,7 @@ abstract class Connector {
         throw new Exception("Conntype for connector {$thisReflectionClass->name} not defined");
     }
     $connector = $thisReflectionClass->newInstance($conntype, $modelClass);
-    $connector->setProperties($modelConnector, $thisReflectionClass->name);
+    $connector->setProperties($connectorConfiguration, $thisReflectionClass->name);
     return $connector;
   }
   

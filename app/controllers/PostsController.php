@@ -2,7 +2,7 @@
 
 namespace app\controllers;
 use core\ControllerBase;
-use core\resolver\ControllerArgs;
+use app\models\PostModel;
 /**
  * Description of TestController
  *
@@ -12,10 +12,9 @@ class PostsController extends ControllerBase {
   const ARRAY_DELIMITER = ":";
   
   public function index() {
-    $posts = new \app\models\PostModel();
-    //$postsData = $posts->getAll();
+    $postsData = PostModel::getAll();
     echo "<pre>got here";
-    //print_r($postsData);
+    print_r($postsData);
     echo "</pre>";
   }
   
