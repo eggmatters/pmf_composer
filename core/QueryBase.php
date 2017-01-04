@@ -29,25 +29,13 @@ class QueryBase {
    */
   private $dbConn;
   
-  /**
-   * Constructor accepts the class path of the model it is selecting from
-   * @param string $currentModel
-   */
-  public function __construct($currentModel, $eagerLoading = false) {
-    global $schemaConnector;
-    $reflectionClass = new \ReflectionClass($currentModel);
-    $this->currentTable = self::tableizeModelName($reflectionClass->getName());
+  public function __construct(DBConnector $connector, \ReflectionClass $modelClass, $eagerLoading = false) {
+    $this->currentTable = \core\resolver\Inflector::tableizeModelName($modelClass->name);
     $this->query = [];
     $this->columnsList = [];
     $this->tablesList = [];
     $this->bindings = [];
-    $this->dbConn = new DBConnector($schemaConnector);
-  }
-  
-  public static function tableizeModelName($modelName) {
-    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelName);
-    $classBase = str_replace('Model', '', $className);
-    return Inflector::tableize($classBase);
+    $this->dbConn = $connector;
   }
   
   /**

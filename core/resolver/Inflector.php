@@ -356,6 +356,6 @@ class Inflector {
   static function tableizeModelName($modelName) {
     $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelName);
     $classBase = str_replace('Model', '', $className);
-    self::tableize($classBase);
+    return self::tableize($classBase);
   }
 }

@@ -21,7 +21,7 @@ class DBConnector extends Connector {
   private $numRows;
 
   public function getAll() {
-    $queryBase = new QueryBase($this->modelClass);
+    $queryBase = new QueryBase($this, $this->modelClass);
     $constraint = new Constraints();
     $sql = $queryBase
       ->Select()
