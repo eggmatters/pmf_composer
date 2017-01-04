@@ -13,9 +13,9 @@ class PostsController extends ControllerBase {
   
   public function index() {
     $posts = new \app\models\PostModel();
-    $postsData = $posts->getAll();
-    echo "<pre>";
-    print_r($postsData);
+    //$postsData = $posts->getAll();
+    echo "<pre>got here";
+    //print_r($postsData);
     echo "</pre>";
   }
   

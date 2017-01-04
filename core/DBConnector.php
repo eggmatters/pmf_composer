@@ -12,6 +12,7 @@ class DBConnector extends Connector {
   protected $host;
   protected $dbName;
   protected $user;
+  protected $pass;
   
   private $pdoConn;
   private $stmt;

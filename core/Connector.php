@@ -75,20 +75,29 @@ abstract class Connector {
   
   public static function instantiate(array $modelConnector, \ReflectionClass $modelClass) {
     $thisReflectionClass = new \ReflectionClass($modelConnector['Connector']);
+    $conntype = null;
+    switch ($thisReflectionClass->name) {
+      case "core\DBConnector":
+        $conntype = self::DBCONN;
+        break;
+      case "core\APIConnector" :
+        $conntype = self::APICONN;
+        break;
+      default:
+        throw new Exception("Conntype for connector {$thisReflectionClass->name} not defined");
+    }
+    $connector = $thisReflectionClass->newInstance($conntype, $modelClass);
+    $connector->setProperties($modelConnector, $thisReflectionClass->name);
+    return $connector;
   }
   
-  protected function setDb($connector) {
-    $reflectionClass = new \ReflectionClass($this);
-    $className = $reflectionClass->getName();
-    foreach($connector as $property => $value) {
+  private function setProperties(array $modelConnector, string $className) {
+    $connectorProps = $modelConnector['ConnectorConfig'];
+    foreach($connectorProps as $property => $value) {
       if (property_exists($className, $property)) {
         $this->$property = $value;
       }
     }
-  }
-  
-  protected function setAPI($connector) {
-  
   }
   
   private function validateResource($resource) {
