@@ -17,9 +17,6 @@ namespace core;
  */
 abstract class Connector {
   
-  protected $host;
-  protected $dbName;
-  protected $user;
   protected $port;
   protected $pass;
   protected $conntype;

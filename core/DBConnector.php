@@ -8,7 +8,11 @@ namespace core;
  * @author meggers
  */
 class DBConnector extends Connector {
-    
+  
+  protected $host;
+  protected $dbName;
+  protected $user;
+  
   private $pdoConn;
   private $stmt;
   private $lastInserted;

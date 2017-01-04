@@ -9,7 +9,7 @@ namespace core;
 require_once CoreApp::rootDir() . '/configurations/ModelMapper.php';
 
 abstract class ModelBase {
-  
+
   protected static abstract function getConnectorConfiguration();
 
   public function __construct($modelAttributes = null) {
@@ -46,8 +46,7 @@ abstract class ModelBase {
   }
   
   private static function getConfiguredConnector() {
-    global $modelConnections;
-    $connector = null;
+    $connector = isset($this->connector);
     $modelClass = get_called_class(); 
     $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelClass);
     switch ($modelConnections[$className]['ConnectorType']) {
