@@ -17,11 +17,11 @@ abstract class ModelBase {
   
   protected static abstract function getConnectorConfiguration();
 
-  public function __construct($modelAttributes = null) {
+  public function __construct(array $modelAttributes = null) {
     $this->setAttributes($modelAttributes);
   }
 
-  public function setAttributes($modelAttributes = null) {
+  public function setAttributes(array $modelAttributes = null) {
     if (empty($modelAttributes)) {
       return;
     }
@@ -46,12 +46,12 @@ abstract class ModelBase {
   
   public static function getAll() {
     $results = self::getModelConnector()->getAll();
-    return self::setCollectionFromPDOArray($results);
+    return self::setCollection($results);
   }
   
   public static function get($id) {
     $results = self::getModelConnector()->get($id);
-    return self::setCollectionFromPDOArray($results);
+    return self::setCollection($results);
   }
   /**
    * 
@@ -73,7 +73,7 @@ abstract class ModelBase {
     return $modelObject;
   }
   
-  private static function setCollectionFromPDOArray($collection) {
+  private static function setCollection(array $collection) {
     $modelsCollection = [];
     foreach($collection as $entity) {
       $rf = new \ReflectionClass(get_called_class());
