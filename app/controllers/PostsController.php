@@ -25,6 +25,12 @@ class PostsController extends ControllerBase {
     echo "</pre>";
   }
   
+  public function getUserPosts(UsersController $user) {
+    echo "<pre>";
+    print_r($user);
+    echo "</pre>";
+  }
+  
   public function getUserPostsTest(UsersController $user
     , int $position
     , string $tag

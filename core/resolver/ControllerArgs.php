@@ -179,7 +179,8 @@ class ControllerArgs {
   }
   
   private function matchParams($params) {
-    return array_walk($this->arguments, function($argument, $index) use ($params) {
+    $status = true;
+    $aw = array_walk($this->arguments, function($argument, $index) use ($params, &$status) {
       $type = $argument->type;
       $matchingParams = array_filter($params, function($param) use ($type) {
         if (is_null($param->getType())) {
@@ -188,6 +189,7 @@ class ControllerArgs {
             . "\nPlease typehint parameters in controller methods";
           throw new \Exception($message );
         }
+        $dbg = $param->getType()->__toString();
         return ($param->getType()->__toString() == $type);
       });
       if (count($matchingParams) > 1) {
@@ -204,8 +206,11 @@ class ControllerArgs {
       } else if (!empty($matchingParams)) {
         $param = $matchingParams[array_keys($matchingParams)[0]];
         $argument->position = $param->getPosition();
+      } else {
+        $status = false;
       }
     });
+    return ($aw && $status);
   }
   
   private function getMethodPrefix($httpMethod) {

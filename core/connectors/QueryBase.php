@@ -60,25 +60,23 @@ class QueryBase {
     }
     return $this;
   }
+  
   /**
-   * Tables will be a valid list of tables with foreign key relations
-   * on the currentTable (model).
    * 
-   * Tables may be an array or comma seperated string
-   * 
-   * @param array | string $tables
-   * @return \core\QueryBase
+   * @param \ReflectionClass | string $fromTable
+   * @param \ReflectionClass | string  $onTable
+   * @param string $foreignKey
    */
-  public function Join($tables = null) {
-    $tablesList = [];
-    if (is_array($tables)) {
-      $tablesList = $tables;
-    } else if (is_string($tables)) {
-      $tablesList = explode(',', $tables);
-    }
-    $this->tablesList = array_map('core\Inflector::tableize', $tablesList);
-    $this->fkConstraints = $this->foreignKeyConstraints($tablesList);
-    print_r($tablesList);
+  public function LeftJoin($fromTable, $onTable, $foreignKey) {
+    $from = (is_a($fromTable, \ReflectionClass::class)) 
+      ? Inflector::tableizeModelName($fromTable->name) 
+        : Inflector::tableizeModelName($fromTable);
+    $on = (is_a($onTable, \ReflectionClass::class)) 
+      ? Inflector::tableizeModelName($onTable->name) 
+        : Inflector::tableizeModelName($onTable);
+    $this->query['JOINS'] = "LEFT JOIN $from ON "
+      . $from . "." . $foreignKey . " = " 
+      . $on . "." . $foreignKey;
     return $this;
   }
   
@@ -140,39 +138,6 @@ class QueryBase {
     } else {
       return false;
     }
-  }
-  
-  private function setJoinConditions($tableFrom) {
-    $tableFromRow = $this->getFKConstraint('REFERENCED_TABLE_NAME', $tableFrom);
-    if ($tableFromRow == false) {
-      return;
-    }
-    if (cont($tableFromRow) > 1) {
-      //now determine which join table is relevant to our mapping.
-      //with the addition of users_tags, we are in a sticky situation:
-      //we're not interested in joining users on tags for a request like:
-      //users/1/posts/tags
-      //nor are we interested in joining posts on tags for a request like:
-      //posts/1/users/tags
-    }
-    
-  }
-  
-  public function getFKConstraints($key, $table) {
-    return array_filter($this->fkConstraints, 
-      function($current) use ($key, $table) { 
-        return $current[$key] == $table;
-      });
-  }
-  
-  private function addJoin($referencedTable, $tableName, $columnName) {
-    if (in_array($referencedTable, $this->tablesList) || in_array($tableName, $this->tablesList)) {
-      $this->query['JOINS'][] = "JOIN $referencedTable"
-          . " ON {$referencedTable}.id ="
-          . " {$tableName}.{$columnName} ";
-      return true;
-    }
-    return false;
   }
 }
 /**
