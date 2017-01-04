@@ -13,24 +13,24 @@ $devAPIConn = array(
 );
 
 $schemaConnector = array(
-  'ConnectorType' => \core\Connector::DBCONN,
-  'Connector' => $devDbConn
+  'Connector' => \core\DBConnector::class,
+  'ConnectorConfig' => $devDbConn
 );
 
 $apiConnector = array(
-  'ConnectorType' => \core\Connector::APICONN,
-  'Connector' => $devAPIConn
+  'Connector' => \core\APIConnector::class,
+  'ConnectorConfig' => $devAPIConn
 );
 
 trait schemaConnector {
-  protected static function getConnectorConfiguration() {
+  protected static function getModelConnector() {
     global $schemaConnector;
     return $schemaConnector;
   }
 }
 
 trait apiConnector {
-  protected static function getConnectorConfiguration() {
+  protected static function getModelConnector() {
     global $apiConnector;
     return $apiConnector;
   }

@@ -9,12 +9,31 @@ namespace core;
 require_once CoreApp::rootDir() . '/configurations/ModelMapper.php';
 
 abstract class ModelBase {
-
-  protected static abstract function getConnectorConfiguration();
+  /**
+   *
+   * @var Connector; 
+   */
+  protected $connector;
+  
+  /**
+   *
+   * @var array 
+   */
+  private $modelConnector;
+  
+  /**
+   *
+   * @var \ReflectionClass $reflectionClass;
+   */
+  private $reflectionClass;
+  
+  protected static abstract function getModelConnector();
 
   public function __construct($modelAttributes = null) {
+    $this->modelConnector = $this->getModelConnector();
+    $this->reflectionClass = new \ReflectionClass($this);
+    $this->connector = Connector::instantiate($this->modelConnector, $this->reflectionClass);
     $this->setAttributes($modelAttributes);
-    return $this;
   }
 
   public function setAttributes($modelAttributes = null) {
@@ -43,21 +62,6 @@ abstract class ModelBase {
   public static function getAll() {
     $results = self::getConfiguredConnector()->getAll();
     return self::setCollectionFromPDOArray($results);
-  }
-  
-  private static function getConfiguredConnector() {
-    $connector = isset($this->connector);
-    $modelClass = get_called_class(); 
-    $className = preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $modelClass);
-    switch ($modelConnections[$className]['ConnectorType']) {
-      case Connector::DBCONN:
-        $connector = new DBConnector($modelConnections[$className], $modelClass);
-        break;
-      case Connector::APICONN:
-        $connector = new APIConnector($modelConnections[$className], $modelClass);
-        break;
-    }
-    return $connector;
   }
   
   private function setObject($name, \stdClass $modelObject) {

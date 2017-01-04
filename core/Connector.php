@@ -17,9 +17,15 @@ namespace core;
  */
 abstract class Connector {
   
-  protected $port;
-  protected $pass;
+  /**
+   *
+   * @var int $conntype 
+   */
   protected $conntype;
+  /**
+   *
+   * @var \ReflectionClass  
+   */
   protected $modelClass;
   
   const DBCONN=1;
@@ -35,15 +41,8 @@ abstract class Connector {
   
   abstract public function delete($params = null);
 
-  public function __construct($modelConnector, $modelClass = null) {
-    if ($modelConnector['ConnectorType'] == self::DBCONN) {
-      $this->setDb($modelConnector['Connector']);
-      $this->conntype = self::DBCONN;
-    }
-    if ($modelConnector['ConnectorType'] == self::APICONN) {
-      $this->setAPI($modelConnector['Connector']);
-      $this->conntype = self::APICONN;
-    }
+  public function __construct(int $conntype, \ReflectionClass $modelClass) {
+    $this->conntype = $conntype;
     $this->modelClass = $modelClass;
   }
   
@@ -72,6 +71,10 @@ abstract class Connector {
       $current = $next;
     }
     return $rv;
+  }
+  
+  public static function instantiate(array $modelConnector, \ReflectionClass $modelClass) {
+    $thisReflectionClass = new \ReflectionClass($modelConnector['Connector']);
   }
   
   protected function setDb($connector) {

@@ -8,5 +8,5 @@ use core\ModelBase;
  * @author matthewe
  */
 class UserModel extends ModelBase {
-  //put your code here
+  use \configurations\schemaConnector;
 }
