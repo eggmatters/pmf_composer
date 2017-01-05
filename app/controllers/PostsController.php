@@ -26,10 +26,18 @@ class PostsController extends ControllerBase {
   }
   
   public function getUserPosts(UsersController $user) {
-    $userModel = self::fetchModelNamespace(UsersController::class);
-    
+    $userArgs = $user->getControllerArgs();
+    $userModel = self::fetchModelReflector($userArgs->getNamespace());
+    /*@var $connector \core\connectors\DBConnector */
+    $connector = PostModel::getConnector();
+    $constraints = new \core\connectors\Constraints();
+    $qb = $connector->buildQuery()
+      ->Select()
+      ->LeftJoin($userModel, PostModel::class, "id")
+      ->Where($constraints->term('users.id', '=', $userArgs->getArguments()[0]->value));
+    $postsData = $connector->executeQuery($qb);
     echo "<pre>";
-    print_r($model);
+    print_r($postsData);
     echo "</pre>";
   }
   

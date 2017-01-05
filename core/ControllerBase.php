@@ -37,7 +37,7 @@ abstract class ControllerBase {
   }
   /**
    * 
-   * @return core\resolver\ControllerArgs
+   * @return \core\resolver\ControllerArgs
    */
   protected function getControllerArgs() {
     return $this->controllerArgs;
@@ -65,7 +65,11 @@ abstract class ControllerBase {
     return $requestedController;
   }
   
-  public static function fetchModelNamespace(string $controllerNamespace) {
-    return Inflector::swapControllerNamespaceToModel($controllerNamespace);
+  public static function fetchModelReflector(string $controllerNamespace) {
+    $reflector = Inflector::swapControllerNamespaceToModel($controllerNamespace);
+    if (class_exists($reflector)) {
+      return new \ReflectionClass($reflector);
+    }
+    return null;
   }
 }

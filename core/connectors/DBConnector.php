@@ -64,7 +64,20 @@ class DBConnector extends Connector {
     
   }
   
-  public function query($sql, array $bindValues = []) {
+  public function buildQuery() {
+    return new QueryBase($this, $this->modelClass);
+  }
+  
+  public function executeQuery(QueryBase $queryBuilder) {
+    $bindValues = $queryBuilder->getBindValues();
+    if ($this->query($queryBuilder->getSelect(), $bindValues)) {
+      return $this->getResultsSet();
+    }
+    return false; 
+    
+  }
+  
+  private function query($sql, array $bindValues = []) {
     $this->conn();
     $this->stmt = $this->pdoConn->prepare($sql);
     try {

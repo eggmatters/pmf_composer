@@ -74,7 +74,7 @@ class QueryBase {
     $on = (is_a($onTable, \ReflectionClass::class)) 
       ? Inflector::tableizeModelName($onTable->name) 
         : Inflector::tableizeModelName($onTable);
-    $this->query['JOINS'] = "LEFT JOIN $from ON "
+    $this->query['JOINS'][] = "LEFT JOIN $from ON "
       . $from . "." . $foreignKey . " = " 
       . $on . "." . $foreignKey;
     return $this;

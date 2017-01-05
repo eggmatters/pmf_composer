@@ -15,7 +15,6 @@ abstract class ModelBase {
    *
    * @var Connector; 
    */
-  protected $connector;
   
   protected static abstract function getConnectorConfiguration();
 
@@ -38,14 +37,6 @@ abstract class ModelBase {
     }
   }
   
-  public function setConnector(Connector $connector) {
-    $this->connector = $connector;
-  }
-  
-  public function getConnector() {
-    return $this->connector;
-  }
-  
   public static function getAll() {
     $results = self::getModelConnector()->getAll();
     return self::setCollection($results);
@@ -54,6 +45,13 @@ abstract class ModelBase {
   public static function get($id) {
     $results = self::getModelConnector()->get($id);
     return self::setCollection($results);
+  }
+  /**
+   * 
+   * @return core\connectors\DBConnector|core\connectors\APIConnector
+   */
+  public static function getConnector() {
+    return self::getModelConnector();
   }
   /**
    * 
