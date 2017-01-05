@@ -8,7 +8,7 @@ use core\ControllerBase;
  *
  * @author matthewe
  */
-class subClassController extends ControllerBase {
+class subClassesController extends ControllerBase {
   //put your code here
   public function get() {
     echo "<pre>";

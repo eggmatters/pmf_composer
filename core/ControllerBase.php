@@ -7,8 +7,8 @@
  */
 namespace core;
 
-use resolver\Resolver;
-use resolver\ControllerArgs;
+use core\resolver\Inflector;
+use core\resolver\ControllerArgs;
 
 abstract class ControllerBase {
 
@@ -43,14 +43,29 @@ abstract class ControllerBase {
     return $this->controllerArgs;
   }
   
-  public static function invokeInstance(Request $request, \core\resolver\ControllerArgs $controllerArgs) {
+  /**
+   * 
+   * @param \core\Request $request
+   * @param ControllerArgs $controllerArgs
+   * @return ControllerBase
+   */
+  public static function invokeInstance(Request $request, ControllerArgs $controllerArgs) {
     return $controllerArgs->getReflectionClass()->newInstance($request, $controllerArgs);
   }
-  
-  public static function invokeMethod(Request $request, \core\resolver\ControllerArgs $controllerArgs) {
+  /**
+   * 
+   * @param \core\Request $request
+   * @param ControllerArgs $controllerArgs
+   * @return ControllerBase
+   */
+  public static function invokeMethod(Request $request, ControllerArgs $controllerArgs) {
     $requestedController = self::invokeInstance($request, $controllerArgs);
     $requestedControllerMethod = $controllerArgs->getMethod();
     $requestedControllerMethod->invokeArgs($requestedController, $controllerArgs->getArgumentsValues());
     return $requestedController;
+  }
+  
+  public static function fetchModelNamespace(string $controllerNamespace) {
+    return Inflector::swapControllerNamespaceToModel($controllerNamespace);
   }
 }

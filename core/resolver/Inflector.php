@@ -358,4 +358,19 @@ class Inflector {
     $classBase = str_replace('Model', '', $className);
     return self::tableize($classBase);
   }
+  
+  static function swapControllerNamespaceToModel($controllerNamespace) {
+    $swapped = str_replace('controller', 'model', str_replace('Controller', 'Model', $controllerNamespace));
+    $output = [];
+    preg_match("/(\w.*)[\\\]([a-zA-Z].*)Model/", $swapped, $output);
+    if (!empty($output)) {
+      $model = self::singularize($output[2]);
+      return $output[1] . "\\" . $model . "Model";
+    }
+    return $output;
+  }
+  
+  static function test($val) {
+    return $val . "!";
+  }
 }

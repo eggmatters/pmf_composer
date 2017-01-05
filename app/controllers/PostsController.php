@@ -26,8 +26,10 @@ class PostsController extends ControllerBase {
   }
   
   public function getUserPosts(UsersController $user) {
+    $userModel = self::fetchModelNamespace(UsersController::class);
+    
     echo "<pre>";
-    print_r($user);
+    print_r($model);
     echo "</pre>";
   }
   
