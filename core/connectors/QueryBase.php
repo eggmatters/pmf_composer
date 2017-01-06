@@ -39,20 +39,14 @@ class QueryBase {
   }
   
   /**
-   * Columns list may be either an array or comma seperated string.
-   * Columns list must be in table_name.column_name format.
-   * @param array|string $columns
-   * @return \core\QueryBase
+   * 
+   * @param variadic $columns
+   * @return $this
    */
-  public function Select($columns = null) {
-    $columnsList = [];
-    if (is_array($columns)) {
-      $columnsList = $columns;
-    } else if (is_string($columns)) {
-      $columnsList = explode(',', $columns);
-    }
-    
-    $this->columnsList = array_map('\core\resolver\Inflector::underscore', $columnsList);
+  public function Select(...$columns) {
+    $this->columnsList = array_map(function ($cur) {
+      return \core\resolver\Inflector::tableizeModelName($cur) . ".*";
+    }, $columns);
     if (count($this->columnsList) > 0 ) {
       $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
     } else {

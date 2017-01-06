@@ -43,6 +43,19 @@ abstract class ControllerBase {
     return $this->controllerArgs;
   }
   
+  protected function getMethodArguments() {
+    return array_map(function($cur) { return $cur->value; }, $this->controllerArgs->getArguments());
+  }
+  
+  protected function getNamespace() {
+    $rf = new \ReflectionClass($this);
+    return $rf->getName();
+  }
+  
+  protected function getModelNamespace() {
+    return self::fetchModelNamespace($this->getNamespace());
+  }
+  
   /**
    * 
    * @param \core\Request $request
@@ -71,5 +84,9 @@ abstract class ControllerBase {
       return new \ReflectionClass($reflector);
     }
     return null;
+  }
+  
+  public static function fetchModelNamespace(string $controllerNamespace) {
+    return Inflector::swapControllerNamespaceToModel($controllerNamespace);
   }
 }
