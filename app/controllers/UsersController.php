@@ -15,8 +15,8 @@ use core\ControllerBase;
  * @author meggers
  */
 class UsersController extends ControllerBase {
-  public function get(int $argument) {
-    $this->renderDebug("GOT HERE IN Users WITH GET");
+  public function get(int $id) {
+    $this->renderDebug("<pre>".print_r(\app\models\UserModel::get($id),1)."</pre>");
   }
   
   public function index() {
