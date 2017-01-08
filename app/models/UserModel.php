@@ -8,5 +8,6 @@ use core\ModelBase;
  * @author matthewe
  */
 class UserModel extends ModelBase {
+  const allowedFields = ['id','user_name','user_role'];
   use \configurations\schemaConnector;
 }

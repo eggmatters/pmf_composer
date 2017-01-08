@@ -6,7 +6,7 @@ namespace core\connectors;
  * passed in the constructor.
  * 
  * Additionally, this class is reliant on foreign key constraints established
- * in the databse. Calls to join on tables without defined foreign key constraints
+ * in the database. Calls to join on tables without defined foreign key constraints
  * will not work.
  * 
  * This class relies on the Constraints class to establish where clauses.
@@ -43,12 +43,11 @@ class QueryBase {
    * @param variadic $columns
    * @return $this
    */
-  public function Select(...$columns) {
-    $this->columnsList = array_map(function ($cur) {
-      return \core\resolver\Inflector::tableizeModelName($cur) . ".*";
-    }, $columns);
-    if (count($this->columnsList) > 0 ) {
-      $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
+  public function Select(...$models) {
+    $models = (empty($models)) ? [$this->currentTable] : $models;
+    $columnsList = array_map('\\core\\connectors\\QueryBase::formatSelectColumns', $models);
+    if (count($columnsList) > 0 ) {
+      $this->query['SELECT'] = "SELECT " . implode(",", $columnsList) . " FROM $this->currentTable";
     } else {
       $this->query['SELECT'] = "SELECT $this->currentTable.* FROM $this->currentTable";
     }
@@ -133,7 +132,33 @@ class QueryBase {
       return false;
     }
   }
-}
+  
+  private function getTableColumns($namespace) {
+    $rf = new \ReflectionClass($namespace);
+    if ($rf->hasConstant('allowedFields')) {
+      return $rf->getConstant('allowedFields');
+    }
+    $schema = $this->dbConn->getSchema();
+    $table = Inflector::tableizeModelName($namespace);
+    $sql = "SELECT COLUMN_NAME FROM information_schema.COLUMNS "
+      ." WHERE TABLE_SCHEMA = :schema AND TABLE_NAME = :table";
+    if ($this->dbConn->query($sql, ['schema' => $schema, 'table' => $table])) {
+      return array_column($this->dbConn->getResultsSet(), 'COLUMN_NAME');
+    } else {
+      return null;
+    }
+  }
+  
+  private function formatSelectColumns($namespace) {
+    $table  = Inflector::tableizeModelName($namespace);
+    $colums = $this->getTableColumns($namespace);
+    $namespaceAlias = Inflector::aliasNamepsace($namespace);
+    return join(',', array_map(function($column) use ($table, $namespace, $namespaceAlias) { 
+      return $table . "." . $column . " as $namespaceAlias" . "_$column";
+    }, $colums));
+  }
+    
+ }
 /**
  * Join Table:
  * /posts/1/tags
@@ -156,7 +181,11 @@ FROM
     -- current table
     tags	
 		JOIN
-    -- current table = [2] => Array ([REFERENCED_TABLE_NAME] => tags)
+    -- current table = [2] => Array ([REFERENCED_TABLE_NAME] => tag  
+  private function stringifyColunns($tableColumns, $tableName) {
+    return 
+  }
+}s)
     posts_tags ON tags.id = posts_tags.tags_id
     -- next table = [2] => Array ([TABLE_NAME] => posts_tags)
 		JOIN

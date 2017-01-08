@@ -77,7 +77,7 @@ class DBConnector extends Connector {
     
   }
   
-  private function query($sql, array $bindValues = []) {
+  public function query($sql, array $bindValues = [], $outputFormat = \PDO::FETCH_ASSOC) {
     $this->conn();
     $this->stmt = $this->pdoConn->prepare($sql);
     try {
@@ -89,7 +89,7 @@ class DBConnector extends Connector {
       return false;
     }
     if ($this->stmt->columnCount() > 0) {
-      $this->resultSet = $this->stmt->fetchAll(\PDO::FETCH_ASSOC);
+      $this->resultSet = $this->stmt->fetchAll($outputFormat);
     } else {
       $this->lastInserted = $this->pdoConn->lastInsertId();
       $this->numRows = $this->stmt->rowCount();
@@ -125,6 +125,10 @@ class DBConnector extends Connector {
   
   public function flattenResultSet() {
 
+  }
+  
+  public function getSchema() {
+    return $this->dbName;
   }
   
   private function conn() {

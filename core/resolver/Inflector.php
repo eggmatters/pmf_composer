@@ -370,7 +370,7 @@ class Inflector {
     return $output;
   }
   
-  static function test($val) {
-    return $val . "!";
+  static function aliasNamepsace($namespace) {
+    return str_replace("\\", '_', $namespace) . '__';
   }
 }
