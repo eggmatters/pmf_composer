@@ -15,7 +15,7 @@ namespace core\connectors;
  */
 use core\resolver\Inflector;
 
-class QueryBase {
+class QueryBase implements IDBConn {
 
   private $currentTable;
   private $query;
@@ -104,6 +104,20 @@ class QueryBase {
     return $this->bindings;
   }
   
+  public static function setCollectionFromResultsSet(array $resultsSet) {
+    $rs = [];
+    foreach ($resultsSet as $result) {
+      $rs[] = self::setObjectFromResultsSet($result);
+    }
+    return $rs;
+  }
+
+  public static function setObjectFromResultsSet(array $resultsSet) {
+    foreach ($resultsSet as $rkey => $data) {
+      
+    }
+  }
+  
   private function setBindValues($array) {
     $bindValues = [];
     foreach($array as $value) {
@@ -157,8 +171,8 @@ class QueryBase {
       return $table . "." . $column . " as $namespaceAlias" . "_$column";
     }, $colums));
   }
-    
- }
+
+}
 /**
  * Join Table:
  * /posts/1/tags
