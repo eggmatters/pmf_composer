@@ -17,10 +17,11 @@ use core\resolver\Inflector;
 
 class QueryBase implements IDBConn {
 
+  private $modelClass;
   private $currentTable;
   private $query;
   private $columnsList;
-  private $tablesList;
+  private $tableAliases;
   private $fkConstraints;
   private $bindings;
   /**
@@ -30,10 +31,11 @@ class QueryBase implements IDBConn {
   private $dbConn;
   
   public function __construct(DBConnector $connector, \ReflectionClass $modelClass, $eagerLoading = false) {
+    $this->modelClass = $modelClass;
     $this->currentTable = \core\resolver\Inflector::tableizeModelName($modelClass->name);
     $this->query = [];
     $this->columnsList = [];
-    $this->tablesList = [];
+    $this->tableAliases = [];
     $this->bindings = [];
     $this->dbConn = $connector;
   }
@@ -45,9 +47,10 @@ class QueryBase implements IDBConn {
    */
   public function Select(...$models) {
     $models = (empty($models)) ? [$this->currentTable] : $models;
-    $columnsList = array_map('\\core\\connectors\\QueryBase::formatSelectColumns', $models);
-    if (count($columnsList) > 0 ) {
-      $this->query['SELECT'] = "SELECT " . implode(",", $columnsList) . " FROM $this->currentTable";
+    $this->columnsList = array_map('\\core\\connectors\\QueryBase::formatSelectColumns', $models);
+    if (count($this->columnsList) > 0 ) {
+
+      $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
     } else {
       $this->query['SELECT'] = "SELECT $this->currentTable.* FROM $this->currentTable";
     }
@@ -112,9 +115,10 @@ class QueryBase implements IDBConn {
     return $rs;
   }
 
-  public static function setObjectFromResultsSet(array $resultsSet) {
-    foreach ($resultsSet as $rkey => $data) {
-      
+  public static function setModelFromResultsSet(array $resultsSet) {
+    $modelNamespace = $this->modelClass->getNamespaceName();
+    $modelInstance = $this->modelClass->newInstance();
+    foreach ($resultsSet as $columnAlias => $value) {
     }
   }
   
@@ -167,11 +171,12 @@ class QueryBase implements IDBConn {
     $table  = Inflector::tableizeModelName($namespace);
     $colums = $this->getTableColumns($namespace);
     $namespaceAlias = Inflector::aliasNamepsace($namespace);
-    return join(',', array_map(function($column) use ($table, $namespace, $namespaceAlias) { 
-      return $table . "." . $column . " as $namespaceAlias" . "_$column";
+    return join(',', array_map(function($column) use ($table, $namespace, $namespaceAlias) {
+      $columnAlias = $namespaceAlias . "_$column";
+      $this->tableAliases[$columnAlias] = $namespace;
+      return "$table.$column as $columnAlias";
     }, $colums));
   }
-
 }
 /**
  * Join Table:

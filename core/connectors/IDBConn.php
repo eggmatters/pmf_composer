@@ -14,5 +14,5 @@ namespace core\connectors;
  */
 interface IDBConn {
   public static function setCollectionFromResultsSet(array $resultsSet);
-  public static function setObjectFromResultsSet(array $resultsSet);
+  public static function setModelFromResultsSet(array $resultsSet);
 }
