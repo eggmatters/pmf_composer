@@ -116,9 +116,11 @@ class QueryBase implements IDBConn {
   }
 
   public static function setModelFromResultsSet(array $resultsSet) {
-    $modelNamespace = $this->modelClass->getNamespaceName();
-    $modelInstance = $this->modelClass->newInstance();
+    //$modelInstance = $this->modelClass->newInstance();
     foreach ($resultsSet as $columnAlias => $value) {
+      if ($this->tableAliases[$columnAlias] == $modelNamespace) {
+        
+      }
     }
   }
   
