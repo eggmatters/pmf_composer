@@ -22,6 +22,7 @@ class QueryBase implements IDBConn {
   private $query;
   private $columnsList;
   private $tableAliases;
+  private $modelInstances;
   private $fkConstraints;
   private $bindings;
   /**
@@ -38,6 +39,7 @@ class QueryBase implements IDBConn {
     $this->tableAliases = [];
     $this->bindings = [];
     $this->dbConn = $connector;
+    $this->modelInstances = [];
   }
   
   /**
@@ -49,9 +51,10 @@ class QueryBase implements IDBConn {
     $models = (empty($models)) ? [$this->currentTable] : $models;
     $this->columnsList = array_map('\\core\\connectors\\QueryBase::formatSelectColumns', $models);
     if (count($this->columnsList) > 0 ) {
-
+      $this->setModelInstances($models);
       $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
     } else {
+      $this->setModelInstances([$this->modelClass->getNamespaceName()]);
       $this->query['SELECT'] = "SELECT $this->currentTable.* FROM $this->currentTable";
     }
     return $this;
@@ -124,6 +127,13 @@ class QueryBase implements IDBConn {
     }
   }
   
+  private function setModelInstances(array $modelNamespaces) {
+    foreach ($modelNamespaces as $namespace) {
+      $rf =  new \ReflectionClass($namespace);
+      $this->modelInstances[$namespace] = $rf->newInstance();
+    }
+  }
+  
   private function setBindValues($array) {
     $bindValues = [];
     foreach($array as $value) {
@@ -175,7 +185,8 @@ class QueryBase implements IDBConn {
     $namespaceAlias = Inflector::aliasNamepsace($namespace);
     return join(',', array_map(function($column) use ($table, $namespace, $namespaceAlias) {
       $columnAlias = $namespaceAlias . "_$column";
-      $this->tableAliases[$columnAlias] = $namespace;
+      //Have the value of table aliases resolve to a function, rather than an isntance.
+      $this->tableAliases[$columnAlias] = $this->modelInstances[$namespace];
       return "$table.$column as $columnAlias";
     }, $colums));
   }
