@@ -110,21 +110,19 @@ class QueryBase implements IDBConn {
     return $this->bindings;
   }
   
-  public static function setCollectionFromResultsSet(array $resultsSet) {
+  public static function getCollectionFromResultsSet(array $resultsSet, QueryBase $queryBuilder) {
     $rs = [];
     foreach ($resultsSet as $result) {
-      $rs[] = self::setObjectFromResultsSet($result);
+      $rs[] = self::getModelFromResultsSet($result, $queryBuilder);
     }
     return $rs;
   }
 
-  public static function setModelFromResultsSet(array $resultsSet) {
-    //$modelInstance = $this->modelClass->newInstance();
+  public static function getModelFromResultsSet(array $resultsSet, QueryBase $queryBuilder) {
     foreach ($resultsSet as $columnAlias => $value) {
-      if ($this->tableAliases[$columnAlias] == $modelNamespace) {
-        
-      }
+       $queryBuilder->setModelInstanceProperty($columnAlias, $value);
     }
+    return $queryBuilder->modelInstances;
   }
   
   private function setModelInstances(array $modelNamespaces) {
@@ -132,6 +130,12 @@ class QueryBase implements IDBConn {
       $rf =  new \ReflectionClass($namespace);
       $this->modelInstances[$namespace] = $rf->newInstance();
     }
+  }
+  
+  private function setModelInstanceProperty($columnAlias, $value) {
+   $instance = $this->modelInstances[$this->tableAliases[$columnAlias]['namespace']];
+   $property = $this->tableAliases[$columnAlias]['property'];
+   $instance->{$property} = $value;
   }
   
   private function setBindValues($array) {
@@ -185,8 +189,7 @@ class QueryBase implements IDBConn {
     $namespaceAlias = Inflector::aliasNamepsace($namespace);
     return join(',', array_map(function($column) use ($table, $namespace, $namespaceAlias) {
       $columnAlias = $namespaceAlias . "_$column";
-      //Have the value of table aliases resolve to a function, rather than an isntance.
-      $this->tableAliases[$columnAlias] = $this->modelInstances[$namespace];
+      $this->tableAliases[$columnAlias] = array('namespace' => $namespace, 'property' => $column);
       return "$table.$column as $columnAlias";
     }, $colums));
   }

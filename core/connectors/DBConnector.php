@@ -7,7 +7,7 @@ namespace core\connectors;
  *
  * @author meggers
  */
-class DBConnector extends Connector {
+class DBConnector extends Connector implements IDBConn {
   
   protected $host;
   protected $dbName;
@@ -19,6 +19,14 @@ class DBConnector extends Connector {
   private $lastInserted;
   private $resultSet;
   private $numRows;
+  
+  public static function getCollectionFromResultsSet(array $resultsSet, QueryBase $queryBuilder) {
+    return $queryBuilder->getCollectionFromResultsSet($resultsSet, $queryBuilder);
+  }
+
+  public static function getModelFromResultsSet(array $resultsSet, QueryBase $queryBuilder) {
+    return $queryBuilder->getModelFromResultsSet($resultsSet, $queryBuilder);
+  }
 
   public function getAll() {
     $queryBase = new QueryBase($this, $this->modelClass);
@@ -139,4 +147,5 @@ class DBConnector extends Connector {
     }
     $this->pdoConn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
   }
+
 }
