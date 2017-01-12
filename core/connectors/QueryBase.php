@@ -48,15 +48,10 @@ class QueryBase implements IDBConn {
    * @return $this
    */
   public function Select(...$models) {
-    $models = (empty($models)) ? [$this->currentTable] : $models;
+    $models = (empty($models)) ? [$this->modelClass->getName()] : $models;
     $this->columnsList = array_map('\\core\\connectors\\QueryBase::formatSelectColumns', $models);
-    if (count($this->columnsList) > 0 ) {
-      $this->setModelInstances($models);
-      $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
-    } else {
-      $this->setModelInstances([$this->modelClass->getNamespaceName()]);
-      $this->query['SELECT'] = "SELECT $this->currentTable.* FROM $this->currentTable";
-    }
+    $this->setModelInstances($models);
+    $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
     return $this;
   }
   
