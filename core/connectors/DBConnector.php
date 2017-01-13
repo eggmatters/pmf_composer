@@ -129,7 +129,7 @@ class DBConnector extends Connector {
     return $this->dbName;
   }
   
-  public function normalizeResultsSet(array $resultsSet, $queryBuilder, $modelNamespace = null) {
+  public function normalizeResultsSet(array $resultsSet, $queryBuilder) {
     $tableAliases = $queryBuilder->getTableAliases();
     $resultsCollection = [];
     foreach($resultsSet as $columnAlias => $value) {
@@ -138,8 +138,7 @@ class DBConnector extends Connector {
       if ($namespace == $this->modelClass->getName()) {
         $resultsCollection[$property] = $value;
       } else {
-        $namespaceIndex = Inflector::camelize(Inflector::singularize(Inflector::tableizeModelName($namespace)));
-        $resultsCollection[$namespaceIndex][$property] = $value;
+        $resultsCollection[$namespace][$property] = $value;
       }
     }
     return $resultsCollection;

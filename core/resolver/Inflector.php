@@ -373,4 +373,8 @@ class Inflector {
   static function aliasNamepsace($namespace) {
     return str_replace("\\", '_', $namespace) . '__';
   }
+  
+  static function namespaceToModelName($namespace) {
+    return preg_replace("/.\w.*\\\([A-Za-z].*)/", "$1", $namespace);
+  }
 }

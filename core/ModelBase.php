@@ -27,8 +27,13 @@ abstract class ModelBase {
       return;
     }
     foreach ($modelAttributes as $name => $value) {
-      if (is_array($value)) {
-        $this->$name = $this->setArray($value);
+      if (class_exists($name)) {
+        $classReflector = new \ReflectionClass($name);
+        $classInstance  = $classReflector->newInstance($value);
+        $this->{$this->resolveName($name)} = $classInstance;
+      }
+      if (is_array($value))  {
+        $this->setCollection($value);
       } else if (is_object($value)) {
         $this->$name = $this->setObject($name, $value);
       } else {
@@ -53,7 +58,22 @@ abstract class ModelBase {
   public static function getConnector() {
     return self::getModelConnector();
   }
-  /**
+  
+  public static function setCollection($collection) {
+    $modelsCollection = [];
+    foreach ($collection as $index => $values) {
+      if (is_numeric($index)) {
+        $classReflector = new \ReflectionClass(get_called_class());
+        $classInstance  = $classReflector->newInstance($values);
+        $modelsCollection[] = $classInstance;
+      } else {
+        $modelsCollection[$index] = $values;
+      }
+    }
+    return $modelsCollection;
+  }
+  
+  /**$property
    * 
    * @return Connector
    */
@@ -63,20 +83,15 @@ abstract class ModelBase {
     return Connector::instantiate($className::getConnectorConfiguration(), $modelClass);
   }
   
-  private static function setObject($modelObject) {
-    $className = get_called_class();
-    $classReflector = new \ReflectionClass($className);
+  private static function setObject($modelObject, $namespace) {
+    $classReflector = new \ReflectionClass($namespace);
     $classInstance = $classReflector->newInstance($modelObject);
     return $classInstance;
   }
   
-  public static function setCollection(array $collection) {
-    $modelsCollection = [];
-    foreach($collection as $entity) {
-      $rf = new \ReflectionClass(get_called_class());
-      $modelInstance = $rf->newInstance($entity);
-      $modelsCollection[] = $modelInstance;
-    }
-    return $modelsCollection;
+  private function resolveName($name) {
+    return class_exists($name) ?
+      resolver\Inflector::namespaceToModelName($name) :
+        $name;
   }
 }
