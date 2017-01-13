@@ -15,14 +15,13 @@ namespace core\connectors;
  */
 use core\resolver\Inflector;
 
-class QueryBase implements IDBConn {
+class QueryBase {
 
   private $modelClass;
   private $currentTable;
   private $query;
   private $columnsList;
   private $tableAliases;
-  private $modelInstances;
   private $fkConstraints;
   private $bindings;
   /**
@@ -39,7 +38,6 @@ class QueryBase implements IDBConn {
     $this->tableAliases = [];
     $this->bindings = [];
     $this->dbConn = $connector;
-    $this->modelInstances = [];
   }
   
   /**
@@ -50,7 +48,7 @@ class QueryBase implements IDBConn {
   public function Select(...$models) {
     $models = (empty($models)) ? [$this->modelClass->getName()] : $models;
     $this->columnsList = array_map('\\core\\connectors\\QueryBase::formatSelectColumns', $models);
-    $this->setModelInstances($models);
+    //$this->setModelInstances($models);
     $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
     return $this;
   }
@@ -105,32 +103,8 @@ class QueryBase implements IDBConn {
     return $this->bindings;
   }
   
-  public static function getCollectionFromResultsSet(array $resultsSet, QueryBase $queryBuilder) {
-    $rs = [];
-    foreach ($resultsSet as $result) {
-      $rs[] = self::getModelFromResultsSet($result, $queryBuilder);
-    }
-    return $rs;
-  }
-
-  public static function getModelFromResultsSet(array $resultsSet, QueryBase $queryBuilder) {
-    foreach ($resultsSet as $columnAlias => $value) {
-       $queryBuilder->setModelInstanceProperty($columnAlias, $value);
-    }
-    return $queryBuilder->modelInstances;
-  }
-  
-  private function setModelInstances(array $modelNamespaces) {
-    foreach ($modelNamespaces as $namespace) {
-      $rf =  new \ReflectionClass($namespace);
-      $this->modelInstances[$namespace] = $rf->newInstance();
-    }
-  }
-  
-  private function setModelInstanceProperty($columnAlias, $value) {
-   $instance = $this->modelInstances[$this->tableAliases[$columnAlias]['namespace']];
-   $property = $this->tableAliases[$columnAlias]['property'];
-   $instance->{$property} = $value;
+  public function getTableAliases() {
+    return $this->tableAliases;
   }
   
   private function setBindValues($array) {
@@ -183,11 +157,12 @@ class QueryBase implements IDBConn {
     $colums = $this->getTableColumns($namespace);
     $namespaceAlias = Inflector::aliasNamepsace($namespace);
     return join(',', array_map(function($column) use ($table, $namespace, $namespaceAlias) {
-      $columnAlias = $namespaceAlias . "_$column";
+      $columnAlias = $namespaceAlias . $column;
       $this->tableAliases[$columnAlias] = array('namespace' => $namespace, 'property' => $column);
       return "$table.$column as $columnAlias";
     }, $colums));
   }
+
 }
 /**
  * Join Table:

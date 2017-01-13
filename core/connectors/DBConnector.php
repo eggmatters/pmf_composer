@@ -2,12 +2,14 @@
 
 namespace core\connectors;
 
+use core\resolver\Inflector;
+
 /**
  * Creates and establishes Connections and queries to a database using PDO
  *
  * @author meggers
  */
-class DBConnector extends Connector implements IDBConn {
+class DBConnector extends Connector {
   
   protected $host;
   protected $dbName;
@@ -19,14 +21,6 @@ class DBConnector extends Connector implements IDBConn {
   private $lastInserted;
   private $resultSet;
   private $numRows;
-  
-  public static function getCollectionFromResultsSet(array $resultsSet, QueryBase $queryBuilder) {
-    return $queryBuilder->getCollectionFromResultsSet($resultsSet, $queryBuilder);
-  }
-
-  public static function getModelFromResultsSet(array $resultsSet, QueryBase $queryBuilder) {
-    return $queryBuilder->getModelFromResultsSet($resultsSet, $queryBuilder);
-  }
 
   public function getAll() {
     $queryBase = new QueryBase($this, $this->modelClass);
@@ -46,16 +40,16 @@ class DBConnector extends Connector implements IDBConn {
     if (is_null($id)) {
       $id = "null";
     }
-    $queryBase = new QueryBase($this, $this->modelClass);
+    $queryBuilder = new QueryBase($this, $this->modelClass);
     $constraint = new Constraints();
     $constraint->term("id", "=", $id);
-    $sql = $queryBase
+    $sql = $queryBuilder
       ->Select()
       ->Where($constraint)
       ->getSelect();
-    $bindValues = $queryBase->getBindValues();
+    $bindValues = $queryBuilder->getBindValues();
     if ($this->query($sql, $bindValues)) {
-      return $this->getResultsSet();
+      return $this->normalizeResultsSet($this->getResultsSet()[0], $queryBuilder);
     }
     return false; 
   }
@@ -131,12 +125,32 @@ class DBConnector extends Connector implements IDBConn {
     }
   }
   
-  public function flattenResultSet() {
-
-  }
-  
   public function getSchema() {
     return $this->dbName;
+  }
+  
+  public function normalizeResultsSet(array $resultsSet, $queryBuilder, $modelNamespace = null) {
+    $tableAliases = $queryBuilder->getTableAliases();
+    $resultsCollection = [];
+    foreach($resultsSet as $columnAlias => $value) {
+      $namespace = $tableAliases[$columnAlias]['namespace'];
+      $property  = $tableAliases[$columnAlias]['property'];
+      if ($namespace == $this->modelClass->getName()) {
+        $resultsCollection[$property] = $value;
+      } else {
+        $namespaceIndex = Inflector::camelize(Inflector::singularize(Inflector::tableizeModelName($namespace)));
+        $resultsCollection[$namespaceIndex][$property] = $value;
+      }
+    }
+    return $resultsCollection;
+  }
+  
+  public function normalizeResultsCollection(array $resultsCollection, $queryBuilder) {
+    $modelResults = [];
+    foreach($resultsCollection as $resultSet) {
+      $modelResults[] = self::normalizeResultsSet($resultSet, $queryBuilder);
+    }
+    return $modelResults;
   }
   
   private function conn() {

@@ -44,7 +44,7 @@ abstract class ModelBase {
   
   public static function get($id) {
     $results = self::getModelConnector()->get($id);
-    return self::setCollection($results);
+    return self::setObject($results);
   }
   /**
    * 
@@ -63,17 +63,14 @@ abstract class ModelBase {
     return Connector::instantiate($className::getConnectorConfiguration(), $modelClass);
   }
   
-  private function setObject($name, \stdClass $modelObject) {
-    $className = 'app\\models\\' . Inflector::camelize($name) . "Model";
-    if (\class_exists($className)) {
-      $classReflector = new \ReflectionClass($className);
-      $classInstance = $classReflector->newInstance($modelObject);
-      return $classInstance;
-    }
-    return $modelObject;
+  private static function setObject($modelObject) {
+    $className = get_called_class();
+    $classReflector = new \ReflectionClass($className);
+    $classInstance = $classReflector->newInstance($modelObject);
+    return $classInstance;
   }
   
-  private static function setCollection(array $collection) {
+  public static function setCollection(array $collection) {
     $modelsCollection = [];
     foreach($collection as $entity) {
       $rf = new \ReflectionClass(get_called_class());

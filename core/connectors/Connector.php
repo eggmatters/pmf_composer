@@ -15,7 +15,7 @@ namespace core\connectors;
  *
  * @author meggers
  */
-abstract class Connector {
+abstract class Connector implements IConnector {
   
   /**
    *

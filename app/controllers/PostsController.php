@@ -33,8 +33,8 @@ class PostsController extends ControllerBase {
       ->Select($this->getModelNamespace(), $user->getModelNamespace())
       ->LeftJoin($user->getModelNamespace(), $this->getModelNamespace(), "id")
       ->Where($constraints->term('users.id', '=', $user->getMethodArguments()[0]));
-    $postsData = $connector->executeQuery($qb);
-    $userPosts = $connector::getCollectionFromResultsSet($postsData, $qb);
+    $postsData = $connector->normalizeResultsCollection($connector->executeQuery($qb), $qb);
+    $userPosts = PostModel::setCollection($postsData);
     echo "<pre>";
     print_r($userPosts);
     echo "</pre>";
