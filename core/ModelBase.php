@@ -51,6 +51,11 @@ abstract class ModelBase {
     $results = self::getModelConnector()->get($id);
     return self::setObject($results);
   }
+  
+  public static function getBy($foreignModel, $foreignKey = "id", $foreignValue, $resultsFormatter = null) {
+    $results = self::getModelConnector()->getBy($foreignModel, $foreignKey, $resultsFormatter);
+    return self::setCollection($results);
+  }
   /**
    * 
    * @return core\connectors\DBConnector|core\connectors\APIConnector
@@ -79,12 +84,12 @@ abstract class ModelBase {
    */
   private static function getModelConnector() {
     $className = get_called_class();
-    $modelClass = new \ReflectionClass($className);
+    $modelClass = new \ReflectionClass(get_called_class());
     return Connector::instantiate($className::getConnectorConfiguration(), $modelClass);
   }
   
-  private static function setObject($modelObject, $namespace) {
-    $classReflector = new \ReflectionClass($namespace);
+  private static function setObject($modelObject) {
+    $classReflector = new \ReflectionClass(get_called_class());
     $classInstance = $classReflector->newInstance($modelObject);
     return $classInstance;
   }

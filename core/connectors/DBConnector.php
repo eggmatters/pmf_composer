@@ -2,7 +2,6 @@
 
 namespace core\connectors;
 
-use core\resolver\Inflector;
 
 /**
  * Creates and establishes Connections and queries to a database using PDO
@@ -10,6 +9,9 @@ use core\resolver\Inflector;
  * @author meggers
  */
 class DBConnector extends Connector {
+  
+  const NESTED_LAYOUT = 3;
+  const SIDE_BY_SIDE  = 5;
   
   protected $host;
   protected $dbName;
@@ -54,6 +56,29 @@ class DBConnector extends Connector {
     return false; 
   }
   
+  public function getBy($foreignModel, $foreignKey, $foreignValue, $resultsFormatter = null) {
+    $lhs = \core\resolver\Inflector::tableizeModelName($foreignModel) . ".$foreignKey";
+    $contstraints = new Constraints();
+    $qb = $this->buildQuery()
+      ->Select($this->modelClass->getName(), $foreignModel)
+      ->LeftJoin($foreignModel, $this->modelClass->getName(), $foreignKey)
+      ->Where($contstraints->term($lhs, "=", $foreignValue));
+    $sql = $qb->getSelect();
+    $bindValues = $qb->getBindValues();
+    if ($this->query($sql, $bindValues)) {
+      return $this->normalizeResultsCollection($this->getResultsSet(), $qb);
+    }
+    
+    /*
+      ->Select($this, $user->getModelNamespace())
+      ->LeftJoin($user->getModelNamespace(), $this->getModelNamespace(), "id")
+      ->Where($constraints->term('users.id', '=', $user->getMethodArguments()[0]));
+    $postsData = $connector->normalizeResultsCollection($connector->executeQuery($qb), $qb);
+    $userPosts = PostModel::setCollection($postsData);
+     * 
+     */
+  }
+  
   public function create($params) {
     
   }
@@ -65,7 +90,10 @@ class DBConnector extends Connector {
   public function delete($params = null) {
     
   }
-  
+  /**
+   * 
+   * @return \core\connectors\QueryBase
+   */
   public function buildQuery() {
     return new QueryBase($this, $this->modelClass);
   }
@@ -160,5 +188,4 @@ class DBConnector extends Connector {
     }
     $this->pdoConn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
   }
-
 }

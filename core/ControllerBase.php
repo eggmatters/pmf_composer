@@ -28,6 +28,10 @@ abstract class ControllerBase {
     $this->request = $request;
     $this->controllerArgs = $controllerArgs;
   }
+  
+  public function getModelNamespace() {
+    return self::fetchModelNamespace($this->getNamespace());
+  }
   /**
    * 
    * @return Request
@@ -50,10 +54,6 @@ abstract class ControllerBase {
   protected function getNamespace() {
     $rf = new \ReflectionClass($this);
     return $rf->getName();
-  }
-  
-  protected function getModelNamespace() {
-    return self::fetchModelNamespace($this->getNamespace());
   }
   
   /**

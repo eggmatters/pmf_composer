@@ -3,6 +3,7 @@
 namespace app\controllers;
 use core\ControllerBase;
 use app\models\PostModel;
+use core\connectors;
 /**
  * Description of TestController
  *
@@ -26,15 +27,8 @@ class PostsController extends ControllerBase {
   }
   
   public function getUserPosts(UsersController $user) {
-    /*@var $connector \core\connectors\DBConnector */
-    $connector = PostModel::getConnector();
-    $constraints = new \core\connectors\Constraints();
-    $qb = $connector->buildQuery()
-      ->Select($this->getModelNamespace(), $user->getModelNamespace())
-      ->LeftJoin($user->getModelNamespace(), $this->getModelNamespace(), "id")
-      ->Where($constraints->term('users.id', '=', $user->getMethodArguments()[0]));
-    $postsData = $connector->normalizeResultsCollection($connector->executeQuery($qb), $qb);
-    $userPosts = PostModel::setCollection($postsData);
+    $userArgs = $user->getControllerArgs()->getArguments()[0];
+    $userPosts = PostModel::getBy($user->getModelNamespace(), "id", $userArgs, connectors\DBConnector::NESTED_LAYOUT);
     echo "<pre>";
     print_r($userPosts);
     echo "</pre>";
