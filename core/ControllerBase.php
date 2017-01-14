@@ -32,19 +32,20 @@ abstract class ControllerBase {
   public function getModelNamespace() {
     return self::fetchModelNamespace($this->getNamespace());
   }
+  
+  /**
+   * 
+   * @return \core\resolver\ControllerArgs
+   */
+  public function getControllerArgs() {
+    return $this->controllerArgs;
+  }
   /**
    * 
    * @return Request
    */
   protected function getRequest() {
     return $this->request;
-  }
-  /**
-   * 
-   * @return \core\resolver\ControllerArgs
-   */
-  protected function getControllerArgs() {
-    return $this->controllerArgs;
   }
   
   protected function getMethodArguments() {

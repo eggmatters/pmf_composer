@@ -56,7 +56,9 @@ class DBConnector extends Connector {
     return false; 
   }
   
-  public function getBy($foreignModel, $foreignKey, $foreignValue, $resultsFormatter = null) {
+  public function getBy(\core\ControllerBase $foreignController, $foreignKey, $resultsFormatter = self::NESTED_LAYOUT) {
+    $foreignModel = $foreignController->getModelNamespace();
+    $foreignValue = $foreignController->getControllerArgs()->getArguments()[0]->value;
     $lhs = \core\resolver\Inflector::tableizeModelName($foreignModel) . ".$foreignKey";
     $contstraints = new Constraints();
     $qb = $this->buildQuery()
@@ -68,15 +70,6 @@ class DBConnector extends Connector {
     if ($this->query($sql, $bindValues)) {
       return $this->normalizeResultsCollection($this->getResultsSet(), $qb);
     }
-    
-    /*
-      ->Select($this, $user->getModelNamespace())
-      ->LeftJoin($user->getModelNamespace(), $this->getModelNamespace(), "id")
-      ->Where($constraints->term('users.id', '=', $user->getMethodArguments()[0]));
-    $postsData = $connector->normalizeResultsCollection($connector->executeQuery($qb), $qb);
-    $userPosts = PostModel::setCollection($postsData);
-     * 
-     */
   }
   
   public function create($params) {

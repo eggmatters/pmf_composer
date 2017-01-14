@@ -52,8 +52,8 @@ abstract class ModelBase {
     return self::setObject($results);
   }
   
-  public static function getBy($foreignModel, $foreignKey = "id", $foreignValue, $resultsFormatter = null) {
-    $results = self::getModelConnector()->getBy($foreignModel, $foreignKey, $resultsFormatter);
+  public static function getBy(\core\ControllerBase  $foreignController, $foreignKey, $resultsFormatter = null) {
+    $results = self::getModelConnector()->getBy($foreignController, $foreignKey, $resultsFormatter);
     return self::setCollection($results);
   }
   /**
@@ -78,7 +78,7 @@ abstract class ModelBase {
     return $modelsCollection;
   }
   
-  /**$property
+  /**
    * 
    * @return Connector
    */
