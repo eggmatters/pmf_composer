@@ -109,6 +109,9 @@ class DBConnector extends Connector {
       $errorMessage = "Database error: Code {$e->getCode()}\n"
         . "Message: {$e->getMessage()}";
       error_log($errorMessage);
+      unset($this->stmt);
+      unset($this->pdoConn);
+      $this->resultSet = null;
       return false;
     }
     if ($this->stmt->columnCount() > 0) {

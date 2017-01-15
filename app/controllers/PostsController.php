@@ -33,25 +33,22 @@ class PostsController extends ControllerBase {
     echo "</pre>";
   }
   
-  public function getUserPostsTest(UsersController $user
-    , int $position
-    , string $tag
-    , string $flap
-    , float $float
-    , array $array) {
-    echo "<h1>POSTS</h2>";
+  public function getPostTags(TagsController $tags) {
+    /* @var $connector \core\connectors\DBConnector */
+    $connector = PostModel::getConnector();
+    $constraints = new connectors\Constraints();
+    $tagsValue = $tags->getControllerArgs()->getArguments()[0]->value;
+    $sql = $connector->buildQuery()
+      ->Select($this->getModelNamespace(), $tags->getModelNamespace())
+      ->LeftJoin('posts_tags', $this->getModelNamespace(), "posts_id" ,"id")
+      ->LeftJoin($tags->getModelNamespace(), 'posts_tags',"id","tags_id")
+      ->Where(
+        $constraints->term('tags.id', '=', $tagsValue)
+        );
+    $connector->executeQuery($sql);
+    $postTags = PostModel::setCollection($connector->normalizeResultsCollection($connector->getResultsSet(), $sql));
     echo "<pre>";
-    print_r($user);
-    echo "\n";
-    echo($position);
-    echo "\n";
-    echo($tag);
-    echo "\n";
-    echo($flap);
-    echo "\n";
-    echo($float);
-    echo "\n";
-    print_r(join(",", $array));
+    print_r($postTags);
     echo "</pre>";
   }
 }

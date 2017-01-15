@@ -23,18 +23,18 @@ class Constraints {
     $this->bindings = [];
   }
   
-  public function term($lhs, $operator, $rhs) {
-    $this->constraints .= $this->setTerm($lhs, $operator, $rhs);
+  public function term($lhs, $operator, $rhs, $bind = true) {
+    $this->constraints .= $this->setTerm($lhs, $operator, $rhs, $bind);
     return $this;
   }
   
-  public function andTerm($lhs = "", $operator = "", $rhs = "") {
-    $this->constraints .= "AND " . $this->setTerm($lhs, $operator, $rhs);
+  public function andTerm($lhs = "", $operator = "", $rhs = "", $bind = true) {
+    $this->constraints .= "AND " . $this->setTerm($lhs, $operator, $rhs, $bind);
     return $this;
   }
   
-  public function orTerm($lhs = "", $operator = "", $rhs = "") {
-    $this->constraints .= "OR "  . $this->setTerm($lhs, $operator, $rhs);
+  public function orTerm($lhs = "", $operator = "", $rhs = "", $bind = true) {
+    $this->constraints .= "OR "  . $this->setTerm($lhs, $operator, $rhs, $bind);
     return $this;
   }
   
@@ -56,8 +56,8 @@ class Constraints {
     return $this->bindings;
   }
   
-  private function setTerm($lhs = "", $operator = "", $rhs = "") {
-    if (!empty($lhs) && !empty($rhs)) {
+  private function setTerm($lhs = "", $operator = "", $rhs = "", $bind = true) {
+    if ((!empty($lhs) && !empty($rhs)) && $bind) {
       $rhs = $this->setBindings($lhs, $rhs);
     }
     return trim("$lhs $operator $rhs") . " ";

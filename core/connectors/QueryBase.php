@@ -59,16 +59,22 @@ class QueryBase {
    * @param \ReflectionClass | string  $onTable
    * @param string $foreignKey
    */
-  public function LeftJoin($fromTable, $onTable, $foreignKey) {
+  public function LeftJoin($fromTable, $onTable, $lvalue, $rvalue = null) {
     $from = (is_a($fromTable, \ReflectionClass::class)) 
       ? Inflector::tableizeModelName($fromTable->name) 
         : Inflector::tableizeModelName($fromTable);
     $on = (is_a($onTable, \ReflectionClass::class)) 
       ? Inflector::tableizeModelName($onTable->name) 
         : Inflector::tableizeModelName($onTable);
-    $this->query['JOINS'][] = "LEFT JOIN $from ON "
-      . $from . "." . $foreignKey . " = " 
-      . $on . "." . $foreignKey;
+    if (is_null($rvalue)) {
+      $this->query['JOINS'][] = "LEFT JOIN $from ON "
+      . $from . "." . $lvalue . " = " 
+      . $on . "." . $lvalue;
+    } else {
+      $this->query['JOINS'][] = "LEFT JOIN $from ON "
+      . $on . "." . $rvalue . " = " 
+      . $from . "." . $lvalue;
+    }
     return $this;
   }
   
@@ -94,7 +100,7 @@ class QueryBase {
    */
   public function getSelect() {
     $queryString  = isset($this->query['SELECT']) ? $this->query['SELECT'] ." " : "";
-    $queryString .= isset($this->query['JOINS']) ? implode("",$this->query['JOINS']) . " " : "";
+    $queryString .= isset($this->query['JOINS']) ? implode(" ",$this->query['JOINS']) . " " : "";
     $queryString .= isset($this->query['WHERE']) ? $this->query['WHERE'] . " " : "";
     return $queryString;
   }
