@@ -13,6 +13,34 @@ namespace core\connectors;
  *
  * @author meggers
  */
-class APIConnector {
-  //put your code here
+class APIConnector extends Connector {
+
+  public function create($params) {
+    
+  }
+
+  public function delete($params = null) {
+    
+  }
+
+  public function get($id = null) {
+    
+  }
+
+  public function getAll() {
+    
+  }
+
+  public function normalizeResultsCollection(array $resultsCollection, \utilities\normalizers\INormalizer $normalizer) {
+    
+  }
+
+  public function normalizeResultsSet(array $resultsSet, \utilities\normalizers\INormalizer $normalizer) {
+    
+  }
+
+  public function update($id, $params) {
+    
+  }
+
 }

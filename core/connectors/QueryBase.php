@@ -15,22 +15,60 @@ namespace core\connectors;
  */
 use core\resolver\Inflector;
 
-class QueryBase {
+use utilities\normalizers\DBNormalizer;
 
+class QueryBase {
+  /**
+   *
+   * @var /ReflectionClass 
+   */
   private $modelClass;
+  /**
+   *
+   * @var string 
+   */
   private $currentTable;
+  /**
+   *
+   * @var array 
+   */
   private $query;
+  /**
+   *
+   * @var array 
+   */
   private $columnsList;
+  /**
+   *
+   * @var array 
+   */
   private $tableAliases;
-  private $fkConstraints;
+  /**
+   *
+   * @var array 
+   */
   private $bindings;
+  /**
+   *
+   * @var array 
+   */
+  private $eagerLoading;
+  /**
+   *
+   * @var int 
+   */
+  private $layout;
   /**
    *
    * @var core\DBConnector 
    */
   private $dbConn;
   
-  public function __construct(DBConnector $connector, \ReflectionClass $modelClass, $eagerLoading = false) {
+  public function __construct(DBConnector $connector
+    , \ReflectionClass $modelClass
+    , $eagerLoading = false
+    , $layout = DBNormalizer::NESTED_LAYOUT ) 
+  {
     $this->modelClass = $modelClass;
     $this->currentTable = \core\resolver\Inflector::tableizeModelName($modelClass->name);
     $this->query = [];
@@ -38,6 +76,8 @@ class QueryBase {
     $this->tableAliases = [];
     $this->bindings = [];
     $this->dbConn = $connector;
+    $this->eagerLoading = $eagerLoading;
+    $this->layout = $layout;
   }
   
   /**
@@ -46,9 +86,8 @@ class QueryBase {
    * @return $this
    */
   public function Select(...$models) {
-    $models = (empty($models)) ? [$this->modelClass->getName()] : $models;
+    $models = (empty($models) || !$this->eagerLoading) ? [$this->modelClass->getName()] : $models;
     $this->columnsList = array_map('\\core\\connectors\\QueryBase::formatSelectColumns', $models);
-    //$this->setModelInstances($models);
     $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
     return $this;
   }
@@ -121,27 +160,6 @@ class QueryBase {
     return $bindValues;
   }
   
-  private function setBindValueStrings($array) {
-    return array_map(create_function('$str', 'return ":$str";'), $array);
-  }
-  
-  public function foreignKeyConstraints($tablesList) {
-    //$tablesList[] = $this->currentTable;
-    $tablesListBindStrings = implode(',',$this->setBindValueStrings($tablesList));
-    $tablesListBindValues  = $this->setBindValues($tablesList);
-    $sql = "SELECT i.TABLE_NAME, k.COLUMN_NAME, k.REFERENCED_TABLE_NAME"
-      . " FROM information_schema.TABLE_CONSTRAINTS i"
-      . " LEFT JOIN information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME"
-      . " WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY'"
-      . " AND i.TABLE_SCHEMA = DATABASE()"
-      . " AND k.REFERENCED_TABLE_NAME in ($tablesListBindStrings);";
-    if ($this->dbConn->query($sql, $tablesListBindValues)) {
-       return $this->dbConn->getResultsSet();
-    } else {
-      return false;
-    }
-  }
-  
   private function getTableColumns($namespace) {
     $rf = new \ReflectionClass($namespace);
     if ($rf->hasConstant('allowedFields')) {
@@ -158,6 +176,26 @@ class QueryBase {
     }
   }
   
+  private function setBindValueStrings($array) {
+    return array_map(create_function('$str', 'return ":$str";'), $array);
+  }
+  
+  public function foreignKeyConstraints($tablesList) {
+    $tablesListBindStrings = implode(',',$this->setBindValueStrings($tablesList));
+    $tablesListBindValues  = $this->setBindValues($tablesList);
+    $sql = "SELECT i.TABLE_NAME, k.COLUMN_NAME, k.REFERENCED_TABLE_NAME"
+      . " FROM information_schema.TABLE_CONSTRAINTS i"
+      . " LEFT JOIN information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME"
+      . " WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY'"
+      . " AND i.TABLE_SCHEMA = DATABASE()"
+      . " AND k.REFERENCED_TABLE_NAME in ($tablesListBindStrings);";
+    if ($this->dbConn->query($sql, $tablesListBindValues)) {
+       return $this->dbConn->getResultsSet();
+    } else {
+      return false;
+    }
+  }
+  
   private function formatSelectColumns($namespace) {
     $table  = Inflector::tableizeModelName($namespace);
     $colums = $this->getTableColumns($namespace);
@@ -168,111 +206,4 @@ class QueryBase {
       return "$table.$column as $columnAlias";
     }, $colums));
   }
-
 }
-/**
- * Join Table:
- * /posts/1/tags
- *  [0] => Array
-        (
-            [TABLE_NAME] => posts_tags
-            [COLUMN_NAME] => posts_id
-            [REFERENCED_TABLE_NAME] => posts
-        )
-
-    [1] => Array
-        (
-            [TABLE_NAME] => posts_tags
-            [COLUMN_NAME] => tags_id
-            [REFERENCED_TABLE_NAME] => tags
-        )
-SELECT 
-    tags.*
-FROM
-    -- current table
-    tags	
-		JOIN
-    -- current table = [2] => Array ([REFERENCED_TABLE_NAME] => tag  
-  private function stringifyColunns($tableColumns, $tableName) {
-    return 
-  }
-}s)
-    posts_tags ON tags.id = posts_tags.tags_id
-    -- next table = [2] => Array ([TABLE_NAME] => posts_tags)
-		JOIN
-	  -- [2] => Array ([TABLE_NAME] => posts_tags)
-    -- [1] => Array ([REFERENCED_TABLE_NAME] => posts_             
-    posts ON posts.id = posts_tags.posts_id
-WHERE
-    posts.id = 1;
- * 
- * 
- * Straight Join:
- * /users/2/posts
- *  [0] => Array
-        (
-            [TABLE_NAME] => posts
-            [COLUMN_NAME] => users_id
-            [REFERENCED_TABLE_NAME] => users
-        )
-
-    [1] => Array
-        (
-            [TABLE_NAME] => posts_tags
-            [COLUMN_NAME] => posts_id
-            [REFERENCED_TABLE_NAME] => posts
-        )
- * 
-SELECT 
-    posts.*
-FROM
-    -- current table
-    posts	
-		JOIN
-    -- current table = [2] => Array ([REFERENCED_TABLE_NAME] => users)
-    users ON users.id = posts.users_id
-WHERE
-    posts.id = 1;
- * Mutli Join:
- * users/1/posts/tags
- *  [0] => Array
-        (
-            [TABLE_NAME] => posts
-            [COLUMN_NAME] => users_id
-            [REFERENCED_TABLE_NAME] => users
-        )
-
-    [1] => Array
-        (
-            [TABLE_NAME] => posts_tags
-            [COLUMN_NAME] => posts_id
-            [REFERENCED_TABLE_NAME] => posts
-        )
-
-    [2] => Array
-        (
-            [TABLE_NAME] => posts_tags
-            [COLUMN_NAME] => tags_id
-            [REFERENCED_TABLE_NAME] => tags
-        )
-SELECT 
-    tags.*
-FROM
-    -- current table
-    tags	
-		JOIN
-    -- current table = [2] => Array ([REFERENCED_TABLE_NAME] => tags)
-    posts_tags ON tags.id = posts_tags.tags_id
-    -- next table = [2] => Array ([TABLE_NAME] => posts_tags)
-		JOIN
-	-- [2] => Array ([TABLE_NAME] => posts_tags)
-    -- [1] => Array ([REFERENCED_TABLE_NAME] => posts_             
-    posts ON posts.id = posts_tags.posts_id
-    -- 
-		JOIN
-	-- [0] => Array ([TABLE_NAME] => posts)
-    -- [0] => Array ([REFERENCED_TABLE_NAME] => users)
-    users on users.id = posts.users_id
-WHERE
-    users.id = 1;
- */

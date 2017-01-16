@@ -10,11 +10,6 @@ namespace core\connectors;
  */
 class DBConnector extends Connector {
   
-  const NESTED_LAYOUT = 1; // 0b0001
-  const EAGER_LOADING = 2; // 0b0010
-  const SIDE_BY_SIDE  = 4; // 0b0100
-  const LAZY_LOADING  = 8; // 0b1000
-  
   protected $host;
   protected $dbName;
   protected $user;

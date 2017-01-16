@@ -18,6 +18,6 @@ interface IConnector {
   public function create($params);
   public function update($id, $params);
   public function delete($params = null);
-  public function getSet(array $resultsSet, INormalizer $normalizer);
-  public function getResultsCollection(array $resultsCollection, INormalizer $normalizer);
+  public function normalizeResultsSet(array $resultsSet, INormalizer $normalizer);
+  public function normalizeResultsCollection(array $resultsCollection, INormalizer $normalizer);
 }
