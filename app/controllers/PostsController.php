@@ -3,7 +3,7 @@
 namespace app\controllers;
 use core\ControllerBase;
 use app\models\PostModel;
-use core\connectors;
+use core\connectors\DBConnector;
 /**
  * Description of TestController
  *
@@ -27,7 +27,7 @@ class PostsController extends ControllerBase {
   }
   
   public function getUserPosts(UsersController $user) {
-    $userPosts = PostModel::getBy($user, "id", connectors\DBConnector::NESTED_LAYOUT);
+    $userPosts = PostModel::getBy($user, "id", DBConnector::NESTED_LAYOUT);
     echo "<pre>";
     print_r($userPosts);
     echo "</pre>";
