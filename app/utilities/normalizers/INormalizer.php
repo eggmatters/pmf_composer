@@ -7,5 +7,8 @@ namespace utilities\normalizers;
  * @author matthewe
  */
 interface INormalizer {
-  //put your code here
+  public function arrayToModelsCollection();
+  public function arrayToModel();
+  public function modelToArray();
+  public function modelToJson();
 }

@@ -34,8 +34,6 @@ abstract class Connector implements IConnector {
   abstract public function getAll();
   
   abstract public function get($id = null);
-  
-  abstract public function getBy(\core\ControllerBase $foreignController, $foreignKey, $resultsFormatter = null);
 
   abstract public function create($params);
   

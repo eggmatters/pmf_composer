@@ -15,7 +15,6 @@ abstract class ModelBase {
    *
    * @var Connector; 
    */
-  
   protected static abstract function getConnectorConfiguration();
 
   public function __construct(array $modelAttributes = null) {
