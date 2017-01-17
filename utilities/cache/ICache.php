@@ -7,7 +7,8 @@ namespace utilities\cache;
  * @author matthewe
  */
 interface ICache {
-  public function isCacheEnabled();
+  public static function isCacheEnabled();
+  public static function enableCache();
   public function setCachedObject($object, $key);
   public function setCachedArray($array, $key);
   public function setCachedValue($value, $key);

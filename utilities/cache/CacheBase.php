@@ -8,6 +8,8 @@
 
 namespace utilities\cache;
 
+use core\CoreApp;
+use core\resolver\Inflector;
 /**
  * Description of CacheBase
  *
@@ -28,6 +30,18 @@ abstract class CacheBase implements ICache {
       : CoreApp::rootDir() . DIRECTORY_SEPARATOR . $appPath;
     $this->namespaceBase = (is_null($appPath)) ? "app" : "\\" . $appPath;
     $this->namespaceDirectories = [];
+  }
+  
+  public function getAppPath() {
+    return $this->appPath;
+  }
+  
+  public function getNamespaceBase() {
+    return $this->namespaceBase;
+  }
+  
+  public function getNamespaceDirectories() {
+    return $this->namespaceDirectories;
   }
   
   protected function getIterator($path) {
@@ -52,5 +66,30 @@ abstract class CacheBase implements ICache {
       }
     }
     return $namespaceArray;
+  }
+  
+  public static function isCacheEnabled() {
+    return false;
+  }
+  public static function enableCache() {
+    
+  }
+  public function setCachedObject($object, $key) {
+    
+  }
+  public function setCachedArray($array, $key) {
+    
+  }
+  public function setCachedValue($value, $key) {
+    
+  }
+  public function getCachedObject($key) {
+    return null;
+  }
+  public function getCachedArray($key) {
+    return null;
+  }
+  public function getCachedValue($key) {
+    return null;
   }
 }

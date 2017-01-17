@@ -189,7 +189,6 @@ class ControllerArgs {
             . "\nPlease typehint parameters in controller methods";
           throw new \Exception($message );
         }
-        $dbg = $param->getType()->__toString();
         return ($param->getType()->__toString() == $type);
       });
       if (count($matchingParams) > 1) {

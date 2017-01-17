@@ -18,7 +18,7 @@ class CoreApp {
     $resolver = new resolver\Resolver();
     $controllerArgs = $resolver->resolveRequest($request);
     /* @var $resolvedControllerArg resolver\ControllerArgs */
-    $resolvedControllerArg = $resolver->resolveController($request, $controllerArgs);
+    $resolvedControllerArg = $resolver->resolveController($controllerArgs);
     if (is_null($resolvedControllerArg)) {
       self::issue("404");
       return;
