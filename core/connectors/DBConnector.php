@@ -93,10 +93,15 @@ class DBConnector extends Connector {
     if ($this->query($queryBuilder->getSelect(), $bindValues)) {
       return $this->getResultsSet();
     }
-    return false; 
-    
+    return false;
   }
   
+  public function rawQuery($sql, array $bindValues = [], $outputFormat = \PDO::FETCH_ASSOC) {
+    if ($this->query($sql, $bindValues, $outputFormat)) {
+      return $this->getResultsSet();
+    }
+    return false;
+  }
   public function query($sql, array $bindValues = [], $outputFormat = \PDO::FETCH_ASSOC) {
     $this->conn();
     $this->stmt = $this->pdoConn->prepare($sql);

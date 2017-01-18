@@ -41,12 +41,16 @@ abstract class Connector implements IConnector {
   
   abstract public function delete($params = null);
 
-  public function __construct(int $conntype, \ReflectionClass $modelClass) {
+  public function __construct(int $conntype, \ReflectionClass $modelClass = null) {
     $this->conntype = $conntype;
     $this->modelClass = $modelClass;
   }
   
-  public static function instantiate(array $connectorConfiguration, \ReflectionClass $modelClass) {
+  public function setModelClass(\ReflectionClass $modelClass) {
+    $this->modelClass = $modelClass;
+  }
+  
+  public static function instantiate(array $connectorConfiguration, \ReflectionClass $modelClass = null) {
     $thisReflectionClass = new \ReflectionClass($connectorConfiguration['Connector']);
     $conntype = null;
     switch ($thisReflectionClass->name) {

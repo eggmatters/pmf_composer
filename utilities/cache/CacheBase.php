@@ -72,7 +72,7 @@ abstract class CacheBase implements ICache {
     return false;
   }
   public static function enableCache() {
-    
+    return false;
   }
   public function setCachedObject($object, $key) {
     
@@ -84,7 +84,7 @@ abstract class CacheBase implements ICache {
     
   }
   public function getCachedObject($key) {
-    return null;
+    return false;
   }
   public function getCachedArray($key) {
     return null;

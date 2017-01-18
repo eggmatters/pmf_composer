@@ -65,12 +65,14 @@ class QueryBase {
   private $dbConn;
   
   public function __construct(DBConnector $connector
-    , \ReflectionClass $modelClass
+    , \ReflectionClass $modelClass = null
     , $eagerLoading = false
     , $layout = DBNormalizer::NESTED_LAYOUT ) 
   {
     $this->modelClass = $modelClass;
-    $this->currentTable = \core\resolver\Inflector::tableizeModelName($modelClass->name);
+    $this->currentTable = (is_null($modelClass)) ?
+      "" :
+        \core\resolver\Inflector::tableizeModelName($modelClass->name);
     $this->query = [];
     $this->columnsList = [];
     $this->tableAliases = [];
