@@ -18,14 +18,16 @@ use core\connectors\DBConnector;
  * @author meggers
  */
 class DBCache extends CacheBase {
-  const TABLE_COLUMNS = 'table_columns';
-  const DB_RELATIONS = 'db_relations';
+  const DB_NODES = 'db_nodes';
   /**
    *
    * @var core\connectors\DBConnector 
    */
   private $dbConnector;
-  
+  /**
+   *
+   * @var array - array of anonymous classes. 
+   */
   private $dbNodes;
   
   /**
@@ -34,6 +36,10 @@ class DBCache extends CacheBase {
    */
   private $queryBase;
   
+  private $tables;
+  
+  private $relations;
+  
   public function __construct($appPath = null) {
     parent::__construct($appPath);
     $this->dbConnector = new DBConnector(DBConnector::DBCONN);
@@ -41,15 +47,27 @@ class DBCache extends CacheBase {
     $this->dbNodes = [];
   }
   
-  public function setDbNode($tableName) {
-    
+  public function setDbNodes() {
+    $this->tables = $this->getAllTables();
+    $this->relations = $this->getTableRelations();
+    foreach($this->tables as $table) {
+      $tableColumns = $this->getTableColumns($table);
+      
+    }
+  }
+  /**
+   * 
+   * @param string $tableName
+   * @return DBNode
+   */
+  private function getDBNode($tableName) {
+    if (!isset($this->dbNodes[$tableName])) {
+      $this->dbNodes[$tableName] = new DBNode($tableName);
+    } 
+    return $this->dbNodes[$tableName];
   }
   
-  public function setTableColumns() {
-    
-  }
-  
-  private function getConstrainedTables() {
+  private function getTableRelations() {
     $sql = "SELECT i.TABLE_NAME, k.COLUMN_NAME, k.REFERENCED_TABLE_NAME"
       . " FROM information_schema.TABLE_CONSTRAINTS i"
       . " LEFT JOIN information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME"
@@ -61,6 +79,27 @@ class DBCache extends CacheBase {
   private function getAllTables() {
     $sql = "SELECT TABLE_NAME FROM information_schema.TABLES"
       . " WHERE TABLE_SCHEMA = DATABASE();";
-    return $this->dbConnector->rawQuery($sql);
+    return array_column($this->dbConnector->rawQuery($sql), 'TABLE_NAME');
+  }
+  
+  private function getTableColumns($table) {
+    $sql = "SELECT COLUMN_NAME FROM information_schema.COLUMNS "
+      ." WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table";
+    if ($this->dbConn->query($sql, ['table' => $table])) {
+      return array_column($this->dbConn->getResultsSet(), 'COLUMN_NAME');
+    } else {
+      return null;
+    }
+  }
+  
+  private function fetchRelation($tableName) {
+    $m = array_filter($this->relations, function($row) use ($tableName) {
+      if ($row['TABLE_NAME'] == $tableName) {
+        $node = $this->getDBNode($tableName);
+        $parentNode = $this->getDBNode($row['REFERENCED_TABLE']);
+        $parentNode->setChild($tableName, $node);
+        $node->setParent($row['REFERENCED_TABLE'], $parentNode);
+      }
+    });
   }
 }
