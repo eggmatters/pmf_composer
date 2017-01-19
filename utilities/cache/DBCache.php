@@ -30,30 +30,37 @@ class DBCache extends CacheBase {
    */
   private $dbNodes;
   
-  /**
-   *
-   * @var core\connectors\QueryBase 
-   */
-  private $queryBase;
-  
   private $tables;
   
   private $relations;
   
-  public function __construct($appPath = null) {
+  public function __construct($appPath = null, $connector = null) {
     parent::__construct($appPath);
-    $this->dbConnector = new DBConnector(DBConnector::DBCONN);
-    $this->queryBase = new QueryBase($this->dbConnector);
+    $this->dbConnector = $connector;
     $this->dbNodes = [];
   }
   
   public function setDbNodes() {
+    $this->dbNodes = $this->getCachedArray(self::DB_NODES);
+    if (!empty($this->dbNodes)) {
+      return;
+    }
     $this->tables = $this->getAllTables();
     $this->relations = $this->getTableRelations();
     foreach($this->tables as $table) {
       $tableColumns = $this->getTableColumns($table);
-      
+      $this->setRelatedNodes($table);
+      $this->dbNodes[$table]->setColumns($tableColumns);
     }
+  }
+  
+  public function getDbNodes() {
+    $this->dbNodes = $this->getCachedArray(self::DB_NODES);
+    if (empty($this->dbNodes)) {
+      $this->setDbNodes();
+      $this->setCachedArray($this->dbNodes, self::DB_NODES);
+    }
+    return $this->dbNodes;
   }
   /**
    * 
@@ -92,14 +99,21 @@ class DBCache extends CacheBase {
     }
   }
   
-  private function fetchRelation($tableName) {
-    $m = array_filter($this->relations, function($row) use ($tableName) {
+  private function setRelatedNodes($tableName) {
+    $iterator = new \core\SimpleIterator($this->relations);
+    $row = $iterator->current();
+    while ($iterator->hasNext()) {
       if ($row['TABLE_NAME'] == $tableName) {
         $node = $this->getDBNode($tableName);
         $parentNode = $this->getDBNode($row['REFERENCED_TABLE']);
         $parentNode->setChild($tableName, $node);
         $node->setParent($row['REFERENCED_TABLE'], $parentNode);
+      } else if ($row['REFERENCED_TABLE_NAME'] == $tableName) {
+        $node = $this->getDBNode($tableName);
+        $childNode = $this->getDBNode($row['TABLE_NAME']);
+        $node->setChild($row['TABLE_NAME'], $childNode);
       }
-    });
+      $iterator->next();
+    }
   }
 }

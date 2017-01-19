@@ -7,5 +7,5 @@ use core\ModelBase;
  * @author matthewe
  */
 class TagModel extends ModelBase {
-  use \configurations\schemaConnector;
+  use \configurations\schemaConnectorTrait;
 }

@@ -52,7 +52,7 @@ class DBNode {
     $this->children = $children;
     return $this;
   }
-  public function geChild($childname) {
+  public function getChild($childname) {
     return (isset($this->children[$childname])) ?
       $this->children[$childname] :
         null;            

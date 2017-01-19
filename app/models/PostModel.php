@@ -8,8 +8,8 @@ use core\ModelBase;
  */
 class PostModel extends ModelBase {
   /**
-   * schemaConnector is a defined trait which provides the 
+   * schemaConnectorTrait is a defined trait which provides the 
    * required abstract function: protected static function getConnectorConfiguration()
    */
-  use \configurations\schemaConnector;
+  use \configurations\schemaConnectorTrait;
 }

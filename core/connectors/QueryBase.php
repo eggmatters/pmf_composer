@@ -64,6 +64,8 @@ class QueryBase {
    */
   private $dbConn;
   
+  private $dbNodes;
+  
   public function __construct(DBConnector $connector
     , \ReflectionClass $modelClass = null
     , $eagerLoading = false
@@ -180,22 +182,6 @@ class QueryBase {
   
   private function setBindValueStrings($array) {
     return array_map(create_function('$str', 'return ":$str";'), $array);
-  }
-  
-  public function foreignKeyConstraints($tablesList) {
-    $tablesListBindStrings = implode(',',$this->setBindValueStrings($tablesList));
-    $tablesListBindValues  = $this->setBindValues($tablesList);
-    $sql = "SELECT i.TABLE_NAME, k.COLUMN_NAME, k.REFERENCED_TABLE_NAME"
-      . " FROM information_schema.TABLE_CONSTRAINTS i"
-      . " LEFT JOIN information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME"
-      . " WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY'"
-      . " AND i.TABLE_SCHEMA = DATABASE()"
-      . " AND k.REFERENCED_TABLE_NAME in ($tablesListBindStrings);";
-    if ($this->dbConn->query($sql, $tablesListBindValues)) {
-       return $this->dbConn->getResultsSet();
-    } else {
-      return false;
-    }
   }
   
   private function formatSelectColumns($namespace) {

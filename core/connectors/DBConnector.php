@@ -2,7 +2,8 @@
 
 namespace core\connectors;
 
-
+use utilities\normalizers\INormalizer;
+use utilities\normalizers\DBNormalizer;
 /**
  * Creates and establishes Connections and queries to a database using PDO
  *
@@ -20,7 +21,14 @@ class DBConnector extends Connector {
   private $lastInserted;
   private $resultSet;
   private $numRows;
+  private $dbNodes;
 
+  public function __construct(int $conntype, \ReflectionClass $modelClass = null) {
+    parent::__construct($conntype, $modelClass);
+    $dbCache = new \utilities\cache\DBCache("", $this);
+    $this->dbNodes = $dbCache->getDbNodes();
+  }
+  
   public function getAll() {
     $queryBase = new QueryBase($this, $this->modelClass);
     $constraint = new Constraints();
@@ -48,7 +56,8 @@ class DBConnector extends Connector {
       ->getSelect();
     $bindValues = $queryBuilder->getBindValues();
     if ($this->query($sql, $bindValues)) {
-      return $this->normalizeResultsSet($this->getResultsSet()[0], $queryBuilder);
+      $dbNormalizer = new DBNormalizer($queryBuilder);
+      return $this->normalizeResultsSet($this->getResultsSet()[0], $dbNormalizer);
     }
     return false; 
   }
@@ -155,28 +164,17 @@ class DBConnector extends Connector {
     return $this->dbName;
   }
   
-  public function normalizeResultsSet(array $resultsSet, $queryBuilder) {
-    $tableAliases = $queryBuilder->getTableAliases();
-    $resultsCollection = [];
-    foreach($resultsSet as $columnAlias => $value) {
-      $namespace = $tableAliases[$columnAlias]['namespace'];
-      $property  = $tableAliases[$columnAlias]['property'];
-      if ($namespace == $this->modelClass->getName()) {
-        $resultsCollection[$property] = $value;
-      } else {
-        $resultsCollection[$namespace][$property] = $value;
-      }
-    }
-    return $resultsCollection;
+  public function normalizeResultsSet(array $resultsSet, INormalizer $dbNormalizer) {
+    return $dbNormalizer->arrayToModel($resultsSet);
   }
   
-  public function normalizeResultsCollection(array $resultsCollection, $queryBuilder) {
-    $modelResults = [];
-    foreach($resultsCollection as $resultSet) {
-      $modelResults[] = self::normalizeResultsSet($resultSet, $queryBuilder);
-    }
-    return $modelResults;
-  }
+//  public function normalizeResultsCollection(array $resultsCollection, $queryBuilder) {
+//    $modelResults = [];
+//    foreach($resultsCollection as $resultSet) {
+//      $modelResults[] = self::normalizeResultsSet($resultSet, $queryBuilder);
+//    }
+//    return $modelResults;
+//  }
   
   private function conn() {
     try {
@@ -186,4 +184,9 @@ class DBConnector extends Connector {
     }
     $this->pdoConn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
   }
+
+  public function normalizeResultsCollection(array $resultsCollection, INormalizer $normalizer) {
+    
+  }
+
 }

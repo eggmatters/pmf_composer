@@ -9,5 +9,5 @@ use core\ModelBase;
  */
 
 class IndexModel extends ModelBase {
-  use \configurations\schemaConnector;
+  use \configurations\schemaConnectorTrait;
 }

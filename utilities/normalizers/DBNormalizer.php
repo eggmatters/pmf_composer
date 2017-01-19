@@ -27,7 +27,7 @@ class DBNormalizer implements INormalizer {
     
   }
   
-  public function arrayToModel(array $resultsCollection, $modelNamespace, $formatter = null) {
+  public function arrayToModel(array $resultsSet, $formatter = null) {
     $formatter = is_null($formatter) ? 0b00 : $formatter;
     // ($formatter & self::NESTED_LAYOUT)
     $tableAliases = $this->queryBuilder->getTableAliases();
