@@ -9,12 +9,6 @@ use core\connectors\QueryBase;
  * @author matthewe
  */
 class DBNormalizer implements INormalizer {
-  
-  const NESTED_LAYOUT = 1; // 0b0001
-  const EAGER_LOADING = 2; // 0b0010
-  const SIDE_BY_SIDE  = 4; // 0b0100
-  const LAZY_LOADING  = 8; // 0b1000
-  
   private $queryBase;
   private $defaultFormat;
   
@@ -28,8 +22,7 @@ class DBNormalizer implements INormalizer {
   }
   
   public function arrayToModel(array $resultsSet, $modelNamespace = null, $formatter = null) {
-    $formatter = is_null($formatter) ? 0b00 : $formatter;
-    // ($formatter & self::NESTED_LAYOUT)
+    
     $tableAliases = $this->queryBuilder->getTableAliases();
     $resultsCollection = [];
     foreach($resultsSet as $columnAlias => $value) {

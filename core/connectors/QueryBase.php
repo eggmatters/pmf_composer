@@ -52,11 +52,6 @@ class QueryBase {
   private $bindings;
   /**
    *
-   * @var array 
-   */
-  private $eagerLoading;
-  /**
-   *
    * @var int 
    */
   private $layout;
@@ -67,12 +62,10 @@ class QueryBase {
   
   public function __construct(\ReflectionClass $modelClass = null
     , DBCache $dbCache = null
-    , $eagerLoading = false
     , $layout = DBNormalizer::NESTED_LAYOUT ) 
   {
     $this->modelClass = $modelClass;
     $this->dbCache = $dbCache;
-    $this->eagerLoading = $eagerLoading;
     $this->layout = $layout;
     
     $this->currentTable = (is_null($modelClass)) ?
@@ -91,7 +84,7 @@ class QueryBase {
    * @return $this
    */
   public function Select(...$models) {
-    $models = (empty($models) || !$this->eagerLoading) ? [$this->modelClass->getName()] : $models;
+    $models = (empty($models)) ? [$this->modelClass->getName()] : $models;
     $this->columnsList = array_map('\\core\\connectors\\QueryBase::formatSelectColumns', $models);
     $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
     return $this;
@@ -158,7 +151,7 @@ class QueryBase {
   }
   
   private function formatSelectColumns($namespace) {
-    $table  = Inflector::tableizeModelName($namespace);
+    $table  = (strpos('Model', $namespace)) ? Inflector::tableizeModelName($namespace) : $namespace;
     $colums = $this->dbNodes[$table]->getColumns();
     $namespaceAlias = Inflector::aliasNamepsace($namespace);
     return join(',', array_map(function($column) use ($table, $namespace, $namespaceAlias) {

@@ -16,12 +16,15 @@ class DBConnector extends Connector {
   protected $user;
   protected $pass;
   
-  public function getAll() {
+  public function getAll($eagerLoading = false, $formatter = null) {
     $mysql = $this->getMySql();
     $constraint = new Constraints();
-    $queryBase = (new QueryBase($this->modelClass, $this->connectorCache))
-      ->Select()
-      ->Where($constraint);
+    $queryBase = new QueryBase($this->modelClass, $this->connectorCache);
+    if ($eagerLoading) {
+      
+    } else {
+    $queryBase->Select()->Where($constraint);
+    }
     return $mysql->executeQuery($queryBase);
   }
   
@@ -89,5 +92,12 @@ class DBConnector extends Connector {
   
   private function getMySql() {
     return new PDOConnector($this->host, $this->dbName, $this->user, $this->pass);
+  }
+  
+  private function eagerAll(QueryBase $qb) {
+    $parentTable = \core\resolver\Inflector::tableizeModelName($this->modelClass->getName());
+    /* @var  $parentNode \utilities\cache\DBNode */
+    $parentNode = $this->connectorCache->getDBNode($parentTable);
+    $children = $parentNode->getChildren();
   }
 }

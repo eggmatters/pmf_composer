@@ -13,7 +13,7 @@ class PostsController extends ControllerBase {
   const ARRAY_DELIMITER = ":";
   
   public function index() {
-    $postsData = PostModel::getAll();
+    $postsData = PostModel::getAll(true);
     echo "<pre>";
     print_r($postsData);
     echo "</pre>";

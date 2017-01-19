@@ -40,18 +40,18 @@ abstract class ModelBase {
     }
   }
   
-  public static function getAll() {
-    $results = self::getModelConnector()->getAll();
+  public static function getAll($eagerLoading = false, $formatter = null) {
+    $results = self::getModelConnector()->getAll($eagerLoading, $formatter);
     return self::setCollection($results);
   }
   
-  public static function get($id) {
-    $results = self::getModelConnector()->get($id);
+  public static function get($id, $eagerLoading = false, $formatter = null) {
+    $results = self::getModelConnector()->get($id, $eagerLoading, $formatter);
     return self::setObject($results);
   }
   
-  public static function getBy(\core\ControllerBase  $foreignController, $foreignKey, $resultsFormatter = null) {
-    $results = self::getModelConnector()->getBy($foreignController, $foreignKey, $resultsFormatter);
+  public static function getBy(\core\ControllerBase  $foreignController, $foreignKey, $eagerLoading = false, $resultsFormatter = null) {
+    $results = self::getModelConnector()->getBy($foreignController, $foreignKey, $eagerLoading, $resultsFormatter);
     return self::setCollection($results);
   }
   /**
