@@ -17,6 +17,8 @@ use core\resolver\Inflector;
 
 use utilities\normalizers\DBNormalizer;
 
+use utilities\cache\DBCache;
+
 class QueryBase {
   /**
    *
@@ -58,20 +60,21 @@ class QueryBase {
    * @var int 
    */
   private $layout;
-  /**
-   *
-   * @var core\DBConnector 
-   */
-  private $dbConn;
+
+  private $dbCache;
   
   private $dbNodes;
   
-  public function __construct(DBConnector $connector
-    , \ReflectionClass $modelClass = null
+  public function __construct(\ReflectionClass $modelClass = null
+    , DBCache $dbCache = null
     , $eagerLoading = false
     , $layout = DBNormalizer::NESTED_LAYOUT ) 
   {
     $this->modelClass = $modelClass;
+    $this->dbCache = $dbCache;
+    $this->eagerLoading = $eagerLoading;
+    $this->layout = $layout;
+    
     $this->currentTable = (is_null($modelClass)) ?
       "" :
         \core\resolver\Inflector::tableizeModelName($modelClass->name);
@@ -79,9 +82,7 @@ class QueryBase {
     $this->columnsList = [];
     $this->tableAliases = [];
     $this->bindings = [];
-    $this->dbConn = $connector;
-    $this->eagerLoading = $eagerLoading;
-    $this->layout = $layout;
+    $this->dbNodes = $this->dbCache->getDbNodes();
   }
   
   /**
@@ -158,7 +159,7 @@ class QueryBase {
   
   private function formatSelectColumns($namespace) {
     $table  = Inflector::tableizeModelName($namespace);
-    $colums = $this->getTableColumns($namespace);
+    $colums = $this->dbNodes[$table]->getColumns();
     $namespaceAlias = Inflector::aliasNamepsace($namespace);
     return join(',', array_map(function($column) use ($table, $namespace, $namespaceAlias) {
       $columnAlias = $namespaceAlias . $column;

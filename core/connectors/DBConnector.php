@@ -16,15 +16,12 @@ class DBConnector extends Connector {
   protected $user;
   protected $pass;
   
-  private $dbNodes;
-  
   public function getAll() {
     $mysql = $this->getMySql();
     $constraint = new Constraints();
-    $queryBase = (new QueryBase($this, $this->modelClass))
+    $queryBase = (new QueryBase($this->modelClass, $this->connectorCache))
       ->Select()
-      ->Where($constraint)
-      ->getSelect();
+      ->Where($constraint);
     return $mysql->executeQuery($queryBase);
   }
   

@@ -38,7 +38,7 @@ class DBCache extends CacheBase {
   public function __construct($appPath = null) {
     parent::__construct($appPath);
     $this->dbNodes = [];
-    $this->pdoConn = new PDOConnector($host, $dbName, $user, $pass);
+    $this->setPDOConn();
   }
   
   public function setDbNodes() {
@@ -76,7 +76,6 @@ class DBCache extends CacheBase {
   }
   
   private function getTableRelations() {
-    $schema = $this->dbConnector->getSchema();
     $sql = "SELECT i.TABLE_NAME, k.COLUMN_NAME, k.REFERENCED_TABLE_NAME"
       . " FROM information_schema.TABLE_CONSTRAINTS i"
       . " LEFT JOIN information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME"
@@ -86,7 +85,6 @@ class DBCache extends CacheBase {
   }
   
   private function getAllTables() {
-    $schema = $this->dbConnector->getSchema();
     $sql = "SELECT TABLE_NAME FROM information_schema.TABLES"
       . " WHERE TABLE_SCHEMA = DATABASE();";
     return array_column($this->pdoConn->rawQuery($sql), 'TABLE_NAME');
@@ -95,7 +93,7 @@ class DBCache extends CacheBase {
   private function getTableColumns($table) {
     $sql = "SELECT COLUMN_NAME FROM information_schema.COLUMNS "
       ." WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table";
-    $resultsSet = $this->pdoConn->query($sql, ['table' => $table]);
+    $resultsSet = $this->pdoConn->rawQuery($sql, ['table' => $table]);
     if ($resultsSet) {
       return array_column($resultsSet, 'COLUMN_NAME');
     } else {
@@ -106,14 +104,13 @@ class DBCache extends CacheBase {
   private function setRelatedNodes($tableName) {
     $iterator = new \core\SimpleIterator($this->relations);
     $row = $iterator->current();
+    $node = $this->getDBNode($tableName);
     while ($iterator->hasNext()) {
       if ($row['TABLE_NAME'] == $tableName) {
-        $node = $this->getDBNode($tableName);
-        $parentNode = $this->getDBNode($row['REFERENCED_TABLE']);
+        $parentNode = $this->getDBNode($row['REFERENCED_TABLE_NAME']);
         $parentNode->setChild($tableName, $node);
-        $node->setParent($row['REFERENCED_TABLE'], $parentNode);
+        $node->setParent($row['REFERENCED_TABLE_NAME'], $parentNode);
       } else if ($row['REFERENCED_TABLE_NAME'] == $tableName) {
-        $node = $this->getDBNode($tableName);
         $childNode = $this->getDBNode($row['TABLE_NAME']);
         $node->setChild($row['TABLE_NAME'], $childNode);
       }
@@ -122,7 +119,7 @@ class DBCache extends CacheBase {
   }
   
   private function setPDOConn() {
-    $credentials = self::getConnectorConfiguration();
-    return new PDOConnector($credentials['host'], $credentials['dbName'], $credentials['user'], $credentials['pass']);
+    $credentials = self::getConnectorConfiguration()['ConnectorConfig'];
+    $this->pdoConn =  new PDOConnector($credentials['host'], $credentials['dbName'], $credentials['user'], $credentials['pass']);
   }
 }
