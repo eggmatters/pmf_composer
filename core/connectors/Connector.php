@@ -2,6 +2,7 @@
 
 namespace core\connectors;
 
+use utilities\cache\ICache;
 /**
  * This class will instigate and abstract the process of fetching persisted data.
  * What we wish to accomplish is to obtain formatted data from *any* connection.
@@ -28,6 +29,12 @@ abstract class Connector implements IConnector {
    */
   protected $modelClass;
   
+  /**
+   *
+   * @var \utilities\cache\ICache|null $connectorCache
+   */
+  protected $connectorCache;
+  
   const DBCONN=1;
   const APICONN=2;
   
@@ -41,9 +48,10 @@ abstract class Connector implements IConnector {
   
   abstract public function delete($params = null);
 
-  public function __construct(int $conntype, \ReflectionClass $modelClass = null) {
+  public function __construct(int $conntype, \ReflectionClass $modelClass = null, ICache $connectorCache = null) {
     $this->conntype = $conntype;
     $this->modelClass = $modelClass;
+    $this->connectorCache = $connectorCache;
   }
   
   public function setModelClass(\ReflectionClass $modelClass) {
@@ -56,14 +64,16 @@ abstract class Connector implements IConnector {
     switch ($thisReflectionClass->name) {
       case "core\connectors\DBConnector":
         $conntype = self::DBCONN;
+        $connectorCache = new \utilities\cache\DBCache();
         break;
       case "core\connectors\APIConnector" :
         $conntype = self::APICONN;
+         $connectorCache = null;
         break;
       default:
         throw new \Exception("Conntype for connector {$thisReflectionClass->name} not defined");
     }
-    $connector = $thisReflectionClass->newInstance($conntype, $modelClass);
+    $connector = $thisReflectionClass->newInstance($conntype, $modelClass, $connectorCache);
     $connector->setProperties($connectorConfiguration, $thisReflectionClass->name);
     return $connector;
   }

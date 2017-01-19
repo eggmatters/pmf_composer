@@ -156,34 +156,6 @@ class QueryBase {
     return $this->tableAliases;
   }
   
-  private function setBindValues($array) {
-    $bindValues = [];
-    foreach($array as $value) {
-      $bindValues[":$value"] = $value; 
-    }
-    return $bindValues;
-  }
-  
-  private function getTableColumns($namespace) {
-    $rf = new \ReflectionClass($namespace);
-    if ($rf->hasConstant('allowedFields')) {
-      return $rf->getConstant('allowedFields');
-    }
-    $schema = $this->dbConn->getSchema();
-    $table = Inflector::tableizeModelName($namespace);
-    $sql = "SELECT COLUMN_NAME FROM information_schema.COLUMNS "
-      ." WHERE TABLE_SCHEMA = :schema AND TABLE_NAME = :table";
-    if ($this->dbConn->query($sql, ['schema' => $schema, 'table' => $table])) {
-      return array_column($this->dbConn->getResultsSet(), 'COLUMN_NAME');
-    } else {
-      return null;
-    }
-  }
-  
-  private function setBindValueStrings($array) {
-    return array_map(create_function('$str', 'return ":$str";'), $array);
-  }
-  
   private function formatSelectColumns($namespace) {
     $table  = Inflector::tableizeModelName($namespace);
     $colums = $this->getTableColumns($namespace);

@@ -38,7 +38,7 @@ class PostsController extends ControllerBase {
     $connector = PostModel::getConnector();
     $constraints = new connectors\Constraints();
     $tagsValue = $tags->getControllerArgs()->getArguments()[0]->value;
-    $sql = $connector->buildQuery()
+    $sql = $connector->getQueryBase()
       ->Select($this->getModelNamespace(), $tags->getModelNamespace())
       ->LeftJoin('posts_tags', $this->getModelNamespace(), "posts_id" ,"id")
       ->LeftJoin($tags->getModelNamespace(), 'posts_tags',"id","tags_id")

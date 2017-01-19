@@ -2,7 +2,7 @@
 
 namespace utilities\cache;
 
-use core\connectors\DBConnector;
+use core\connectors\PDOConnector;
 /**
  * DBCache -- primary responsibility is to identify and map foreign key 
  * relationships, caching the search patterns. The relationships shall be 
@@ -20,11 +20,6 @@ class DBCache extends CacheBase {
   const DB_NODES = 'db_nodes';
   /**
    *
-   * @var core\connectors\DBConnector 
-   */
-  private $dbConnector;
-  /**
-   *
    * @var array - array of anonymous classes. 
    */
   private $dbNodes;
@@ -32,11 +27,18 @@ class DBCache extends CacheBase {
   private $tables;
   
   private $relations;
+  /**
+   *
+   * @var \core\connectors\PDOConnector 
+   */
+  private $pdoConn;
   
-  public function __construct($appPath = null, DBConnector $connector = null) {
+  use \configurations\schemaConnectorTrait;
+  
+  public function __construct($appPath = null) {
     parent::__construct($appPath);
-    $this->dbConnector = $connector;
     $this->dbNodes = [];
+    $this->pdoConn = new PDOConnector($host, $dbName, $user, $pass);
   }
   
   public function setDbNodes() {
@@ -79,22 +81,23 @@ class DBCache extends CacheBase {
       . " FROM information_schema.TABLE_CONSTRAINTS i"
       . " LEFT JOIN information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME"
       . " WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY'"
-      . " AND i.TABLE_SCHEMA = :schema;";
-    return $this->dbConnector->rawQuery($sql, array('schema' => $schema));
+      . " AND i.TABLE_SCHEMA = DATABASE();";
+    return $this->pdoConn->rawQuery($sql);
   }
   
   private function getAllTables() {
     $schema = $this->dbConnector->getSchema();
     $sql = "SELECT TABLE_NAME FROM information_schema.TABLES"
-      . " WHERE TABLE_SCHEMA = :schema;";
-    return array_column($this->dbConnector->rawQuery($sql, array('schema' => $schema)), 'TABLE_NAME');
+      . " WHERE TABLE_SCHEMA = DATABASE();";
+    return array_column($this->pdoConn->rawQuery($sql), 'TABLE_NAME');
   }
   
   private function getTableColumns($table) {
     $sql = "SELECT COLUMN_NAME FROM information_schema.COLUMNS "
       ." WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table";
-    if ($this->dbConn->query($sql, ['table' => $table])) {
-      return array_column($this->dbConn->getResultsSet(), 'COLUMN_NAME');
+    $resultsSet = $this->pdoConn->query($sql, ['table' => $table]);
+    if ($resultsSet) {
+      return array_column($resultsSet, 'COLUMN_NAME');
     } else {
       return null;
     }
@@ -116,5 +119,10 @@ class DBCache extends CacheBase {
       }
       $iterator->next();
     }
+  }
+  
+  private function setPDOConn() {
+    $credentials = self::getConnectorConfiguration();
+    return new PDOConnector($credentials['host'], $credentials['dbName'], $credentials['user'], $credentials['pass']);
   }
 }
