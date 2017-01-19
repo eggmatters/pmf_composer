@@ -2,7 +2,6 @@
 
 namespace utilities\cache;
 
-use core\connectors\QueryBase;
 use core\connectors\DBConnector;
 /**
  * DBCache -- primary responsibility is to identify and map foreign key 
@@ -34,7 +33,7 @@ class DBCache extends CacheBase {
   
   private $relations;
   
-  public function __construct($appPath = null, $connector = null) {
+  public function __construct($appPath = null, DBConnector $connector = null) {
     parent::__construct($appPath);
     $this->dbConnector = $connector;
     $this->dbNodes = [];
@@ -75,18 +74,20 @@ class DBCache extends CacheBase {
   }
   
   private function getTableRelations() {
+    $schema = $this->dbConnector->getSchema();
     $sql = "SELECT i.TABLE_NAME, k.COLUMN_NAME, k.REFERENCED_TABLE_NAME"
       . " FROM information_schema.TABLE_CONSTRAINTS i"
       . " LEFT JOIN information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME"
       . " WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY'"
-      . " AND i.TABLE_SCHEMA = DATABASE();";
-    return $this->dbConnector->rawQuery($sql);
+      . " AND i.TABLE_SCHEMA = :schema;";
+    return $this->dbConnector->rawQuery($sql, array('schema' => $schema));
   }
   
   private function getAllTables() {
+    $schema = $this->dbConnector->getSchema();
     $sql = "SELECT TABLE_NAME FROM information_schema.TABLES"
-      . " WHERE TABLE_SCHEMA = DATABASE();";
-    return array_column($this->dbConnector->rawQuery($sql), 'TABLE_NAME');
+      . " WHERE TABLE_SCHEMA = :schema;";
+    return array_column($this->dbConnector->rawQuery($sql, array('schema' => $schema)), 'TABLE_NAME');
   }
   
   private function getTableColumns($table) {

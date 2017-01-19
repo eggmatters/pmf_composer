@@ -23,11 +23,11 @@ class DBNormalizer implements INormalizer {
     $this->defaultFormat = self::NESTED_LAYOUT | self::EAGER_LOADING;
   }
 
-  public function arrayToModelsCollection(array $resultsCollection, $modelNamespace, $formatter = null) {
+  public function arrayToModelsCollection(array $resultsCollection, $modelNamespace = null, $formatter = null) {
     
   }
   
-  public function arrayToModel(array $resultsSet, $formatter = null) {
+  public function arrayToModel(array $resultsSet, $modelNamespace = null, $formatter = null) {
     $formatter = is_null($formatter) ? 0b00 : $formatter;
     // ($formatter & self::NESTED_LAYOUT)
     $tableAliases = $this->queryBuilder->getTableAliases();

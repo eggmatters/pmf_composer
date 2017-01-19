@@ -6,7 +6,6 @@ namespace core;
  * 3670bf7ffa177ce82e3677a214861dac585ae7e3
  * @author meggers
  */
-require_once CoreApp::rootDir() . '/configurations/ModelMapper.php';
 
 use core\connectors\Connector;
 
