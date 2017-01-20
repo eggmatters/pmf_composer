@@ -17,22 +17,25 @@ class ModelCache extends CacheBase {
     parent::__construct($appPath);
     $this->modelIterator = $this->getIterator($this->appPath . "/models");
     $this->setModelNamespaces();
-  
+    $this->setModelTables($this->modelNamespaces);
   }
 
   public function setModelNamespaces() {
     $this->modelNamespaces = $this->getCachedArray(self::MODEL_NAMESPACES);
     if (is_null($this->modelNamespaces)) {
       $this->modelNamespaces = $this->setNamespaceArray($this->modelIterator);
-      $this->setCachedArray($this->modelNamespaces, self::CONTROLLER_NAMESPACES);
+      $this->setCachedArray($this->modelNamespaces, self::MODEL_NAMESPACES);
     } 
   }
   
   public function getTableNamespaces() {
-    return $this->modelNamespaces;
+    return $this->tableNamespaces;
   }
   
   public function setModelTables($modelNamespaces) {
-    $tables = array_walk($modelNamespaces, $callback)
+    array_walk($modelNamespaces, function($namespace) {
+      $tableKey = \core\resolver\Inflector::tableizeModelName($namespace);
+      $this->tableNamespaces[$tableKey] = $namespace;
+    });
   }
 }

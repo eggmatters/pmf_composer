@@ -15,10 +15,11 @@ namespace utilities\cache;
  */
 class DBNode {
   private $tableName;
+  private $namespace;
   private $columns;
   private $parents;
   private $children;
-  public function __construct($tableName, $namespace, $columns = [], $parents = [], $children = []) {
+  public function __construct($tableName, $namespace = null, $columns = [], $parents = [], $children = []) {
     $this->tableName = $tableName;
     $this->namespace = $namespace;
     $this->columns = $columns;
@@ -30,6 +31,13 @@ class DBNode {
   }
   public function setTableName($tableName) {
     $this->tableName = $tableName;
+    return $this;
+  }
+  public function getNamespace() {
+    return $this->namespace;
+  } 
+  public function setNamespace($namespace) {
+    $this->namespace = $namespace;
     return $this;
   }
   public function getColumns() {

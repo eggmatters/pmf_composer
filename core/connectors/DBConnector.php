@@ -4,6 +4,8 @@ namespace core\connectors;
 
 use utilities\normalizers\INormalizer;
 use utilities\normalizers\DBNormalizer;
+
+use utilities\cache\ModelCache;
 /**
  * Creates and establishes Connections and queries to a database using PDO
  *
@@ -16,12 +18,16 @@ class DBConnector extends Connector {
   protected $user;
   protected $pass;
   
+  public function __construct(int $conntype, \ReflectionClass $modelClass = null, \utilities\cache\ICache $connectorCache = null) {
+    parent::__construct($conntype, $modelClass, $connectorCache);
+  }
+  
   public function getAll($eagerLoading = false, $formatter = null) {
     $mysql = $this->getMySql();
     $constraint = new Constraints();
     $queryBase = new QueryBase($this->modelClass, $this->connectorCache);
     if ($eagerLoading) {
-      
+      $this->eagerAll($queryBase);
     } else {
     $queryBase->Select()->Where($constraint);
     }
@@ -95,9 +101,22 @@ class DBConnector extends Connector {
   }
   
   private function eagerAll(QueryBase $qb) {
-    $parentTable = \core\resolver\Inflector::tableizeModelName($this->modelClass->getName());
-    /* @var  $parentNode \utilities\cache\DBNode */
-    $parentNode = $this->connectorCache->getDBNode($parentTable);
-    $children = $parentNode->getChildren();
+    $currentTable = \core\resolver\Inflector::tableizeModelName($this->modelClass->getName());
+    /* @var  $currentNode \utilities\cache\DBNode */
+    $currentNode = $this->connectorCache->getDBNode($currentTable);
+    $parents = $currentNode->getParents();
+    $selects = [$this->modelClass->getName()];
+    $this->setEagerSelects($selects, $parents);
+  }
+  
+  private function setEagerSelects(&$selects, $parentNodes) {
+    foreach ($parentNodes as $parentNode) {
+      /* @var  $parentNode \utilities\cache\DBNode */
+      $selects[] = $parentNode->getNamespace();
+      $parents = $parentNode->getParents();
+      if (!empty($parents)) {
+        $this->setEagerSelects($selects, $parents);
+      }
+    }
   }
 }

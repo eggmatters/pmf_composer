@@ -32,6 +32,13 @@ class DBCache extends CacheBase {
    * @var \core\connectors\PDOConnector 
    */
   private $pdoConn;
+  /**
+   *
+   * @var ModelCache 
+   */
+  private $modelCache;
+  
+  private $modelNamespaces;
   
   use \configurations\schemaConnectorTrait;
   
@@ -39,6 +46,8 @@ class DBCache extends CacheBase {
     parent::__construct($appPath);
     $this->dbNodes = [];
     $this->setPDOConn();
+    $this->modelCache = new ModelCache($appPath);
+    $this->modelNamespaces = $this->modelCache->getTableNamespaces();
   }
   
   public function setDbNodes() {
@@ -68,9 +77,11 @@ class DBCache extends CacheBase {
    * @param string $tableName
    * @return DBNode
    */
-  private function getDBNode($tableName) {
+  public function getDBNode($tableName) {
     if (!isset($this->dbNodes[$tableName])) {
-      $this->dbNodes[$tableName] = new DBNode($tableName);
+      $modelNamespace = isset($this->modelNamespaces[$tableName]) ?
+        $this->modelNamespaces[$tableName] : null;
+      $this->dbNodes[$tableName] = new DBNode($tableName, $modelNamespace);
     } 
     return $this->dbNodes[$tableName];
   }

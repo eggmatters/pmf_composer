@@ -50,24 +50,16 @@ class QueryBase {
    * @var array 
    */
   private $bindings;
-  /**
-   *
-   * @var int 
-   */
-  private $layout;
 
   private $dbCache;
   
   private $dbNodes;
   
   public function __construct(\ReflectionClass $modelClass = null
-    , DBCache $dbCache = null
-    , $layout = DBNormalizer::NESTED_LAYOUT ) 
+    , DBCache $dbCache = null ) 
   {
     $this->modelClass = $modelClass;
     $this->dbCache = $dbCache;
-    $this->layout = $layout;
-    
     $this->currentTable = (is_null($modelClass)) ?
       "" :
         \core\resolver\Inflector::tableizeModelName($modelClass->name);
@@ -84,7 +76,11 @@ class QueryBase {
    * @return $this
    */
   public function Select(...$models) {
-    $models = (empty($models)) ? [$this->modelClass->getName()] : $models;
+    $models = (empty($models)) ? 
+      [$this->modelClass->getName()] : 
+        ( 
+          is_array($models[0]) ? $models[0] : $models
+        );
     $this->columnsList = array_map('\\core\\connectors\\QueryBase::formatSelectColumns', $models);
     $this->query['SELECT'] = "SELECT " . implode(",", $this->columnsList) . " FROM $this->currentTable";
     return $this;
