@@ -27,7 +27,7 @@ class PostsController extends ControllerBase {
   }
   
   public function getUserPosts(UsersController $user) {
-    $userPosts = PostModel::getBy($user, "id", DBConnector::NESTED_LAYOUT);
+    $userPosts = PostModel::getBy($user, "id");
     echo "<pre>";
     print_r($userPosts);
     echo "</pre>";

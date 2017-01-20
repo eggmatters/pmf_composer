@@ -4,8 +4,7 @@ namespace core\connectors;
 
 use utilities\normalizers\INormalizer;
 use utilities\normalizers\DBNormalizer;
-
-use utilities\cache\ModelCache;
+use utilities\cache\DBNode;
 /**
  * Creates and establishes Connections and queries to a database using PDO
  *
@@ -27,9 +26,9 @@ class DBConnector extends Connector {
     $constraint = new Constraints();
     $queryBase = new QueryBase($this->modelClass, $this->connectorCache);
     if ($eagerLoading) {
-      $this->eagerAll($queryBase);
+      $this->eagerAll($queryBase)->Where($constraint);
     } else {
-    $queryBase->Select()->Where($constraint);
+      $queryBase->Select()->Where($constraint);
     }
     return $mysql->executeQuery($queryBase);
   }
@@ -106,17 +105,36 @@ class DBConnector extends Connector {
     $currentNode = $this->connectorCache->getDBNode($currentTable);
     $parents = $currentNode->getParents();
     $selects = [$this->modelClass->getName()];
-    $this->setEagerSelects($selects, $parents);
+    $joins = [];
+    $this->setEagerSelectsAndJoins($selects, $joins, $parents, $currentNode);
+    $this->formatEagerSelect($selects, $joins, $qb);
+    return $qb;
   }
   
-  private function setEagerSelects(&$selects, $parentNodes) {
+  private function setEagerSelectsAndJoins(&$selects, &$joins, $parentNodes, DBNode $childNode) {
     foreach ($parentNodes as $parentNode) {
       /* @var  $parentNode \utilities\cache\DBNode */
       $selects[] = $parentNode->getNamespace();
+      $childTable = $childNode->getTableName();
+      $parentTable = $parentNode->getTableName();
+      $joins[] = array(
+        'fromTable' => $parentTable,
+        'onTable'   => $childTable,
+        'lhs'       => $this->connectorCache->getParentKey($parentTable, $childTable),  
+        'rhs'       => 'id'
+      );
       $parents = $parentNode->getParents();
       if (!empty($parents)) {
-        $this->setEagerSelects($selects, $parents);
+        $this->setEagerSelects($selects, $joins, $parents);
       }
     }
+  }
+  
+  private function formatEagerSelect($selects, $joins, QueryBase $qb) {
+    $qb->Select($selects);
+    foreach ($joins as $join) {
+      $qb->LeftJoin($join['fromTable'], $join['onTable'], $join['lhs'], $join['rhs']);
+    }
+    return $qb;
   }
 }

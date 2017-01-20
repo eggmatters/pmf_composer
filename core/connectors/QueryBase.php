@@ -92,22 +92,16 @@ class QueryBase {
    * @param \ReflectionClass | string  $onTable
    * @param string $foreignKey
    */
-  public function LeftJoin($fromTable, $onTable, $lvalue, $rvalue = null) {
+  public function LeftJoin($fromTable, $onTable, $lhs, $rhs) {
     $from = (is_a($fromTable, \ReflectionClass::class)) 
       ? Inflector::tableizeModelName($fromTable->name) 
         : Inflector::tableizeModelName($fromTable);
     $on = (is_a($onTable, \ReflectionClass::class)) 
       ? Inflector::tableizeModelName($onTable->name) 
         : Inflector::tableizeModelName($onTable);
-    if (is_null($rvalue)) {
-      $this->query['JOINS'][] = "LEFT JOIN $from ON "
-      . $from . "." . $lvalue . " = " 
-      . $on . "." . $lvalue;
-    } else {
-      $this->query['JOINS'][] = "LEFT JOIN $from ON "
-      . $on . "." . $rvalue . " = " 
-      . $from . "." . $lvalue;
-    }
+    $this->query['JOINS'][] = "LEFT JOIN $from ON "
+      . $on . "." . $lhs . " = " 
+      . $from . "." . $rhs;
     return $this;
   }
   
@@ -147,7 +141,7 @@ class QueryBase {
   }
   
   private function formatSelectColumns($namespace) {
-    $table  = (strpos('Model', $namespace)) ? Inflector::tableizeModelName($namespace) : $namespace;
+    $table  = (strpos($namespace, 'Model')) ? Inflector::tableizeModelName($namespace) : $namespace;
     $colums = $this->dbNodes[$table]->getColumns();
     $namespaceAlias = Inflector::aliasNamepsace($namespace);
     return join(',', array_map(function($column) use ($table, $namespace, $namespaceAlias) {

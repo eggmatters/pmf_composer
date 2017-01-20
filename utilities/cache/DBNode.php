@@ -19,7 +19,14 @@ class DBNode {
   private $columns;
   private $parents;
   private $children;
-  public function __construct($tableName, $namespace = null, $columns = [], $parents = [], $children = []) {
+  private $parentKey;
+  public function __construct(
+    $tableName
+    , $namespace = null
+    , $columns = []
+    , $parents = []
+    , $children = []
+  ) {
     $this->tableName = $tableName;
     $this->namespace = $namespace;
     $this->columns = $columns;

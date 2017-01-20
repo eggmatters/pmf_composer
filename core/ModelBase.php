@@ -50,7 +50,7 @@ abstract class ModelBase {
     return self::setObject($results);
   }
   
-  public static function getBy(\core\ControllerBase  $foreignController, $foreignKey, $eagerLoading = false, $resultsFormatter = null) {
+  public static function getBy(\core\ControllerBase  $foreignController, $foreignKey, $eagerLoading = false) {
     $results = self::getModelConnector()->getBy($foreignController, $foreignKey, $eagerLoading, $resultsFormatter);
     return self::setCollection($results);
   }

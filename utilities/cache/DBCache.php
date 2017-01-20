@@ -86,6 +86,16 @@ class DBCache extends CacheBase {
     return $this->dbNodes[$tableName];
   }
   
+  public function getParentKey($parentTable, $childTable) {
+    foreach($this->relations as $relation) {
+      if ($relation['TABLE_NAME'] == $childTable && 
+          $relation['REFERENCED_TABLE_NAME'] == $parentTable) {
+        return $relation['COLUMN_NAME'];
+      }
+    }
+    return null;
+  }
+  
   private function getTableRelations() {
     $sql = "SELECT i.TABLE_NAME, k.COLUMN_NAME, k.REFERENCED_TABLE_NAME"
       . " FROM information_schema.TABLE_CONSTRAINTS i"
@@ -117,15 +127,14 @@ class DBCache extends CacheBase {
     $row = $iterator->current();
     $node = $this->getDBNode($tableName);
     while ($iterator->hasNext()) {
+      $parentNode = $this->getDBNode($row['REFERENCED_TABLE_NAME']);
+      $childNode = $this->getDBNode($row['TABLE_NAME']);
       if ($row['TABLE_NAME'] == $tableName) {
-        $parentNode = $this->getDBNode($row['REFERENCED_TABLE_NAME']);
-        $parentNode->setChild($tableName, $node);
         $node->setParent($row['REFERENCED_TABLE_NAME'], $parentNode);
       } else if ($row['REFERENCED_TABLE_NAME'] == $tableName) {
-        $childNode = $this->getDBNode($row['TABLE_NAME']);
         $node->setChild($row['TABLE_NAME'], $childNode);
       }
-      $iterator->next();
+      $row = $iterator->next();
     }
   }
   
