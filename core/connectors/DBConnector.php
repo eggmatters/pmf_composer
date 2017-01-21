@@ -21,38 +21,33 @@ class DBConnector extends Connector {
     parent::__construct($conntype, $modelClass, $connectorCache);
   }
   
-  public function getAll($eagerLoading = false, $formatter = null) {
+  public function getAll($eagerLoading = false) {
     $mysql = $this->getMySql();
     $constraint = new Constraints();
     $queryBase = new QueryBase($this->modelClass, $this->connectorCache);
     if ($eagerLoading) {
-      $this->eagerAll($queryBase)->Where($constraint);
+      $this->eagerFetch($queryBase)->Where($constraint);
     } else {
       $queryBase->Select()->Where($constraint);
     }
     return $mysql->executeQuery($queryBase);
   }
   
-  public function get($id = null) {
-    if (is_null($id)) {
-      $id = "null";
-    }
-    $queryBuilder = new QueryBase($this, $this->modelClass);
+  public function get($id = "null", $eagerLoading = false) {
+    $mysql = $this->getMySql();
     $constraint = new Constraints();
-    $constraint->term("id", "=", $id);
-    $sql = $queryBuilder
-      ->Select()
-      ->Where($constraint)
-      ->getSelect();
-    $bindValues = $queryBuilder->getBindValues();
-    if ($this->query($sql, $bindValues)) {
-      $dbNormalizer = new DBNormalizer($queryBuilder);
-      return $this->normalizeResultsSet($this->getResultsSet()[0], $dbNormalizer);
+    $idField = \core\resolver\Inflector::tableizeModelName($this->modelClass->name) . '.id';
+    $constraint->term($idField, "=", $id);
+    $queryBase = new QueryBase($this->modelClass, $this->connectorCache);
+    if ($eagerLoading) {
+      $this->eagerFetch($queryBase)->Where($constraint);
+    } else {
+      $queryBase->Select()->Where($constraint);
     }
-    return false; 
+    return $mysql->executeQuery($queryBase, true);
   }
   
-  public function getBy(\core\ControllerBase $foreignController, $foreignKey, $resultsFormatter = self::NESTED_LAYOUT) {
+  public function getBy(\core\ControllerBase $foreignController, $eager = false) {
     $foreignModel = $foreignController->getModelNamespace();
     $foreignValue = $foreignController->getControllerArgs()->getArguments()[0]->value;
     $lhs = \core\resolver\Inflector::tableizeModelName($foreignModel) . ".$foreignKey";
@@ -99,7 +94,7 @@ class DBConnector extends Connector {
     return new PDOConnector($this->host, $this->dbName, $this->user, $this->pass);
   }
   
-  private function eagerAll(QueryBase $qb) {
+  private function eagerFetch(QueryBase $qb) {
     $currentTable = \core\resolver\Inflector::tableizeModelName($this->modelClass->getName());
     /* @var  $currentNode \utilities\cache\DBNode */
     $currentNode = $this->connectorCache->getDBNode($currentTable);
@@ -125,7 +120,7 @@ class DBConnector extends Connector {
       );
       $parents = $parentNode->getParents();
       if (!empty($parents)) {
-        $this->setEagerSelects($selects, $joins, $parents);
+        $this->setEagerSelectsAndJoins($selects, $joins, $parents);
       }
     }
   }

@@ -20,7 +20,7 @@ class PostsController extends ControllerBase {
   }
   
   public function get(int $id) {
-    $postsData = PostModel::get($id);
+    $postsData = PostModel::get($id, true);
     echo "<pre>";
     print_r($postsData);
     echo "</pre>";
