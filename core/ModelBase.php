@@ -45,13 +45,13 @@ abstract class ModelBase {
     return self::setCollection($results);
   }
   
-  public static function get($id, $eagerLoading = false, $formatter = null) {
+  public static function get($id, $eagerLoading = false) {
     $results = self::getModelConnector()->get($id, $eagerLoading, $formatter);
     return self::setObject($results);
   }
   
-  public static function getBy(\core\ControllerBase  $foreignController, $foreignKey, $eagerLoading = false) {
-    $results = self::getModelConnector()->getBy($foreignController, $foreignKey, $eagerLoading, $resultsFormatter);
+  public static function getByParent(\core\ControllerBase  $foreignController, $eager = false) {
+    $results = self::getModelConnector()->getByParent($foreignController);
     return self::setCollection($results);
   }
   /**

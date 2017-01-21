@@ -17,14 +17,10 @@ class DBConnector extends Connector {
   protected $user;
   protected $pass;
   
-  public function __construct(int $conntype, \ReflectionClass $modelClass = null, \utilities\cache\ICache $connectorCache = null) {
-    parent::__construct($conntype, $modelClass, $connectorCache);
-  }
-  
   public function getAll($eagerLoading = false) {
-    $mysql = $this->getMySql();
+    $mysql      = $this->getMySql();
     $constraint = new Constraints();
-    $queryBase = new QueryBase($this->modelClass, $this->connectorCache);
+    $queryBase  = new QueryBase($this->modelClass, $this->connectorCache);
     if ($eagerLoading) {
       $this->eagerFetch($queryBase)->Where($constraint);
     } else {
@@ -34,11 +30,11 @@ class DBConnector extends Connector {
   }
   
   public function get($id = "null", $eagerLoading = false) {
-    $mysql = $this->getMySql();
+    $mysql      = $this->getMySql();
     $constraint = new Constraints();
-    $idField = \core\resolver\Inflector::tableizeModelName($this->modelClass->name) . '.id';
+    $idField    = \core\resolver\Inflector::tableizeModelName($this->modelClass->name) . '.id';
     $constraint->term($idField, "=", $id);
-    $queryBase = new QueryBase($this->modelClass, $this->connectorCache);
+    $queryBase  = new QueryBase($this->modelClass, $this->connectorCache);
     if ($eagerLoading) {
       $this->eagerFetch($queryBase)->Where($constraint);
     } else {
@@ -47,20 +43,16 @@ class DBConnector extends Connector {
     return $mysql->executeQuery($queryBase, true);
   }
   
-  public function getBy(\core\ControllerBase $foreignController, $eager = false) {
+  public function getByParent(\core\ControllerBase $foreignController, $eager = false) {
+    $mysql        = $this->getMySql();
+    $constraint   = new Constraints();
     $foreignModel = $foreignController->getModelNamespace();
     $foreignValue = $foreignController->getControllerArgs()->getArguments()[0]->value;
-    $lhs = \core\resolver\Inflector::tableizeModelName($foreignModel) . ".$foreignKey";
-    $contstraints = new Constraints();
-    $qb = new QueryBase($this, $this->modelClass);
-      $qb->Select($this->modelClass->getName(), $foreignModel)
-      ->LeftJoin($foreignModel, $this->modelClass->getName(), $foreignKey)
-      ->Where($contstraints->term($lhs, "=", $foreignValue));
-    $sql = $qb->getSelect();
-    $bindValues = $qb->getBindValues();
-    if ($this->query($sql, $bindValues)) {
-      return $this->normalizeResultsCollection($this->getResultsSet(), $qb);
-    }
+    $idField      = \core\resolver\Inflector::tableizeModelName($foreignModel) . '.id';
+    $constraint->term($idField, "=", $foreignValue);
+    $queryBase  = new QueryBase($this->modelClass, $this->connectorCache);
+    $this->eagerFetch($queryBase, ($eager) ? [$foreignModel] : null)->Where($constraint);
+    return $mysql->executeQuery($queryBase);
   }
   
   public function create($params) {
@@ -94,24 +86,27 @@ class DBConnector extends Connector {
     return new PDOConnector($this->host, $this->dbName, $this->user, $this->pass);
   }
   
-  private function eagerFetch(QueryBase $qb) {
+  private function eagerFetch(QueryBase $qb, $additionalSelects = null) {
     $currentTable = \core\resolver\Inflector::tableizeModelName($this->modelClass->getName());
-    /* @var  $currentNode \utilities\cache\DBNode */
-    $currentNode = $this->connectorCache->getDBNode($currentTable);
-    $parents = $currentNode->getParents();
-    $selects = [$this->modelClass->getName()];
-    $joins = [];
-    $this->setEagerSelectsAndJoins($selects, $joins, $parents, $currentNode);
+    $selects      = (is_null($additionalSelects)) ?
+                      null :
+                        array_merge([$this->modelClass->name], $additionalSelects);
+    $joins        = [];
+    $currentNode  = $this->connectorCache->getDBNode($currentTable);
+    $parents      = $currentNode->getParents();
+    $this->setEagerSelectsAndJoins($selects, $joins, $currentNode, $parents);
     $this->formatEagerSelect($selects, $joins, $qb);
     return $qb;
   }
   
-  private function setEagerSelectsAndJoins(&$selects, &$joins, $parentNodes, DBNode $childNode) {
+  private function setEagerSelectsAndJoins(&$selects, &$joins, DBNode $childNode, $parentNodes) {
     foreach ($parentNodes as $parentNode) {
       /* @var  $parentNode \utilities\cache\DBNode */
-      $selects[] = $parentNode->getNamespace();
-      $childTable = $childNode->getTableName();
-      $parentTable = $parentNode->getTableName();
+      if (!is_null($selects)) {
+        $selects[]    = $parentNode->getNamespace();
+      }
+      $childTable   = $childNode->getTableName();
+      $parentTable  = $parentNode->getTableName();
       $joins[] = array(
         'fromTable' => $parentTable,
         'onTable'   => $childTable,
@@ -120,7 +115,7 @@ class DBConnector extends Connector {
       );
       $parents = $parentNode->getParents();
       if (!empty($parents)) {
-        $this->setEagerSelectsAndJoins($selects, $joins, $parents);
+        $this->setEagerSelectsAndJoins($selects, $joins, $parentNode, $parents);
       }
     }
   }

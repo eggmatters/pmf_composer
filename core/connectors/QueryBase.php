@@ -76,7 +76,7 @@ class QueryBase {
    * @return $this
    */
   public function Select(...$models) {
-    $models = (empty($models)) ? 
+    $models = (empty($models[0])) ? 
       [$this->modelClass->getName()] : 
         ( 
           is_array($models[0]) ? $models[0] : $models

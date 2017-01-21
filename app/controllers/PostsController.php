@@ -27,7 +27,7 @@ class PostsController extends ControllerBase {
   }
   
   public function getUserPosts(UsersController $user) {
-    $userPosts = PostModel::getBy($user, "id");
+    $userPosts = PostModel::getByParent($user);
     echo "<pre>";
     print_r($userPosts);
     echo "</pre>";
