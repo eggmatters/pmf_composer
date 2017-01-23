@@ -32,8 +32,11 @@ class PostsController extends ControllerBase {
     print_r($userPosts);
     echo "</pre>";
   }
+  public function getPostTags2(TagsController $tags) {
+    $tagPosts = PostModel::getByParent($tags);
+  }
   
-  public function getPostTags(TagsController $tags) {
+  public function getPostTags(TagsController $tags, string $debug) {
     /* @var $connector \core\connectors\DBConnector */
     $connector = PostModel::getConnector();
     $constraints = new connectors\Constraints();
