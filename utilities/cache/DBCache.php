@@ -86,7 +86,7 @@ class DBCache extends CacheBase {
     return $this->dbNodes[$tableName];
   }
   
-  public function getParentKey($parentTable, $childTable) {
+  public function getMatchingKey($parentTable, $childTable) {
     foreach($this->relations as $relation) {
       if ($relation['TABLE_NAME'] == $childTable && 
           $relation['REFERENCED_TABLE_NAME'] == $parentTable) {

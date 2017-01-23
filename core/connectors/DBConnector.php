@@ -137,7 +137,7 @@ class DBConnector extends Connector {
       $joins[] = array(
         'fromTable' => $parentTable,
         'onTable'   => $childTable,
-        'lhs'       => $this->connectorCache->getParentKey($parentTable, $childTable),  
+        'lhs'       => $this->connectorCache->getMatchingKey($parentTable, $childTable),
         'rhs'       => 'id'
       );
       $parents = $parentNode->getParents();
