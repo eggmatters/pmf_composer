@@ -41,7 +41,7 @@ class PostsController extends ControllerBase {
     echo "</pre>";
   }
   public function getPostTags2(TagsController $tags) {
-    $tagPosts = PostModel::getByJoin($tags);
+    $tagPosts = PostModel::getByJoin($tags, 1);
     echo "<pre>";
     print_r($tagPosts);
     echo "</pre>";

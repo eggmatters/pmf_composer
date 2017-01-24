@@ -123,7 +123,7 @@ class DBConnector extends Connector {
   
   private function oneToManyClause(&$selects, &$joins, DBNode $parentNode, DBNode $foreignNode) {
     if (!empty($selects)) {
-      $selects = $foreignNode->getNamespace();
+      $selects[] = $foreignNode->getNamespace();
     }
     $joinNodes = array_intersect_key($parentNode->getChildren(), $foreignNode->getChildren());
     if (count($joinNodes) != 1) {
