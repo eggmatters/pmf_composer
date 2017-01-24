@@ -55,7 +55,8 @@ class PDOConnector {
     } catch (\PDOException $e) {
       $errorMessage = "Database error: Code {$e->getCode()}\n"
         . "Message: {$e->getMessage()}";
-      error_log($errorMessage);
+      //error_log($errorMessage);
+      echo($errorMessage);
       unset($this->stmt);
       unset($this->pdoConn);
       $this->resultSet = null;

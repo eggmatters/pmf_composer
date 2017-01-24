@@ -51,7 +51,12 @@ abstract class ModelBase {
   }
   
   public static function getByParent(\core\ControllerBase  $foreignController, $eager = false) {
-    $results = self::getModelConnector()->getByParent($foreignController);
+    $results = self::getModelConnector()->getByParent($foreignController, $eager);
+    return self::setCollection($results);
+  }
+  
+  public static function getByJoin(ControllerBase $foreignController, $eager = false) {
+    $results = self::getModelConnector()->getByJoin($foreignController, $eager = false);
     return self::setCollection($results);
   }
   /**

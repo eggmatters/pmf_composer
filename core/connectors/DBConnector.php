@@ -66,8 +66,9 @@ class DBConnector extends Connector {
     $idField      = \core\resolver\Inflector::tableizeModelName($foreignModel) . '.id';
     $constraint->term($idField, "=", $foreignValue);
     $queryBase    = new QueryBase($this->modelClass, $this->connectorCache);
-    
-    
+    $this->joinTableJoin($queryBase, $foreignController->getModelNamespace(), $eager)
+            ->Where($constraint);
+    return $mysql->executeQuery($queryBase);
   }
   
   public function create($params) {
@@ -113,28 +114,52 @@ class DBConnector extends Connector {
     $foreignTable = \core\resolver\Inflector::tableizeModelName($foreignNamespace);
     $selects      = ($eager) ? [$this->modelClass->name] : [];
     $joins        = [];
-    $currentNode  = $this->connectorCache->getDBNode($currentTable);
+    $parentNode   = $this->connectorCache->getDBNode($currentTable);
     $foreignNode  = $this->connectorCache->getDBNode($foreignTable);
+    $this->oneToManyClause($selects, $joins, $parentNode, $foreignNode);
+    $this->formatClause($selects, $joins, $qb);
+    return $qb;
   }
   
-  private function oneToManyClause(&$selects, &$joins, DBNode $parentNode, DBNode $childNode) {
-    
+  private function oneToManyClause(&$selects, &$joins, DBNode $parentNode, DBNode $foreignNode) {
+    if (!empty($selects)) {
+      $selects = $foreignNode->getNamespace();
+    }
+    $joinNodes = array_intersect_key($parentNode->getChildren(), $foreignNode->getChildren());
+    if (count($joinNodes) != 1) {
+      return;
+    }
+    $joinNode = array_pop($joinNodes);
+    $parentTable = $parentNode->getTableName();
+    $foreignTable = $foreignNode->getTableName();
+    $joinTable = $joinNode->getTableName();
+    $parentFK = $this->connectorCache->getMatchingKey($parentTable, $joinTable);
+    $foreignFK = $this->connectorCache->getMatchingKey($foreignTable, $joinTable);
+    $joins[] = $this->setJoinsArray(
+            $joinTable
+            , $parentTable
+            , 'id'
+            , $parentFK );
+    $joins[] = $this->setJoinsArray(
+            $foreignTable
+            , $joinTable
+            , $foreignFK
+            , 'id' );
   }
   
   private function manyToOneClause(&$selects, &$joins, DBNode $childNode, $parentNodes) {
     foreach ($parentNodes as $parentNode) {
       /* @var  $parentNode \utilities\cache\DBNode */
       if (!empty($selects)) {
-        $selects[]    = $parentNode->getNamespace();
+        $selects[]  = $parentNode->getNamespace();
       }
       $childTable   = $childNode->getTableName();
       $parentTable  = $parentNode->getTableName();
-      $joins[] = array(
-        'fromTable' => $parentTable,
-        'onTable'   => $childTable,
-        'lhs'       => $this->connectorCache->getMatchingKey($parentTable, $childTable),
-        'rhs'       => 'id'
-      );
+      $joins[] = $this->setJoinsArray(
+              $parentTable
+              , $childTable
+              , $this->connectorCache->getMatchingKey($parentTable, $childTable)
+              , 'id');
       $parents = $parentNode->getParents();
       if (!empty($parents)) {
         $this->manyToOneClause($selects, $joins, $parentNode, $parents);
@@ -142,10 +167,20 @@ class DBConnector extends Connector {
     }
   }
   
+  private function setJoinsArray($fromTable, $onTable, $lhs, $rhs, $alias = null) {
+    return array(
+      'fromTable' => $fromTable,
+      'onTable'   => $onTable,
+      'lhs'       => $lhs,
+      'rhs'       => $rhs,
+      'alias'     => $alias  
+    );
+  }
+  
   private function formatClause($selects, $joins, QueryBase $qb) {
     $qb->Select($selects);
     foreach ($joins as $join) {
-      $qb->LeftJoin($join['fromTable'], $join['onTable'], $join['lhs'], $join['rhs']);
+      $qb->LeftJoin($join['fromTable'], $join['onTable'], $join['lhs'], $join['rhs'], $join['alias']);
     }
     return $qb;
   }
