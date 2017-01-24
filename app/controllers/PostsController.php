@@ -13,12 +13,20 @@ class PostsController extends ControllerBase {
   const ARRAY_DELIMITER = ":";
   
   public function index() {
-    $postsData = PostModel::getAll(true);
+    $postsData = PostModel::getAll();
     echo "<pre>";
     print_r($postsData);
     echo "</pre>";
   }
   
+  public function indexEverything(string $eager) {
+    $postsData = PostModel::getAll(true);
+    echo "<pre>";
+    print_r($postsData);
+    echo "</pre>";
+  }
+
+
   public function get(int $id) {
     $postsData = PostModel::get($id, true);
     echo "<pre>";
@@ -27,7 +35,7 @@ class PostsController extends ControllerBase {
   }
   
   public function getUserPosts(UsersController $user) {
-    $userPosts = PostModel::getByParent($user);
+    $userPosts = PostModel::getByParent($user, 1);
     echo "<pre>";
     print_r($userPosts);
     echo "</pre>";

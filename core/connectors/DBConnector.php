@@ -22,7 +22,7 @@ class DBConnector extends Connector {
     $constraint = new Constraints();
     $queryBase  = new QueryBase($this->modelClass, $this->connectorCache);
     if ($eagerLoading) {
-      $this->foreignKeyJoin($queryBase)->Where($constraint);
+      $this->foreignKeyJoin($queryBase, $eagerLoading)->Where($constraint);
     } else {
       $queryBase->Select()->Where($constraint);
     }
@@ -44,6 +44,9 @@ class DBConnector extends Connector {
   }
   
   public function getByParent(\core\ControllerBase $foreignController, $eager = false) {
+    if (!isset($foreignController->getControllerArgs()->getArguments()[0]->value)) {
+      return null;
+    }
     $mysql        = $this->getMySql();
     $constraint   = new Constraints();
     $foreignModel = $foreignController->getModelNamespace();
@@ -94,15 +97,9 @@ class DBConnector extends Connector {
     
   }
   
-  private function getMySql() {
-    return new PDOConnector($this->host, $this->dbName, $this->user, $this->pass);
-  }
-  
-  private function foreignKeyJoin(QueryBase $qb, $additionalSelects = null) {
+  private function foreignKeyJoin(QueryBase $qb, $eager = false) {
     $currentTable = \core\resolver\Inflector::tableizeModelName($this->modelClass->getName());
-    $selects      = (is_null($additionalSelects)) ?
-                      null :
-                        array_merge([$this->modelClass->name], $additionalSelects);
+    $selects      = ($eager) ? [$this->modelClass->name] : [];
     $joins        = [];
     $currentNode  = $this->connectorCache->getDBNode($currentTable);
     $parents      = $currentNode->getParents();
@@ -111,12 +108,10 @@ class DBConnector extends Connector {
     return $qb;
   }
   
-  private function joinTableJoin(QueryBase $qb, $foreignNamespace, $additionalSelects = null) {
+  private function joinTableJoin(QueryBase $qb, $foreignNamespace, $eager = false) {
     $currentTable = \core\resolver\Inflector::tableizeModelName($this->modelClass->getName());
     $foreignTable = \core\resolver\Inflector::tableizeModelName($foreignNamespace);
-    $selects      = (is_null($additionalSelects)) ?
-                      null :
-                        array_merge([$this->modelClass->name], $additionalSelects);
+    $selects      = ($eager) ? [$this->modelClass->name] : [];
     $joins        = [];
     $currentNode  = $this->connectorCache->getDBNode($currentTable);
     $foreignNode  = $this->connectorCache->getDBNode($foreignTable);
@@ -129,7 +124,7 @@ class DBConnector extends Connector {
   private function manyToOneClause(&$selects, &$joins, DBNode $childNode, $parentNodes) {
     foreach ($parentNodes as $parentNode) {
       /* @var  $parentNode \utilities\cache\DBNode */
-      if (!is_null($selects)) {
+      if (!empty($selects)) {
         $selects[]    = $parentNode->getNamespace();
       }
       $childTable   = $childNode->getTableName();
@@ -155,5 +150,8 @@ class DBConnector extends Connector {
     return $qb;
   }
   
+  private function getMySql() {
+    return new PDOConnector($this->host, $this->dbName, $this->user, $this->pass);
+  }
   
 }
