@@ -167,8 +167,7 @@ class ControllerArgs {
   }
   
   private function matchMethod(\ReflectionMethod $method, $httpMethod) {
-    $methodPrefix = $this->getMethodPrefix($httpMethod);
-    if (strpos($method->getName(), $methodPrefix) === false) {
+    if (!$this->matchHTTPMethod($httpMethod, $method->getName())) {
       return false;
     }
     $methodParams = $method->getParameters();
@@ -212,32 +211,41 @@ class ControllerArgs {
     return ($aw && $status);
   }
   
-  private function getMethodPrefix($httpMethod) {
-    $arguments = (count($this->getArguments()) > 0) ? true : false;
-    $new = array_search("new", $this->getArguments());
-    $edit = array_search("edit", $this->getArguments());
-    
-    if ($httpMethod == "GET" && ($new !== false)) {
-      return "new";
+  private function matchHTTPMethod($httpMethod, $methodName) {
+    switch($httpMethod) {
+      case "GET":
+        if (strpos($methodName, "index") !== false) {
+          return true;
+        }
+        if (strpos($methodName, "get") !== false) {
+          return true;
+        }
+        if ( ( strpos($methodName, "edit" ) !== false) && 
+             ( in_array("edit", $this->arguments) )
+           ) {
+          return true;
+        }
+        if ( ( strpos($methodName, "create" ) !== false) && 
+             ( in_array("create", $this->arguments) )
+           ) {
+          return true;
+        }
+        break;
+      case "POST":
+        if (strpos($methodName, "create") !== false) {
+          return true;
+        }
+        if (strpos($methodName, "post") !== false) {
+          return true;
+        }
+        break;
+      case "PUT":
+      case "PATCH":
+        return strpos($methodName, "update");
+      case "DELETE":
+        return strpos($methodName, "delete");
     }
-    if ($httpMethod == "GET" && ($edit !== false)) {
-      return "edit";
-    }
-    if ($httpMethod == "GET" && $arguments) {
-      return "get";
-    }
-    if ($httpMethod == "GET" && $arguments === false) {
-      return "index";
-    }
-    if ($httpMethod == "PUT" || $httpMethod == "PATCH") {
-      return "update";
-    }
-    if ($httpMethod == "POST") {
-      return "create";
-    }
-    if ($httpMethod == "DELETE") {
-      return "delete";
-    }
+    return false;
   }
   
   private function getType($value) {

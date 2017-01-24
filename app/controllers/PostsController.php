@@ -19,7 +19,7 @@ class PostsController extends ControllerBase {
     echo "</pre>";
   }
   
-  public function indexEverything(string $eager) {
+  public function indexAll(string $eager) {
     $postsData = PostModel::getAll(true);
     echo "<pre>";
     print_r($postsData);
