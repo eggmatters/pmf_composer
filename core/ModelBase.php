@@ -10,10 +10,7 @@ namespace core;
 use core\connectors\Connector;
 
 abstract class ModelBase {
-  /**
-   *
-   * @var Connector; 
-   */
+
   protected static abstract function getConnectorConfiguration();
 
   public function __construct(array $modelAttributes = null) {
@@ -40,13 +37,13 @@ abstract class ModelBase {
     }
   }
   
-  public static function getAll($eagerLoading = false, $formatter = null) {
-    $results = self::getModelConnector()->getAll($eagerLoading, $formatter);
+  public static function getAll($eager = false) {
+    $results = self::getModelConnector()->getAll($eager);
     return self::setCollection($results);
   }
   
-  public static function get($id, $eagerLoading = false) {
-    $results = self::getModelConnector()->get($id, $eagerLoading, $formatter);
+  public static function get($id, $eager = false) {
+    $results = self::getModelConnector()->get($id, $eager);
     return self::setObject($results);
   }
   
@@ -55,7 +52,7 @@ abstract class ModelBase {
     return self::setCollection($results);
   }
   
-  public static function getByJoin(ControllerBase $foreignController, $eager = false) {
+  public static function getByJoin(\core\ControllerBase $foreignController, $eager = false) {
     $results = self::getModelConnector()->getByJoin($foreignController, $eager);
     return self::setCollection($results);
   }
