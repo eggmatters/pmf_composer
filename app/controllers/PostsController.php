@@ -3,7 +3,7 @@
 namespace app\controllers;
 use core\ControllerBase;
 use app\models\PostModel;
-use core\connectors\DBConnector;
+
 /**
  * Description of TestController
  *
@@ -40,14 +40,14 @@ class PostsController extends ControllerBase {
     print_r($userPosts);
     echo "</pre>";
   }
-  public function getPostTags2(TagsController $tags) {
+  public function getPostTags(TagsController $tags) {
     $tagPosts = PostModel::getByJoin($tags, 1);
     echo "<pre>";
     print_r($tagPosts);
     echo "</pre>";
   }
   
-  public function getPostTags(TagsController $tags, string $debug) {
+  public function getPostTags2(TagsController $tags, string $debug) {
     /* @var $connector \core\connectors\DBConnector */
     $connector = PostModel::getConnector();
     $constraints = new connectors\Constraints();
