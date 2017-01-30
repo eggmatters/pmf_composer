@@ -28,6 +28,9 @@ class ControllerCache extends CacheBase {
   }
   
   public function getControllerNamespaces() {
+    if (!isset($this->controllerNamespaces)) {
+      $this->setControllerNamespaces();
+    }
     return $this->controllerNamespaces;
   }
 
