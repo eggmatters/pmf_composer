@@ -33,6 +33,8 @@ class ControllerArgs {
    */
   private $arguments;
   
+  private $routingCache;
+  
   /**
    *
    * @var \ReflectionClass $reflectionClass
@@ -47,6 +49,7 @@ class ControllerArgs {
       $this->arguments = [];
       $this->classMethods = [];
       $this->setClassMethods($namespace);
+      $this->routingCache = new \utilities\cache\RoutingCache();
   }
   
   public function getNamespace() {
@@ -143,6 +146,8 @@ class ControllerArgs {
 
   public function getMethodBySignature() {
     $httpMethod = CoreApp::getRequest()->getHttpMethod();
+    $routingSignatures = $this->routingCache->getRoutingSignatures();
+    
     $methodsIterator = new \core\SimpleIterator($this->getClassMethods());
     $currentMethod = $methodsIterator->current();
     while ($methodsIterator->hasNext()) {
