@@ -35,7 +35,7 @@ class RoutingCache extends CacheBase {
       foreach ($reflectionMethods as $reflectionMethod) {
         $key = $this->setSignature($reflectionMethod);
         if (!empty($key)) {
-          $this->routingSignatures[$controllerNamespace][$key] = $reflectionMethod->name;
+          $this->routingSignatures[$controllerNamespace][$key] = $reflectionMethod;
         }
       }
     }
@@ -46,6 +46,11 @@ class RoutingCache extends CacheBase {
     $methodCandidate = $this->methodSignatureComponent($reflectionMethod->name);
     if (empty($methodCandidate)) { return null; }
     $signature =  array_reduce($arguments, function($carry, $item) {
+      if (empty($item->getType())) {
+        $message = "Controller: Parameter $item->name; is not defined in signature." 
+          . "\nPlease typehint parameters in controller methods";
+        throw new \Exception($message );
+      }
       return $carry . $item->getType();
     },$methodCandidate);
     return $signature;

@@ -85,6 +85,9 @@ class ControllerArgs {
       'type'     => $type,
       'position' => $position
     );
+    usort($this->arguments, function($a, $b) {
+      return ($a->position < $b->position) ? -1 : 1;
+    });
   }
   /**
    * 
@@ -145,22 +148,17 @@ class ControllerArgs {
   }
 
   public function getMethodBySignature() {
-    $httpMethod = CoreApp::getRequest()->getHttpMethod();
-    $routingSignatures = $this->routingCache->getRoutingSignatures();
-    
-    $methodsIterator = new \core\SimpleIterator($this->getClassMethods());
-    $currentMethod = $methodsIterator->current();
-    while ($methodsIterator->hasNext()) {
-      if ($this->matchMethod($currentMethod, $httpMethod)) {
-        usort($this->arguments, function($a, $b) {
-          return ($a->position < $b->position) ? -1 : 1;
-        });
-        return $currentMethod;
-      }
-      $currentMethod = $methodsIterator->next();
-    }
+    $signature  = $this->buildSignature(CoreApp::getRequest()->getHttpMethod());
+    $routes = $this->routingCache->getRoutingSignatures();
+    return isset($routes[$this->namespace][$signature]) ?
+      $routes[$this->namespace][$signature] : null;
   }
   
+  private function buildSignature($httpMethod) {
+    return array_reduce($this->arguments, function($carry, $item) {
+      return $carry . $item->type;
+    }, strtolower($httpMethod));
+  }
   private function setMethodByString($method) {
     foreach ($this->getClassMethods() as $classMethod) {
       /* @var $classMethod \ReflectionMethod */
@@ -169,88 +167,6 @@ class ControllerArgs {
         return;
       }
     } 
-  }
-  
-  private function matchMethod(\ReflectionMethod $method, $httpMethod) {
-    if (!$this->matchHTTPMethod($httpMethod, $method->getName())) {
-      return false;
-    }
-    $methodParams = $method->getParameters();
-    if (count($methodParams) != count($this->arguments)) {
-      return false;
-    }
-    return $this->matchParams($methodParams);
-  }
-  
-  private function matchParams($params) {
-    $status = true;
-    $aw = array_walk($this->arguments, function($argument, $index) use ($params, &$status) {
-      $type = $argument->type;
-      $matchingParams = array_filter($params, function($param) use ($type) {
-        if (is_null($param->getType())) {
-          $name = $param->getName();
-          $message = "Controller: $type Parameter $name is not defined in signature." 
-            . "\nPlease typehint parameters in controller methods";
-          throw new \Exception($message );
-        }
-        return ($param->getType()->__toString() == $type);
-      });
-      if (count($matchingParams) > 1) {
-        $param = \core\SimpleIterator::findBy($matchingParams, function($currentParam) use ($index, $type) {
-          for($i = 0; $i < $index; $i++) {
-            $currentArgument = $this->arguments[$i];
-            if ($currentArgument->type == $type && $currentArgument->position == $currentParam->getPosition()) {
-              return false;
-            }
-          }
-          return true;
-        });
-        $argument->position = $param->getPosition();
-      } else if (!empty($matchingParams)) {
-        $param = $matchingParams[array_keys($matchingParams)[0]];
-        $argument->position = $param->getPosition();
-      } else {
-        $status = false;
-      }
-    });
-    return ($aw && $status);
-  }
-  
-  private function matchHTTPMethod($httpMethod, $methodName) {
-    switch($httpMethod) {
-      case "GET":
-        if (strpos($methodName, "index") !== false) {
-          return true;
-        }
-        if (strpos($methodName, "get") !== false) {
-          return true;
-        }
-        if ( ( strpos($methodName, "edit" ) !== false) && 
-             ( in_array("edit", $this->arguments) )
-           ) {
-          return true;
-        }
-        if ( ( strpos($methodName, "create" ) !== false) && 
-             ( in_array("create", $this->arguments) )
-           ) {
-          return true;
-        }
-        break;
-      case "POST":
-        if (strpos($methodName, "create") !== false) {
-          return true;
-        }
-        if (strpos($methodName, "post") !== false) {
-          return true;
-        }
-        break;
-      case "PUT":
-      case "PATCH":
-        return strpos($methodName, "update");
-      case "DELETE":
-        return strpos($methodName, "delete");
-    }
-    return false;
   }
   
   private function getType($value) {
