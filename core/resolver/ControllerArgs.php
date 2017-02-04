@@ -48,7 +48,6 @@ class ControllerArgs {
       $this->method = null;
       $this->arguments = [];
       $this->classMethods = [];
-      $this->setClassMethods($namespace);
       $this->routingCache = new \utilities\cache\RoutingCache();
   }
   
