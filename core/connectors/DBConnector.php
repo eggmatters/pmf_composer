@@ -41,7 +41,8 @@ class DBConnector extends Connector {
     } else {
       $queryBase->Select()->Where($constraint);
     }
-    return $mysql->executeQuery($queryBase, true);
+    $resultsCollection = $mysql->executeQuery($queryBase, true);
+    return $this->normalizer->arrayToModel($resultsCollection, $this->modelClass->name, $queryBase->getTableAliases());
   }
   
   public function getByParent(\core\ControllerBase $foreignController, $eager = false) {
@@ -56,7 +57,8 @@ class DBConnector extends Connector {
     $constraint->term($idField, "=", $foreignValue);
     $queryBase    = new QueryBase($this->modelClass, $this->connectorCache);
     $this->foreignKeyJoin($queryBase, ($eager) ? [$foreignModel] : null)->Where($constraint);
-    return $mysql->executeQuery($queryBase);
+    $resultsCollection = $mysql->executeQuery($queryBase);
+    return $this->normalizer->arrayToModelsCollection($resultsCollection, $this->modelClass->name, $queryBase->getTableAliases());
   }
   
   public function getByJoin(\core\ControllerBase $foreignController, $eager = false) {
@@ -69,7 +71,8 @@ class DBConnector extends Connector {
     $queryBase    = new QueryBase($this->modelClass, $this->connectorCache);
     $this->joinTableJoin($queryBase, $foreignController->getModelNamespace(), $eager)
             ->Where($constraint);
-    return $mysql->executeQuery($queryBase);
+    $resultsCollection = $mysql->executeQuery($queryBase);
+    return $this->normalizer->arrayToModelsCollection($resultsCollection, $this->modelClass->name, $queryBase->getTableAliases());
   }
   
   public function create($params) {
