@@ -9,26 +9,23 @@ use core\connectors\QueryBase;
  * @author matthewe
  */
 class DBNormalizer implements INormalizer {
-  private $queryBase;
-  private $defaultFormat;
-  
-  public function __construct(QueryBase $queryBase) {
-    $this->queryBase = $queryBase;
-    $this->defaultFormat = self::NESTED_LAYOUT | self::EAGER_LOADING;
-  }
 
   public function arrayToModelsCollection(array $resultsCollection, $modelNamespace = null, $formatter = null) {
-    
+    $returnCollection  = [];
+    foreach ($resultsCollection as $resultSet) {
+      $returnCollection[] = $this->arrayToModel($resultSet, $modelNamespace, $formatter);
+    }
+    return $returnCollection;
   }
   
   public function arrayToModel(array $resultsSet, $modelNamespace = null, $formatter = null) {
-    
-    $tableAliases = $this->queryBuilder->getTableAliases();
+    $modelReflector = new \ReflectionClass($modelNamespace);
+    $tableAliases = $formatter;
     $resultsCollection = [];
     foreach($resultsSet as $columnAlias => $value) {
       $namespace = $tableAliases[$columnAlias]['namespace'];
       $property  = $tableAliases[$columnAlias]['property'];
-      if ($namespace == $this->modelClass->getName()) {
+      if ($namespace == $modelReflector->getName()) {
         $resultsCollection[$property] = $value;
       } else {
         $resultsCollection[$namespace][$property] = $value;

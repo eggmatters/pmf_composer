@@ -26,7 +26,8 @@ class DBConnector extends Connector {
     } else {
       $queryBase->Select()->Where($constraint);
     }
-    return $mysql->executeQuery($queryBase);
+    $resultsCollection = $mysql->executeQuery($queryBase);
+    return $this->normalizer->arrayToModelsCollection($resultsCollection, $this->modelClass->name, $queryBase->getTableAliases());
   }
   
   public function get($id = "null", $eagerLoading = false) {

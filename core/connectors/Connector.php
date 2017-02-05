@@ -3,6 +3,7 @@
 namespace core\connectors;
 
 use utilities\cache\ICache;
+use utilities\normalizers\INormalizer;
 /**
  * This class will instigate and abstract the process of fetching persisted data.
  * What we wish to accomplish is to obtain formatted data from *any* connection.
@@ -35,6 +36,12 @@ abstract class Connector implements IConnector {
    */
   protected $connectorCache;
   
+  /**
+   *
+   * @var \utilities\normalizers\INormalizer|null $normalizer
+   */
+  protected $normalizer;
+  
   const DBCONN=1;
   const APICONN=2;
   
@@ -48,10 +55,16 @@ abstract class Connector implements IConnector {
   
   abstract public function delete($params = null);
 
-  public function __construct(int $conntype, \ReflectionClass $modelClass = null, ICache $connectorCache = null) {
+  public function __construct(
+    int $conntype
+    , \ReflectionClass $modelClass = null
+    , ICache $connectorCache = null
+    , INormalizer $normalizer = null )
+  {
     $this->conntype = $conntype;
     $this->modelClass = $modelClass;
     $this->connectorCache = $connectorCache;
+    $this->normalizer = $normalizer;
   }
   
   public function setModelClass(\ReflectionClass $modelClass) {
@@ -65,15 +78,17 @@ abstract class Connector implements IConnector {
       case "core\connectors\DBConnector":
         $conntype = self::DBCONN;
         $connectorCache = new \utilities\cache\DBCache();
+        $normalizer = new \utilities\normalizers\DBNormalizer();
         break;
       case "core\connectors\APIConnector" :
         $conntype = self::APICONN;
-         $connectorCache = null;
+        $connectorCache = null;
+        $normalizer = null;
         break;
       default:
         throw new \Exception("Conntype for connector {$thisReflectionClass->name} not defined");
     }
-    $connector = $thisReflectionClass->newInstance($conntype, $modelClass, $connectorCache);
+    $connector = $thisReflectionClass->newInstance($conntype, $modelClass, $connectorCache, $normalizer);
     $connector->setProperties($connectorConfiguration, $thisReflectionClass->name);
     return $connector;
   }
