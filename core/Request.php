@@ -29,7 +29,7 @@ class Request {
    */
   private $resourceArray;
   /**
-   * SERVER['HTTP_METHOD']
+   * SERVER['METHOD']
    * @var string 
    */
   private $httpMethod;

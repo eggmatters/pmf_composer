@@ -20,7 +20,7 @@ class CoreApp {
     /* @var $resolvedControllerArg resolver\ControllerArgs */
     $resolvedControllerArg = $resolver->resolveController($controllerArgs);
     if (is_null($resolvedControllerArg)) {
-      self::issue("404");
+      Response::issue("404");
       return;
     }
     ControllerBase::invokeMethod($request, $resolvedControllerArg);
@@ -39,15 +39,11 @@ class CoreApp {
   public static function rootDir() {
     return dirname(__DIR__);
   }
-  /**
-   * responsible for issuing error pages (404, 500 etc.)
-   * Will attempt to load corresponding template in application 
-   * Set corresponding headers.
-   * @param type $httpCode
-   */
-  public static function issue($httpCode) {
-    die("Issue $httpCode here");
+  
+  public static function hostName() {
+    return $_SERVER['HTTP_HOST'];
   }
+  
   
   public static function microtime_float() {
     list($usec, $sec) = explode(" ", microtime());
