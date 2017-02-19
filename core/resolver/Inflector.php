@@ -379,7 +379,7 @@ class Inflector {
   }
   
   static function controllerToView($namespace) {
-    $s = strtolower(preg_replace("/.\w.*\\\([A-Za-z].*)Controller.php/", "$1", $namespace));
+    $s = strtolower(preg_replace("/.\w.*\\\([A-Za-z].*)Controller/", "$1", $namespace));
     return $s;
   }
 }

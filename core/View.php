@@ -32,16 +32,21 @@ class View {
     require_once($viewPath);
     $view = ob_get_clean();
     if (isset($viewData['layout'])) {
-      $layoutFile = self::viewDir() . "/" . $viewData['layout'] . "/layout.php";
+      $layoutFile = self::viewDir() 
+        . DIRECTORY_SEPARATOR . "layouts"
+        . DIRECTORY_SEPARATOR . $viewData['layout'] 
+        . DIRECTORY_SEPARATOR .  "layout.php";
       $layoutData = isset($viewData['layoutData']) ? $viewData['layoutData'] : null;
-      $view = $this->layout($layoutFile, $layoutData, $view);
+      $view = self::layout($layoutFile, $layoutData, $view);
     }
     Response::renderHTML($view);
     
   }
   
   public static function  layout($layoutFile, $layoutData, $content) {
-    
+    ob_start();
+    require_once($layoutFile);
+    return ob_get_clean();
   }
   
   public static function partial($viewPath, $viewData) {

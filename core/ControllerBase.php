@@ -58,11 +58,10 @@ abstract class ControllerBase {
   }
   
   protected function render($viewName, array $viewData) {
-    $viewPath = CoreApp::appDir() 
-      . DIRECTORY_SEPARATOR
-      . Inflector::controllerToView(get_called_class())
-      . DIRECTORY_SEPARATOR
-      . $viewName . ".php";
+    $viewPath = CoreApp::appDir()
+      . DIRECTORY_SEPARATOR . 'views'
+      . DIRECTORY_SEPARATOR . Inflector::controllerToView(get_called_class())
+      . DIRECTORY_SEPARATOR . $viewName . ".php";
     View::render($viewPath, $viewData);
   }
   
