@@ -57,6 +57,15 @@ abstract class ControllerBase {
     return $rf->getName();
   }
   
+  protected function render($viewName, array $viewData) {
+    $viewPath = CoreApp::appDir() 
+      . DIRECTORY_SEPARATOR
+      . Inflector::controllerToView(get_called_class())
+      . DIRECTORY_SEPARATOR
+      . $viewName . ".php";
+    View::render($viewPath, $viewData);
+  }
+  
   /**
    * 
    * @param \core\Request $request

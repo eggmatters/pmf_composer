@@ -6,18 +6,15 @@
  */
 namespace app\controllers;
 use core\ControllerBase;
+use core\Response;
 
 class IndexController extends ControllerBase {
 
   public function get() {
-    $this->renderDebug("GOT HERE IN Index WITH GET");
+    
   }
   
   public function index() {
-    $this->renderDebug("GOT HERE IN Index WITH INDEX");
-  }
-  
-  private function renderDebug($msg) {
-    echo "<pre>$msg</pre>";
+    $this->render('index', ['layout' => 'main']);
   }
 }

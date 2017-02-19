@@ -40,6 +40,10 @@ class CoreApp {
     return dirname(__DIR__);
   }
   
+  public static function appDir() {
+    return dirname(__DIR__) . "/app";
+  }
+  
   public static function hostName() {
     return $_SERVER['HTTP_HOST'];
   }

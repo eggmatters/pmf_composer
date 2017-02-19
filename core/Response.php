@@ -101,6 +101,10 @@ class Response {
     exit;
   }
   
+  public static function renderHTML($html, $statusCode  = self::OK_200) {
+    echo $html;
+  }
+  
   public static $statusTexts = array(
     100 => 'Continue',
     101 => 'Switching Protocols',
