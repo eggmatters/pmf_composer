@@ -16,11 +16,11 @@ namespace core;
 class View {
   
   public static function cssBase() {
-    return CoreApp::rootDir() . "/html/css";
+    return CoreApp::rootDir() . "/assets/css";
   }
   
   public static function jsBase() {
-    return CoreApp::rootDir() . "/html/js";
+    return CoreApp::rootDir() . "/assets/js";
   }
   
   public static function viewDir() {

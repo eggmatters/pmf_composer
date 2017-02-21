@@ -23,6 +23,6 @@
   <![endif]-->
 
   <!-- Custom styles for this template -->
-  <link href="<?php \core\View::cssBase() . "\caroursel.css"?>" rel="stylesheet">
+  <link href="/assets/css/carousel.css" rel="stylesheet">
 </head>
 
