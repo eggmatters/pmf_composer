@@ -1,10 +1,11 @@
 /* GLOBAL STYLES
 -------------------------------------------------- */
 /* Padding below the footer and lighter body text */
-
 body {
-  padding-bottom: 40px;
-  color: #5a5a5a;
+font-family: "Freight Sans",Verdana,Geneva,sans-serif;
+    color: #54585E;
+    font-size: 18px;
+    line-height: 27px;
 }
 
 
