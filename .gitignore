@@ -1,3 +1,4 @@
 nbproject/
 /nbproject/private/
-html/assets/images/*.xcf
+html/assets/images/*
+html/assets/ffbe.png

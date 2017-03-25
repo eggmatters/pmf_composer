@@ -17,4 +17,8 @@ class IndexController extends ControllerBase {
   public function index() {
     $this->render('index', ['layout' => 'main']);
   }
+  
+  public function getAbout(string $about) {
+    
+  }
 }

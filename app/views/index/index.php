@@ -94,7 +94,7 @@
       </p>
     </div>
     <div class="col-md-5">
-      <img class="featurette-image img-responsive center-block" data-src="holder.js/500x500/auto" alt="Generic placeholder image">
+      <img class="featurette-image img-responsive center-block" src="https://s3-us-west-2.amazonaws.com/pmf-assets/routes.jpeg" alt="Generic placeholder image">
     </div>
   </div>
 
@@ -103,13 +103,13 @@
   <div class="row featurette">
     <div class="col-md-7 col-md-push-5">
       <h2 class="featurette-heading">Data Source Abstraction: <span class="text-muted">Database, API, Filesystem, Other . . .</span></h2>
-      <p class="lead">Seamlessly integrate data form MySQL, Postgres, NoSQL, API's, CDN's, you name it. You provide the source, PMF does all the rest. 
+      <p class="lead">Seamlessly integrate data from MySQL, Postgres, NoSQL, API's, CDN's, you name it. You provide the source, PMF does all the rest. 
         Is your data source not supported? You have several options to integrate it, from providing your own normalization, creating your own interface or
         winging it. 
       </p>
     </div>
     <div class="col-md-5 col-md-pull-7">
-      <img class="featurette-image img-responsive center-block" data-src="holder.js/500x500/auto" alt="Generic placeholder image">
+      <img class="featurette-image img-responsive center-block" src="https://s3-us-west-2.amazonaws.com/pmf-assets/databstract.jpeg"  alt="Generic placeholder image">
     </div>
   </div>
 
@@ -119,11 +119,11 @@
     <div class="col-md-7">
       <h2 class="featurette-heading">Write More do less</h2>
       <p class="lead">No that's not a typo. Write more effective, usable, functional code. Spend less time combing through application documentation
-        and arcane "Best Practices" guidelines. Write code you're familiar with, not domain specific 
+        and arcane "Best Practices" guidelines. Write code you're familiar with, not domain specific jargon
       </p>
     </div>
     <div class="col-md-5">
-      <img class="featurette-image img-responsive center-block" data-src="holder.js/500x500/auto" alt="Generic placeholder image">
+      <img class="featurette-image img-responsive center-block" src="https://s3-us-west-2.amazonaws.com/pmf-assets/Galot-Mule-City-300-pulling3.jpg" alt="Generic placeholder image">
     </div>
   </div>
 
