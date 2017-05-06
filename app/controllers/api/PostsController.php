@@ -1,6 +1,6 @@
 <?php
 
-namespace app\controllers\sub_controllers;
+namespace app\controllers\api;
 use core\ControllerBase;
 
 /**
@@ -8,7 +8,7 @@ use core\ControllerBase;
  *
  * @author matthewe
  */
-class subClassesController extends ControllerBase {
+class PostsController extends ControllerBase {
   //put your code here
   public function get() {
     echo "<pre>";
