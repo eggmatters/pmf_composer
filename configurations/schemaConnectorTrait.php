@@ -15,7 +15,9 @@ trait schemaConnectorTrait {
         'dbName' => 'pmf_db',
         'user'   => 'pmf_user',
         'pass'   => 'pmf_pass'
-      )
+      ),
+      'ConnectorCache' => \utilities\cache\DBCache::class,
+      'Normalizer' => \utilities\normalizers\DBNormalizer::class
     );
   }
 }

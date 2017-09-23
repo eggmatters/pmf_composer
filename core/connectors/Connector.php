@@ -18,12 +18,7 @@ use utilities\normalizers\INormalizer;
  * @author meggers
  */
 abstract class Connector implements IConnector {
-  
-  /**
-   *
-   * @var int $conntype 
-   */
-  protected $conntype;
+
   /**
    *
    * @var \ReflectionClass  
@@ -42,9 +37,6 @@ abstract class Connector implements IConnector {
    */
   protected $normalizer;
   
-  const DBCONN=1;
-  const APICONN=2;
-  
   abstract public function getAll();
   
   abstract public function get($id = null);
@@ -56,12 +48,10 @@ abstract class Connector implements IConnector {
   abstract public function delete($params = null);
 
   public function __construct(
-    int $conntype
-    , \ReflectionClass $modelClass = null
+    \ReflectionClass $modelClass = null
     , ICache $connectorCache = null
     , INormalizer $normalizer = null )
   {
-    $this->conntype = $conntype;
     $this->modelClass = $modelClass;
     $this->connectorCache = $connectorCache;
     $this->normalizer = $normalizer;
@@ -73,22 +63,11 @@ abstract class Connector implements IConnector {
   
   public static function instantiate(array $connectorConfiguration, \ReflectionClass $modelClass = null) {
     $thisReflectionClass = new \ReflectionClass($connectorConfiguration['Connector']);
-    $conntype = null;
-    switch ($thisReflectionClass->name) {
-      case "core\connectors\DBConnector":
-        $conntype = self::DBCONN;
-        $connectorCache = new \utilities\cache\DBCache();
-        $normalizer = new \utilities\normalizers\DBNormalizer();
-        break;
-      case "core\connectors\APIConnector" :
-        $conntype = self::APICONN;
-        $connectorCache = null;
-        $normalizer = null;
-        break;
-      default:
-        throw new \Exception("Conntype for connector {$thisReflectionClass->name} not defined");
-    }
-    $connector = $thisReflectionClass->newInstance($conntype, $modelClass, $connectorCache, $normalizer);
+    $cacheReflector = new \ReflectionClass($connectorConfiguration['ConnectorCache']);
+    $normalizerReflector = new \ReflectionClass($connectorConfiguration['Normalizer']);
+    $connectorCache = $cacheReflector->newInstance();
+    $normalizer = $normalizerReflector->newInstance();
+    $connector = $thisReflectionClass->newInstance($modelClass, $connectorCache, $normalizer);
     $connector->setProperties($connectorConfiguration, $thisReflectionClass->name);
     return $connector;
   }
