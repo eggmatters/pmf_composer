@@ -1,0 +1,22 @@
+{
+    "name": "eggmatters/pmf",
+    "description": "Composer package for PMF framework library",
+    "type": "library",
+    "keywords": ["pmf", "php", "framework"],
+    "license": "Apache-2.0",
+    "authors": {
+        "name": "Matthew Eggerss",
+        "email": "eggmatters@gmail.com",
+        "homepage": "http://www.eggmatters.com"
+    },
+    "require": {
+        "php" : "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "core\\": "src/",
+            "utilities\\": "src"
+        }
+    }
+    
+}
