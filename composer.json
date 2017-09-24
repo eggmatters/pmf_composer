@@ -10,13 +10,19 @@
         "homepage": "http://www.eggmatters.com"
     },
     "require": {
-        "php" : "^7.0"
+        "php" : "^7.0",
+        "eggmatters/pmf": "composer_setup"
     },
     "autoload": {
         "psr-4": {
             "core\\": "src/",
-            "utilities\\": "src"
+            "utilities\\": "src/"
         }
-    }
-    
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "git@github.com:eggmatters/pmf.git"
+        }
+    ]
 }
