@@ -9,14 +9,10 @@
         "email": "eggmatters@gmail.com",
         "homepage": "http://www.eggmatters.com"
     },
-    "require": {
-        "php" : "^7.0",
-        "eggmatters/pmf": "composer_setup"
-    },
     "autoload": {
         "psr-4": {
-            "core\\": "src/",
-            "utilities\\": "src/"
+            "core\\": "src/core/",
+            "utilities\\": "src/utilities/"
         }
     },
     "repositories": [
