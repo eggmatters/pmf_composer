@@ -49,6 +49,11 @@ class Request {
    */
   private $postParams;
 
+  /**
+   * SERVER['DOCUMENT_ROOT']
+   * @var string 
+   */
+  private $documentRoot;
   
   /**
    * parses the path from the incoming request uri. If no argument, filters it 
@@ -73,8 +78,8 @@ class Request {
     $this->postParams = [];
     if (!empty($_POST)) {
       $this->postParams = $this->filterRequestArray('POST', $_POST);
-    }  
-    //$this->requestObject = RequestObject::setFromResources($this->resourceArray);
+    }
+    $this->documentRoot = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT');
   }
   
   public function getRequestUri() {
@@ -107,6 +112,10 @@ class Request {
   
   public function getPostParams() {
     return $this->postParams;
+  }
+  
+  public function getDocumentRoot() {
+    return $this->documentRoot;
   }
   
   private function filterRequestArray($filter, $requestArray) {

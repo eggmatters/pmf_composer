@@ -18,7 +18,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url":  "git@github.com:eggmatters/pmf.git"
+            "url":  "/home/matthewe/pmf_composer"
         }
     ]
 }

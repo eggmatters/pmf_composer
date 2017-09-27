@@ -37,11 +37,11 @@ class CoreApp {
   }
   
   public static function rootDir() {
-    return dirname(__DIR__);
+    return dirname(self::getRequest()->getDocumentRoot());
   }
   
   public static function appDir() {
-    return dirname(__DIR__) . "/app";
+    return self::rootDir() . "/app";
   }
   
   public static function hostName() {
