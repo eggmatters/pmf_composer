@@ -6,7 +6,7 @@ use core\connectors\PDOConnector;
 /**
  * DBCache -- primary responsibility is to identify and map foreign key 
  * relationships, caching the search patterns. The relationships shall be 
- * modeleled as a n-ary ADT tree. 
+ * modeled as a n-ary ADT tree. 
  * 
  * Each node of the tree shall contain a model namespace (if exists) and
  * the table name. Each node shall point to one or many children. 

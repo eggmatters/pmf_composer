@@ -93,15 +93,15 @@ class QueryBase {
    * @param string $foreignKey
    */
   public function LeftJoin($fromTable, $onTable, $lhs, $rhs, $alias = '') {
-    $from = (is_a($fromTable, \ReflectionClass::class)) 
-      ? Inflector::tableizeModelName($fromTable->name) 
-        : Inflector::tableizeModelName($fromTable);
-    $on = (is_a($onTable, \ReflectionClass::class)) 
-      ? Inflector::tableizeModelName($onTable->name) 
-        : Inflector::tableizeModelName($onTable);
-    $this->query['JOINS'][] = "LEFT JOIN $from $alias ON "
-      . $on . "." . $lhs . " = " 
-      . $from . "." . $rhs;
+//    $from = (is_a($fromTable, \ReflectionClass::class)) 
+//      ? Inflector::tableizeModelName($fromTable->name) 
+//        : Inflector::tableizeModelName($fromTable);
+//    $on = (is_a($onTable, \ReflectionClass::class)) 
+//      ? Inflector::tableizeModelName($onTable->name) 
+//        : Inflector::tableizeModelName($onTable);
+    $this->query['JOINS'][] = "LEFT JOIN $fromTable $alias ON "
+      . $onTable . "." . $lhs . " = " 
+      . $onTable . "." . $rhs;
     return $this;
   }
   

@@ -30,10 +30,10 @@ class DBConnector extends Connector {
     return $this->normalizer->arrayToModelsCollection($resultsCollection, $this->modelClass->name, $queryBase->getTableAliases());
   }
   
-  public function get($id = "null", $eagerLoading = false) {
+  public function get($id = "null", $eagerLoading = false, $column = null) {
     $mysql      = $this->getMySql();
     $constraint = new Constraints();
-    $idField    = \core\resolver\Inflector::tableizeModelName($this->modelClass->name) . '.id';
+    $idField    = \core\resolver\Inflector::tableizeModelName($this->modelClass->name) . $column ?? '.id';
     $constraint->term($idField, "=", $id);
     $queryBase  = new QueryBase($this->modelClass, $this->connectorCache);
     if ($eagerLoading) {
@@ -43,6 +43,10 @@ class DBConnector extends Connector {
     }
     $resultsCollection = $mysql->executeQuery($queryBase, true);
     return $this->normalizer->arrayToModel($resultsCollection, $this->modelClass->name, $queryBase->getTableAliases());
+  }
+  
+  public function getBy($column, $value, $eagerLoading = false) {
+     return $this->get($value, $eagerLoading, $column);
   }
   
   public function getByParent(\core\ControllerBase $foreignController, $eager = false) {
