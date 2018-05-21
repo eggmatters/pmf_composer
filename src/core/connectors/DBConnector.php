@@ -33,7 +33,7 @@ class DBConnector extends Connector {
   public function get($id = "null", $eagerLoading = false, $column = null) {
     $mysql      = $this->getMySql();
     $constraint = new Constraints();
-    $idField    = \core\resolver\Inflector::tableizeModelName($this->modelClass->name) . $column ?? '.id';
+    $idField    = \core\resolver\Inflector::tableizeModelName($this->modelClass->name) . ($column ?? '.id');
     $constraint->term($idField, "=", $id);
     $queryBase  = new QueryBase($this->modelClass, $this->connectorCache);
     if ($eagerLoading) {
