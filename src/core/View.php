@@ -49,7 +49,9 @@ class View {
     return ob_get_clean();
   }
   
-  public static function partial($viewPath, $viewData) {
-    
+  public static function partial(string $viewPath, $viewData) {
+      ob_start();
+      require($viewPath);
+      return ob_get_clean();
   }
 }
