@@ -42,8 +42,8 @@ abstract class ModelBase {
     return self::setCollection($results);
   }
   
-  public static function get($id, $eager = false) {
-    $results = self::getModelConnector()->get($id, $eager);
+  public static function get($id, $eager = false, $column = null) {
+    $results = self::getModelConnector()->get($id, $eager, $column);
     return self::setObject($results);
   }
   
