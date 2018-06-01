@@ -111,7 +111,13 @@ class Resolver {
         return null;
       }
       $resourcesIterator->next();
+      //look for nested Index Controllers to resolve sub-folder index requests.
+      if (!$resourcesIterator->hasNext() && empty($returnArray)) {
+         $resourcesIterator->push('index');
+      }
+      
     }
-    return $returnArray;
+
+    return $returnArray;    
   }
 }
