@@ -34,7 +34,7 @@ class PDOConnector {
   public function executeQuery(QueryBase $queryBuilder, $limitResultsSet = false) {
     $bindValues = $queryBuilder->getBindValues();
     if ($this->query($queryBuilder->getSelect(), $bindValues)) {
-      $results = ($limitResultsSet) ? $this->getResultsSet()[0] : $this->getResultsSet();
+      $results = ($limitResultsSet) ? $this->getResultsSet()[0] ?? [] : $this->getResultsSet();
       return $results;
     }
     return false;

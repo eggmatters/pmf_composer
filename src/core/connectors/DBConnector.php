@@ -41,7 +41,7 @@ class DBConnector extends Connector {
     } else {
       $queryBase->Select()->Where($constraint);
     }
-    $resultsCollection = $mysql->executeQuery($queryBase, true);
+    $resultsCollection = $mysql->executeQuery($queryBase, true) ?? [];
     return $this->normalizer->arrayToModel($resultsCollection, $this->modelClass->name, $queryBase->getTableAliases());
   }
   
